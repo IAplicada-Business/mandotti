@@ -17,7 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -29,7 +35,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmissor } from "@/lib/emissor-context";
-import { useRoles, useSession } from "@/hooks/useAuth";
+import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/certificados")({
   head: () => ({
@@ -79,7 +85,9 @@ function CertificadosPage() {
   const qc = useQueryClient();
   const { emissorId, emissor } = useEmissor();
   const { user } = useSession();
-  const { podeEditar, isAdmin } = useRoles(user);
+  const { pode, perfil } = usePerfil(user);
+  const podeEditar = pode("/certificados", "editar");
+  const isAdmin = perfil === "admin";
   const [aberto, setAberto] = useState(false);
   const [form, setForm] = useState<Form>(vazio);
 

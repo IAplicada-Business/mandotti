@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { supabase } from "@/integrations/supabase/client";
 
-export type AppRole = "administrador" | "gestor" | "operador" | "visualizador";
+export type Perfil = "admin" | "funcionario" | "contabilidade";
 
 export function useSession() {
   const [session, setSession] = useState<Session | null>(null);
@@ -25,25 +25,56 @@ export function useSession() {
   return { session, user: session?.user ?? null, loading };
 }
 
-export function useRoles(user: User | null) {
-  const query = useQuery({
-    queryKey: ["papeis", user?.id],
+// Espelha public.rota_e_fiscal_financeira() da migration — manter em sincronia.
+function rotaEFiscalFinanceira(rota: string) {
+  return (
+    ["/financeiro", "/notas-fiscais", "/contabilidade"].includes(rota) ||
+    rota.startsWith("/financeiro/") ||
+    rota.startsWith("/contabilidade/")
+  );
+}
+
+export function usePerfil(user: User | null) {
+  const perfilQuery = useQuery({
+    queryKey: ["perfil", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("papeis_usuario")
-        .select("role")
-        .eq("user_id", user!.id);
+        .from("perfis")
+        .select("perfil")
+        .eq("user_id", user!.id)
+        .single();
       if (error) throw error;
-      return data.map((r) => r.role as AppRole);
+      return data.perfil as Perfil;
     },
   });
 
-  const roles = query.data ?? [];
+  const acessoQuery = useQuery({
+    queryKey: ["perfis_acesso", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("perfis_acesso")
+        .select("rota, pode_ver, pode_editar")
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const perfil = perfilQuery.data ?? null;
+  const grants = acessoQuery.data ?? [];
+
+  const pode = (rota: string, acao: "ver" | "editar"): boolean => {
+    if (perfil === "admin") return true;
+    if (acao === "ver" && perfil === "contabilidade" && rotaEFiscalFinanceira(rota)) return true;
+    const g = grants.find((x) => x.rota === rota);
+    return acao === "ver" ? !!g?.pode_ver : !!g?.pode_editar;
+  };
+
   return {
-    roles,
-    isAdmin: roles.includes("administrador"),
-    podeEditar: roles.includes("administrador") || roles.includes("gestor"),
-    loading: query.isLoading,
+    perfil,
+    pode,
+    loading: perfilQuery.isLoading || acessoQuery.isLoading,
   };
 }

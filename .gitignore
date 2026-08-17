@@ -7,6 +7,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Notas internas do projeto (planejamento, backlog, briefings) - nunca vai pro git
+notas-internas/
+
 node_modules
 dist
 dist-ssr

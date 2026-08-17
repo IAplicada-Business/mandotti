@@ -27,7 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { useRoles, useSession } from "@/hooks/useAuth";
+import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/emissores")({
   head: () => ({
@@ -76,7 +76,9 @@ const vazio: Form = {
 function EmissoresPage() {
   const qc = useQueryClient();
   const { user } = useSession();
-  const { podeEditar, isAdmin } = useRoles(user);
+  const { pode, perfil } = usePerfil(user);
+  const podeEditar = pode("/emissores", "editar");
+  const isAdmin = perfil === "admin";
   const [aberto, setAberto] = useState(false);
   const [form, setForm] = useState<Form>(vazio);
 
@@ -200,9 +202,7 @@ function EmissoresPage() {
                     <TableCell className="font-medium">{e.razao_social}</TableCell>
                     <TableCell>{e.nome_fantasia ?? "—"}</TableCell>
                     <TableCell>{e.cnpj}</TableCell>
-                    <TableCell>
-                      {[e.cidade, e.uf].filter(Boolean).join("/") || "—"}
-                    </TableCell>
+                    <TableCell>{[e.cidade, e.uf].filter(Boolean).join("/") || "—"}</TableCell>
                     <TableCell>
                       <Badge variant={e.ativo ? "default" : "secondary"}>
                         {e.ativo ? "Ativo" : "Inativo"}

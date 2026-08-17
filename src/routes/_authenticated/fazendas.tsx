@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { useEmissor } from "@/lib/emissor-context";
-import { useRoles, useSession } from "@/hooks/useAuth";
+import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/fazendas")({
   head: () => ({
@@ -72,7 +72,9 @@ function FazendasPage() {
   const qc = useQueryClient();
   const { emissorId, emissor } = useEmissor();
   const { user } = useSession();
-  const { podeEditar, isAdmin } = useRoles(user);
+  const { pode, perfil } = usePerfil(user);
+  const podeEditar = pode("/fazendas", "editar");
+  const isAdmin = perfil === "admin";
   const [aberto, setAberto] = useState(false);
   const [form, setForm] = useState<Form>(vazio);
 

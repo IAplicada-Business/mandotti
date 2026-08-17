@@ -26,14 +26,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useEmissor } from "@/lib/emissor-context";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useRoles, useSession } from "@/hooks/useAuth";
+import { usePerfil, useSession } from "@/hooks/useAuth";
 
-const NAV = [
-  { group: "Visão geral", items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] },
+export const NAV = [
+  {
+    group: "Visão geral",
+    items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+  },
   {
     group: "Cadastros",
     items: [
@@ -91,11 +100,22 @@ function EmissorSelector() {
   );
 }
 
+const PERFIL_LABEL: Record<string, string> = {
+  admin: "Admin",
+  funcionario: "Funcionário",
+  contabilidade: "Contabilidade",
+};
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user } = useSession();
-  const { roles } = useRoles(user);
+  const { perfil, pode } = usePerfil(user);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const navVisivel = NAV.map((section) => ({
+    ...section,
+    items: section.items.filter((item) => pode(item.to, "ver")),
+  })).filter((section) => section.items.length > 0);
 
   const sair = async () => {
     await supabase.auth.signOut();
@@ -119,7 +139,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
-          {NAV.map((section) => (
+          {navVisivel.map((section) => (
             <div key={section.group}>
               <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
                 {section.group}
@@ -183,7 +203,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <DropdownMenuLabel className="font-normal">
                   <p className="text-sm font-medium">{user?.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    {roles.length ? roles.join(", ") : "sem papel definido"}
+                    {perfil ? PERFIL_LABEL[perfil] : "sem perfil definido"}
                   </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
