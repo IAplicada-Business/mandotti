@@ -76,7 +76,7 @@ function EmissorSelector() {
   }
 
   return (
-    <Select value={emissorId ?? undefined} onValueChange={setEmissorId}>
+    <Select value={emissorId ?? ""} onValueChange={setEmissorId}>
       <SelectTrigger className="w-[18rem]" aria-label="Emissor ativo">
         <SelectValue placeholder="Selecione o emissor" />
       </SelectTrigger>
