@@ -5,7 +5,7 @@ import { Building2, ShieldCheck, Sprout, TriangleAlert } from "lucide-react";
 import { PageHeader } from "@/components/AppShell";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { useEmissor } from "@/lib/emissor-context";
+import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -48,23 +48,23 @@ function Metric({
 }
 
 function Dashboard() {
-  const { emissor, emissorId } = useEmissor();
+  const { emissores, emissorIds } = useEmissor();
 
   const { data } = useQuery({
-    queryKey: ["dashboard", emissorId],
+    queryKey: ["dashboard", emissorIds],
+    enabled: emissorIds.length > 0,
     queryFn: async () => {
-      const [emissores, fazendas, certificados] = await Promise.all([
-        supabase.from("emissores").select("id", { count: "exact", head: true }).is("deleted_at", null),
+      const [fazendas, certificados] = await Promise.all([
         supabase
           .from("fazendas")
           .select("id", { count: "exact", head: true })
           .is("deleted_at", null)
-          .eq("emissor_id", emissorId ?? ""),
+          .in("emissor_id", emissorIds),
         supabase
           .from("certificados")
           .select("validade")
           .is("deleted_at", null)
-          .eq("emissor_id", emissorId ?? ""),
+          .in("emissor_id", emissorIds),
       ]);
 
       const hoje = new Date();
@@ -74,7 +74,6 @@ function Dashboard() {
       ).length;
 
       return {
-        emissores: emissores.count ?? 0,
         fazendas: fazendas.count ?? 0,
         certificados: certificados.data?.length ?? 0,
         vencendo,
@@ -82,19 +81,34 @@ function Dashboard() {
     },
   });
 
+  if (!emissorIds.length) {
+    return (
+      <div>
+        <PageHeader
+          title="Dashboard"
+          description="Selecione ao menos um emissor para ver os indicadores."
+        />
+        <Card>
+          <CardContent className="py-16 text-center text-muted-foreground">
+            Selecione ao menos um emissor no topo da tela.
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div>
       <PageHeader
         title="Dashboard"
-        description={
-          emissor
-            ? `Emissor ativo: ${emissor.nome_fantasia || emissor.razao_social}`
-            : "Selecione um emissor para ver os indicadores."
-        }
+        description={resumoEmissores(
+          emissores.filter((e) => emissorIds.includes(e.id)),
+          emissores.length,
+        )}
       />
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric titulo="Emissores" valor={data?.emissores ?? 0} icone={Building2} />
-        <Metric titulo="Fazendas do emissor" valor={data?.fazendas ?? 0} icone={Sprout} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Metric titulo="Emissores selecionados" valor={emissorIds.length} icone={Building2} />
+        <Metric titulo="Fazendas" valor={data?.fazendas ?? 0} icone={Sprout} />
         <Metric titulo="Certificados" valor={data?.certificados ?? 0} icone={ShieldCheck} />
         <Metric titulo="Vencendo em 30 dias" valor={data?.vencendo ?? 0} icone={TriangleAlert} />
       </div>
@@ -104,8 +118,8 @@ function Dashboard() {
           <CardTitle className="text-base">Próximos módulos</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Produtos, notas fiscais, estoque e relatórios já possuem rota reservada na navegação e serão
-          liberados nas próximas entregas.
+          Produtos, notas fiscais, estoque e relatórios já possuem rota reservada na navegação e
+          serão liberados nas próximas entregas.
         </CardContent>
       </Card>
     </div>

@@ -176,9 +176,9 @@ function EmissoresPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Razão social</TableHead>
-                <TableHead>Nome fantasia</TableHead>
+                <TableHead className="hidden sm:table-cell">Nome fantasia</TableHead>
                 <TableHead>CNPJ</TableHead>
-                <TableHead>Cidade/UF</TableHead>
+                <TableHead className="hidden sm:table-cell">Cidade/UF</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-24" />
               </TableRow>
@@ -200,9 +200,11 @@ function EmissoresPage() {
                 data.map((e) => (
                   <TableRow key={e.id}>
                     <TableCell className="font-medium">{e.razao_social}</TableCell>
-                    <TableCell>{e.nome_fantasia ?? "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{e.nome_fantasia ?? "—"}</TableCell>
                     <TableCell>{e.cnpj}</TableCell>
-                    <TableCell>{[e.cidade, e.uf].filter(Boolean).join("/") || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {[e.cidade, e.uf].filter(Boolean).join("/") || "—"}
+                    </TableCell>
                     <TableCell>
                       <Badge variant={e.ativo ? "default" : "secondary"}>
                         {e.ativo ? "Ativo" : "Inativo"}

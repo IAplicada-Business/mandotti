@@ -6,11 +6,13 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
+  Moon,
   Package,
   ScrollText,
   Settings,
   ShieldCheck,
   Sprout,
+  Sun,
   Users,
   Warehouse,
 } from "lucide-react";
@@ -26,17 +28,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEmissor } from "@/lib/emissor-context";
+import { EmissorSelector } from "@/components/EmissorSelector";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
+import { useTheme } from "@/lib/theme-context";
 
 export const NAV = [
   {
@@ -69,37 +65,6 @@ export const NAV = [
   },
 ] as const;
 
-function EmissorSelector() {
-  const { emissores, emissorId, setEmissorId, loading } = useEmissor();
-
-  if (loading) {
-    return <div className="h-9 w-64 animate-pulse rounded-md bg-muted" />;
-  }
-
-  if (!emissores.length) {
-    return (
-      <Link to="/emissores" className="text-sm text-muted-foreground underline underline-offset-4">
-        Nenhum emissor cadastrado — cadastrar
-      </Link>
-    );
-  }
-
-  return (
-    <Select value={emissorId ?? ""} onValueChange={setEmissorId}>
-      <SelectTrigger className="w-[18rem]" aria-label="Emissor ativo">
-        <SelectValue placeholder="Selecione o emissor" />
-      </SelectTrigger>
-      <SelectContent>
-        {emissores.map((e) => (
-          <SelectItem key={e.id} value={e.id}>
-            {e.nome_fantasia || e.razao_social}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
-
 const PERFIL_LABEL: Record<string, string> = {
   admin: "Admin",
   funcionario: "Funcionário",
@@ -110,6 +75,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const { user } = useSession();
   const { perfil, pode } = usePerfil(user);
+  const { theme, toggleTheme } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const navVisivel = NAV.map((section) => ({
@@ -194,8 +160,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="ml-auto">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <span className="max-w-[12rem] truncate text-sm">{user?.email ?? "Conta"}</span>
+                <Button
+                  variant="outline"
+                  className="gap-2"
+                  aria-label={user?.email ? `Conta: ${user.email}` : "Conta"}
+                >
+                  <span className="hidden max-w-[12rem] truncate text-sm sm:inline">
+                    {user?.email ?? "Conta"}
+                  </span>
                   <ChevronDown className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -206,6 +178,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                     {perfil ? PERFIL_LABEL[perfil] : "sem perfil definido"}
                   </p>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={toggleTheme}>
+                  {theme === "dark" ? (
+                    <Sun className="mr-2 size-4" />
+                  ) : (
+                    <Moon className="mr-2 size-4" />
+                  )}
+                  {theme === "dark" ? "Tema claro" : "Tema escuro"}
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={sair}>
                   <LogOut className="mr-2 size-4" />

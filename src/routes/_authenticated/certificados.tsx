@@ -34,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { useEmissor } from "@/lib/emissor-context";
+import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/certificados")({
@@ -54,6 +54,7 @@ export const Route = createFileRoute("/_authenticated/certificados")({
 
 type Form = {
   id?: string;
+  emissor_id: string;
   nome: string;
   tipo: "A1" | "A3";
   titular: string;
@@ -64,6 +65,7 @@ type Form = {
 };
 
 const vazio: Form = {
+  emissor_id: "",
   nome: "",
   tipo: "A1",
   titular: "",
@@ -83,7 +85,7 @@ function statusValidade(validade: string | null) {
 
 function CertificadosPage() {
   const qc = useQueryClient();
-  const { emissorId, emissor } = useEmissor();
+  const { emissorIds, emissores } = useEmissor();
   const { user } = useSession();
   const { pode, perfil } = usePerfil(user);
   const podeEditar = pode("/certificados", "editar");
@@ -92,14 +94,14 @@ function CertificadosPage() {
   const [form, setForm] = useState<Form>(vazio);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["certificados", emissorId],
-    enabled: !!emissorId,
+    queryKey: ["certificados", emissorIds],
+    enabled: emissorIds.length > 0,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("certificados")
         .select("*")
         .is("deleted_at", null)
-        .eq("emissor_id", emissorId!)
+        .in("emissor_id", emissorIds)
         .order("validade");
       if (error) throw error;
       return data;
@@ -111,7 +113,6 @@ function CertificadosPage() {
       const { id, ...campos } = f;
       const payload = {
         ...campos,
-        emissor_id: emissorId!,
         titular: campos.titular || null,
         cnpj: campos.cnpj || null,
         validade: campos.validade || null,
@@ -158,13 +159,16 @@ function CertificadosPage() {
     </div>
   );
 
-  if (!emissorId) {
+  if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader title="Certificados" description="Selecione um emissor no topo da tela." />
+        <PageHeader
+          title="Certificados"
+          description="Selecione ao menos um emissor no topo da tela."
+        />
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
-            Cadastre e selecione um emissor para gerenciar os certificados.
+            Selecione ao menos um emissor para gerenciar os certificados.
           </CardContent>
         </Card>
       </div>
@@ -175,12 +179,15 @@ function CertificadosPage() {
     <div>
       <PageHeader
         title="Certificados digitais"
-        description={`Certificados de ${emissor?.nome_fantasia || emissor?.razao_social || "—"}.`}
+        description={`Certificados de ${resumoEmissores(
+          emissores.filter((e) => emissorIds.includes(e.id)),
+          emissores.length,
+        )}.`}
         action={
           podeEditar ? (
             <Button
               onClick={() => {
-                setForm(vazio);
+                setForm({ ...vazio, emissor_id: emissorIds.length === 1 ? emissorIds[0]! : "" });
                 setAberto(true);
               }}
             >
@@ -198,7 +205,7 @@ function CertificadosPage() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Titular</TableHead>
+                <TableHead className="hidden sm:table-cell">Titular</TableHead>
                 <TableHead>Validade</TableHead>
                 <TableHead>Situação</TableHead>
                 <TableHead className="w-24" />
@@ -224,7 +231,7 @@ function CertificadosPage() {
                     <TableRow key={c.id}>
                       <TableCell className="font-medium">{c.nome}</TableCell>
                       <TableCell>{c.tipo}</TableCell>
-                      <TableCell>{c.titular ?? "—"}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{c.titular ?? "—"}</TableCell>
                       <TableCell>
                         {c.validade ? new Date(c.validade).toLocaleDateString("pt-BR") : "—"}
                       </TableCell>
@@ -240,6 +247,7 @@ function CertificadosPage() {
                             onClick={() => {
                               setForm({
                                 id: c.id,
+                                emissor_id: c.emissor_id,
                                 nome: c.nome,
                                 tipo: c.tipo,
                                 titular: c.titular ?? "",
@@ -283,9 +291,31 @@ function CertificadosPage() {
             className="grid gap-4 sm:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!form.emissor_id) {
+                toast.error("Selecione um emissor");
+                return;
+              }
               salvar.mutate(form);
             }}
           >
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="emissor_id">Emissor *</Label>
+              <Select
+                value={form.emissor_id}
+                onValueChange={(v) => setForm({ ...form, emissor_id: v })}
+              >
+                <SelectTrigger id="emissor_id">
+                  <SelectValue placeholder="Selecione o emissor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {emissores.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.nome_fantasia || e.razao_social}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="sm:col-span-2">{campo("nome", "Nome / apelido *")}</div>
             <div className="space-y-2">
               <Label htmlFor="tipo">Tipo</Label>

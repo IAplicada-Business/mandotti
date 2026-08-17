@@ -17,6 +17,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
   Table,
@@ -27,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { useEmissor } from "@/lib/emissor-context";
+import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/fazendas")({
@@ -47,6 +54,7 @@ export const Route = createFileRoute("/_authenticated/fazendas")({
 
 type Form = {
   id?: string;
+  emissor_id: string;
   nome: string;
   codigo: string;
   inscricao_estadual: string;
@@ -58,6 +66,7 @@ type Form = {
 };
 
 const vazio: Form = {
+  emissor_id: "",
   nome: "",
   codigo: "",
   inscricao_estadual: "",
@@ -70,7 +79,7 @@ const vazio: Form = {
 
 function FazendasPage() {
   const qc = useQueryClient();
-  const { emissorId, emissor } = useEmissor();
+  const { emissorIds, emissores } = useEmissor();
   const { user } = useSession();
   const { pode, perfil } = usePerfil(user);
   const podeEditar = pode("/fazendas", "editar");
@@ -79,14 +88,14 @@ function FazendasPage() {
   const [form, setForm] = useState<Form>(vazio);
 
   const { data, isLoading } = useQuery({
-    queryKey: ["fazendas", emissorId],
-    enabled: !!emissorId,
+    queryKey: ["fazendas", emissorIds],
+    enabled: emissorIds.length > 0,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fazendas")
         .select("*")
         .is("deleted_at", null)
-        .eq("emissor_id", emissorId!)
+        .in("emissor_id", emissorIds)
         .order("nome");
       if (error) throw error;
       return data;
@@ -98,7 +107,6 @@ function FazendasPage() {
       const { id, area_hectares, ...campos } = f;
       const payload = {
         ...campos,
-        emissor_id: emissorId!,
         codigo: campos.codigo || null,
         inscricao_estadual: campos.inscricao_estadual || null,
         car: campos.car || null,
@@ -147,13 +155,13 @@ function FazendasPage() {
     </div>
   );
 
-  if (!emissorId) {
+  if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader title="Fazendas" description="Selecione um emissor no topo da tela." />
+        <PageHeader title="Fazendas" description="Selecione ao menos um emissor no topo da tela." />
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
-            Cadastre e selecione um emissor para gerenciar as fazendas.
+            Selecione ao menos um emissor para gerenciar as fazendas.
           </CardContent>
         </Card>
       </div>
@@ -164,12 +172,15 @@ function FazendasPage() {
     <div>
       <PageHeader
         title="Fazendas"
-        description={`Propriedades de ${emissor?.nome_fantasia || emissor?.razao_social || "—"}.`}
+        description={`Propriedades de ${resumoEmissores(
+          emissores.filter((e) => emissorIds.includes(e.id)),
+          emissores.length,
+        )}.`}
         action={
           podeEditar ? (
             <Button
               onClick={() => {
-                setForm(vazio);
+                setForm({ ...vazio, emissor_id: emissorIds.length === 1 ? emissorIds[0]! : "" });
                 setAberto(true);
               }}
             >
@@ -186,8 +197,8 @@ function FazendasPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>Nome</TableHead>
-                <TableHead>Código</TableHead>
-                <TableHead>Município/UF</TableHead>
+                <TableHead className="hidden sm:table-cell">Código</TableHead>
+                <TableHead className="hidden sm:table-cell">Município/UF</TableHead>
                 <TableHead>Área (ha)</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="w-24" />
@@ -210,8 +221,10 @@ function FazendasPage() {
                 data.map((f) => (
                   <TableRow key={f.id}>
                     <TableCell className="font-medium">{f.nome}</TableCell>
-                    <TableCell>{f.codigo ?? "—"}</TableCell>
-                    <TableCell>{[f.municipio, f.uf].filter(Boolean).join("/") || "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{f.codigo ?? "—"}</TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      {[f.municipio, f.uf].filter(Boolean).join("/") || "—"}
+                    </TableCell>
                     <TableCell>{f.area_hectares ?? "—"}</TableCell>
                     <TableCell>
                       <Badge variant={f.ativo ? "default" : "secondary"}>
@@ -227,6 +240,7 @@ function FazendasPage() {
                           onClick={() => {
                             setForm({
                               id: f.id,
+                              emissor_id: f.emissor_id,
                               nome: f.nome,
                               codigo: f.codigo ?? "",
                               inscricao_estadual: f.inscricao_estadual ?? "",
@@ -270,9 +284,31 @@ function FazendasPage() {
             className="grid gap-4 sm:grid-cols-2"
             onSubmit={(e) => {
               e.preventDefault();
+              if (!form.emissor_id) {
+                toast.error("Selecione um emissor");
+                return;
+              }
               salvar.mutate(form);
             }}
           >
+            <div className="space-y-2 sm:col-span-2">
+              <Label htmlFor="emissor_id">Emissor *</Label>
+              <Select
+                value={form.emissor_id}
+                onValueChange={(v) => setForm({ ...form, emissor_id: v })}
+              >
+                <SelectTrigger id="emissor_id">
+                  <SelectValue placeholder="Selecione o emissor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {emissores.map((e) => (
+                    <SelectItem key={e.id} value={e.id}>
+                      {e.nome_fantasia || e.razao_social}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <div className="sm:col-span-2">{campo("nome", "Nome *")}</div>
             {campo("codigo", "Código interno")}
             {campo("inscricao_estadual", "Inscrição estadual")}

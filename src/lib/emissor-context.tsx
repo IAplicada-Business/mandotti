@@ -11,13 +11,12 @@ export type Emissor = {
   ativo: boolean;
 };
 
-const STORAGE_KEY = "mandotti.emissor_id";
+const STORAGE_KEY = "mandotti.emissor_ids";
 
 type Ctx = {
   emissores: Emissor[];
-  emissorId: string | null;
-  emissor: Emissor | null;
-  setEmissorId: (id: string | null) => void;
+  emissorIds: string[];
+  setEmissorIds: (ids: string[]) => void;
   loading: boolean;
 };
 
@@ -39,38 +38,62 @@ export function useEmissores() {
   });
 }
 
+export function resumoEmissores(selecionados: Emissor[], total: number): string {
+  if (selecionados.length === 0) return "Nenhum emissor selecionado";
+  if (total > 0 && selecionados.length === total) return "Todos os emissores";
+  if (selecionados.length === 1) {
+    const e = selecionados[0]!;
+    return e.nome_fantasia || e.razao_social;
+  }
+  if (selecionados.length === 2) {
+    const [a, b] = selecionados as [Emissor, Emissor];
+    return `${a.nome_fantasia || a.razao_social} + ${b.nome_fantasia || b.razao_social}`;
+  }
+  return `${selecionados.length} selecionados`;
+}
+
 export function EmissorProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useEmissores();
-  const [emissorId, setEmissorIdState] = useState<string | null>(null);
+  const emissores = useMemo(() => data ?? [], [data]);
+  const [emissorIds, setEmissorIdsState] = useState<string[] | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    const stored = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
-    if (stored) setEmissorIdState(stored);
+    const raw = typeof window !== "undefined" ? window.localStorage.getItem(STORAGE_KEY) : null;
+    if (raw !== null) {
+      try {
+        const parsed = JSON.parse(raw);
+        setEmissorIdsState(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setEmissorIdsState([]);
+      }
+    }
+    setHydrated(true);
   }, []);
 
-  const emissores = useMemo(() => data ?? [], [data]);
-
   useEffect(() => {
-    if (!emissores.length) return;
-    if (!emissorId || !emissores.some((e) => e.id === emissorId)) {
-      setEmissorIdState(emissores[0]!.id);
-    }
-  }, [emissores, emissorId]);
+    if (isLoading || !hydrated) return;
+    setEmissorIdsState((current) => {
+      if (current === null) return emissores.map((e) => e.id);
+      if (current.length === 0) return current;
+      const validos = current.filter((id) => emissores.some((e) => e.id === id));
+      if (validos.length === 0) return emissores.map((e) => e.id);
+      return validos;
+    });
+  }, [emissores, isLoading, hydrated]);
 
-  const setEmissorId = (id: string | null) => {
-    setEmissorIdState(id);
+  const setEmissorIds = (ids: string[]) => {
+    setEmissorIdsState(ids);
     if (typeof window !== "undefined") {
-      if (id) window.localStorage.setItem(STORAGE_KEY, id);
-      else window.localStorage.removeItem(STORAGE_KEY);
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
     }
   };
 
   const value: Ctx = {
     emissores,
-    emissorId,
-    emissor: emissores.find((e) => e.id === emissorId) ?? null,
-    setEmissorId,
-    loading: isLoading,
+    emissorIds: emissorIds ?? [],
+    setEmissorIds,
+    loading: isLoading || emissorIds === null,
   };
 
   return <EmissorContext.Provider value={value}>{children}</EmissorContext.Provider>;
