@@ -53,7 +53,7 @@ export function EmissorProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!emissores.length) return;
     if (!emissorId || !emissores.some((e) => e.id === emissorId)) {
-      setEmissorIdState(emissores[0].id);
+      setEmissorIdState(emissores[0]!.id);
     }
   }, [emissores, emissorId]);
 
