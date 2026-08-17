@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedCertificadosRouteImport } from './routes/_authenticated/certificados'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmissoresRouteImport } from './routes/_authenticated/emissores'
 import { Route as AuthenticatedFazendasRouteImport } from './routes/_authenticated/fazendas'
@@ -30,6 +31,12 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCertificadosRoute =
+  AuthenticatedCertificadosRouteImport.update({
+    id: '/certificados',
+    path: '/certificados',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -49,6 +56,7 @@ const AuthenticatedFazendasRoute = AuthenticatedFazendasRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/certificados': typeof AuthenticatedCertificadosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
@@ -56,6 +64,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/certificados': typeof AuthenticatedCertificadosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
@@ -65,20 +74,24 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/certificados': typeof AuthenticatedCertificadosRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/emissores': typeof AuthenticatedEmissoresRoute
   '/_authenticated/fazendas': typeof AuthenticatedFazendasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/emissores' | '/fazendas'
+  fullPaths:
+    '/' | '/auth' | '/certificados' | '/dashboard' | '/emissores' | '/fazendas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/emissores' | '/fazendas'
+  to:
+    '/' | '/auth' | '/certificados' | '/dashboard' | '/emissores' | '/fazendas'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/certificados'
     | '/_authenticated/dashboard'
     | '/_authenticated/emissores'
     | '/_authenticated/fazendas'
@@ -113,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/certificados': {
+      id: '/_authenticated/certificados'
+      path: '/certificados'
+      fullPath: '/certificados'
+      preLoaderRoute: typeof AuthenticatedCertificadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -138,12 +158,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCertificadosRoute: typeof AuthenticatedCertificadosRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmissoresRoute: typeof AuthenticatedEmissoresRoute
   AuthenticatedFazendasRoute: typeof AuthenticatedFazendasRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCertificadosRoute: AuthenticatedCertificadosRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmissoresRoute: AuthenticatedEmissoresRoute,
   AuthenticatedFazendasRoute: AuthenticatedFazendasRoute,
