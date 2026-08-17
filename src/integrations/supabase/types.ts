@@ -14,16 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      certificados: {
+        Row: {
+          ativo: boolean
+          cnpj: string | null
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          id: string
+          nome: string
+          senha_referencia: string | null
+          tipo: Database["public"]["Enums"]["tipo_certificado"]
+          titular: string | null
+          updated_at: string
+          validade: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          cnpj?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          id?: string
+          nome: string
+          senha_referencia?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_certificado"]
+          titular?: string | null
+          updated_at?: string
+          validade?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          cnpj?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          id?: string
+          nome?: string
+          senha_referencia?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_certificado"]
+          titular?: string | null
+          updated_at?: string
+          validade?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificados_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emissores: {
+        Row: {
+          ativo: boolean
+          cep: string | null
+          cidade: string | null
+          cnpj: string
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          endereco: string | null
+          id: string
+          inscricao_estadual: string | null
+          nome_fantasia: string | null
+          razao_social: string
+          telefone: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          cep?: string | null
+          cidade?: string | null
+          cnpj: string
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          inscricao_estadual?: string | null
+          nome_fantasia?: string | null
+          razao_social: string
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          cep?: string | null
+          cidade?: string | null
+          cnpj?: string
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          inscricao_estadual?: string | null
+          nome_fantasia?: string | null
+          razao_social?: string
+          telefone?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fazendas: {
+        Row: {
+          area_hectares: number | null
+          ativo: boolean
+          car: string | null
+          codigo: string | null
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          id: string
+          inscricao_estadual: string | null
+          municipio: string | null
+          nome: string
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          area_hectares?: number | null
+          ativo?: boolean
+          car?: string | null
+          codigo?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          id?: string
+          inscricao_estadual?: string | null
+          municipio?: string | null
+          nome: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          area_hectares?: number | null
+          ativo?: boolean
+          car?: string | null
+          codigo?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          id?: string
+          inscricao_estadual?: string | null
+          municipio?: string | null
+          nome?: string
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fazendas_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      papeis_usuario: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      perfis: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          email: string | null
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          email?: string | null
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      pode_editar: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "administrador" | "gestor" | "operador" | "visualizador"
+      tipo_certificado: "A1" | "A3"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +374,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["administrador", "gestor", "operador", "visualizador"],
+      tipo_certificado: ["A1", "A3"],
+    },
   },
 } as const
