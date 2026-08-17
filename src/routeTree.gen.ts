@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedEmissoresRouteImport } from './routes/_authenticated/emissores'
+import { Route as AuthenticatedFazendasRouteImport } from './routes/_authenticated/fazendas'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -39,18 +40,25 @@ const AuthenticatedEmissoresRoute = AuthenticatedEmissoresRouteImport.update({
   path: '/emissores',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedFazendasRoute = AuthenticatedFazendasRouteImport.update({
+  id: '/fazendas',
+  path: '/fazendas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
+  '/fazendas': typeof AuthenticatedFazendasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
+  '/fazendas': typeof AuthenticatedFazendasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +67,13 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/emissores': typeof AuthenticatedEmissoresRoute
+  '/_authenticated/fazendas': typeof AuthenticatedFazendasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/dashboard' | '/emissores'
+  fullPaths: '/' | '/auth' | '/dashboard' | '/emissores' | '/fazendas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/emissores'
+  to: '/' | '/auth' | '/dashboard' | '/emissores' | '/fazendas'
   id:
     | '__root__'
     | '/'
@@ -72,6 +81,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/dashboard'
     | '/_authenticated/emissores'
+    | '/_authenticated/fazendas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,17 +127,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmissoresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/fazendas': {
+      id: '/_authenticated/fazendas'
+      path: '/fazendas'
+      fullPath: '/fazendas'
+      preLoaderRoute: typeof AuthenticatedFazendasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEmissoresRoute: typeof AuthenticatedEmissoresRoute
+  AuthenticatedFazendasRoute: typeof AuthenticatedFazendasRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEmissoresRoute: AuthenticatedEmissoresRoute,
+  AuthenticatedFazendasRoute: AuthenticatedFazendasRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
