@@ -66,7 +66,10 @@ function AuthPage() {
       },
     });
     setCarregando(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Cadastro criado. Verifique seu e-mail se a confirmação estiver ativa.");
   };
 
