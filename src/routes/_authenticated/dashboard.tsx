@@ -145,7 +145,7 @@ function Dashboard() {
   }
 
   const certTotal = data?.certificados ?? 0;
-  const certOk = Math.max(0, certTotal - (data?.vencendo ?? 0);
+  const certOk = Math.max(0, certTotal - (data?.vencendo ?? 0));
 
   const composicaoPatrimonio = useMemo(() => {
     const r = data?.resumo;
