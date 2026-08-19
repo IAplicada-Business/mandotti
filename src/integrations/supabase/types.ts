@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      cadastro_pessoas: {
+        Row: {
+          cep: string | null
+          cidade: string | null
+          created_at: string
+          data_nascimento: string | null
+          dependentes: number | null
+          email: string | null
+          endereco: string | null
+          id: string
+          nome: string
+          ordem: number
+          origem: string
+          profissao: string | null
+          sexo: string | null
+          telefone: string | null
+          tempo_residencia: string | null
+          tipo: string
+          tipo_residencia: string | null
+          uf: string | null
+          updated_at: string
+        }
+        Insert: {
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          dependentes?: number | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome: string
+          ordem?: number
+          origem?: string
+          profissao?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          tempo_residencia?: string | null
+          tipo: string
+          tipo_residencia?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cep?: string | null
+          cidade?: string | null
+          created_at?: string
+          data_nascimento?: string | null
+          dependentes?: number | null
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome?: string
+          ordem?: number
+          origem?: string
+          profissao?: string | null
+          sexo?: string | null
+          telefone?: string | null
+          tempo_residencia?: string | null
+          tipo?: string
+          tipo_residencia?: string | null
+          uf?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categorias_financeiras: {
         Row: {
           ativo: boolean
@@ -387,40 +453,78 @@ export type Database = {
         Row: {
           agencia: string | null
           categoria: string
+          cep: string | null
           cidade: string | null
           contato_nome: string | null
           created_at: string
+          cultura_codigo: string | null
+          email: string | null
+          endereco: string | null
           id: string
           nome: string
           ordem: number
           origem: string
+          preco_saca: number | null
+          safra: string | null
+          status: string
+          telefone: string | null
+          uf: string | null
           updated_at: string
+          volume_sc: number | null
         }
         Insert: {
           agencia?: string | null
           categoria: string
+          cep?: string | null
           cidade?: string | null
           contato_nome?: string | null
           created_at?: string
+          cultura_codigo?: string | null
+          email?: string | null
+          endereco?: string | null
           id?: string
           nome: string
           ordem?: number
           origem?: string
+          preco_saca?: number | null
+          safra?: string | null
+          status?: string
+          telefone?: string | null
+          uf?: string | null
           updated_at?: string
+          volume_sc?: number | null
         }
         Update: {
           agencia?: string | null
           categoria?: string
+          cep?: string | null
           cidade?: string | null
           contato_nome?: string | null
           created_at?: string
+          cultura_codigo?: string | null
+          email?: string | null
+          endereco?: string | null
           id?: string
           nome?: string
           ordem?: number
           origem?: string
+          preco_saca?: number | null
+          safra?: string | null
+          status?: string
+          telefone?: string | null
+          uf?: string | null
           updated_at?: string
+          volume_sc?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "grupo_contatos_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+        ]
       }
       lancamentos: {
         Row: {

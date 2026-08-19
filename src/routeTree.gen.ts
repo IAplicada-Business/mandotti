@@ -26,6 +26,7 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMaquinarioRouteImport } from './routes/_authenticated/maquinario'
 import { Route as AuthenticatedNotasFiscaisRouteImport } from './routes/_authenticated/notas-fiscais'
 import { Route as AuthenticatedPassivosRouteImport } from './routes/_authenticated/passivos'
+import { Route as AuthenticatedPatrimonioRouteImport } from './routes/_authenticated/patrimonio'
 import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
@@ -124,6 +125,11 @@ const AuthenticatedPassivosRoute = AuthenticatedPassivosRouteImport.update({
   path: '/passivos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPatrimonioRoute = AuthenticatedPatrimonioRouteImport.update({
+  id: '/patrimonio',
+  path: '/patrimonio',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
   id: '/producao',
   path: '/producao',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/passivos': typeof AuthenticatedPassivosRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/passivos': typeof AuthenticatedPassivosRoute
+  '/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/producao': typeof AuthenticatedProducaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/_authenticated/maquinario': typeof AuthenticatedMaquinarioRoute
   '/_authenticated/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/_authenticated/passivos': typeof AuthenticatedPassivosRoute
+  '/_authenticated/patrimonio': typeof AuthenticatedPatrimonioRoute
   '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
@@ -277,6 +286,7 @@ export interface FileRouteTypes {
     | '/maquinario'
     | '/notas-fiscais'
     | '/passivos'
+    | '/patrimonio'
     | '/producao'
     | '/produtos'
     | '/relatorios'
@@ -304,6 +314,7 @@ export interface FileRouteTypes {
     | '/maquinario'
     | '/notas-fiscais'
     | '/passivos'
+    | '/patrimonio'
     | '/producao'
     | '/produtos'
     | '/relatorios'
@@ -332,6 +343,7 @@ export interface FileRouteTypes {
     | '/_authenticated/maquinario'
     | '/_authenticated/notas-fiscais'
     | '/_authenticated/passivos'
+    | '/_authenticated/patrimonio'
     | '/_authenticated/producao'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
@@ -470,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPassivosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/patrimonio': {
+      id: '/_authenticated/patrimonio'
+      path: '/patrimonio'
+      fullPath: '/patrimonio'
+      preLoaderRoute: typeof AuthenticatedPatrimonioRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/producao': {
       id: '/_authenticated/producao'
       path: '/producao'
@@ -568,6 +587,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMaquinarioRoute: typeof AuthenticatedMaquinarioRoute
   AuthenticatedNotasFiscaisRoute: typeof AuthenticatedNotasFiscaisRoute
   AuthenticatedPassivosRoute: typeof AuthenticatedPassivosRoute
+  AuthenticatedPatrimonioRoute: typeof AuthenticatedPatrimonioRoute
   AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
   AuthenticatedProdutosRoute: typeof AuthenticatedProdutosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
@@ -592,6 +612,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMaquinarioRoute: AuthenticatedMaquinarioRoute,
   AuthenticatedNotasFiscaisRoute: AuthenticatedNotasFiscaisRoute,
   AuthenticatedPassivosRoute: AuthenticatedPassivosRoute,
+  AuthenticatedPatrimonioRoute: AuthenticatedPatrimonioRoute,
   AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
   AuthenticatedProdutosRoute: AuthenticatedProdutosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
