@@ -62,7 +62,9 @@ export function parseExtratoCsv(text: string): Array<{
     if (/^data[;,\t]/i.test(line)) continue;
     const parts = line.split(/[;\t,]/);
     if (parts.length < 3) continue;
-    const [dataRaw, desc, valorRaw] = parts;
+    const dataRaw = parts[0] ?? "";
+    const desc = parts[1] ?? "";
+    const valorRaw = parts[2] ?? "";
     const valorNum = Number(
       String(valorRaw)
         .replace(/\./g, "")
