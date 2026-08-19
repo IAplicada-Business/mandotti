@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -23,7 +24,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/producao")({
@@ -109,6 +109,24 @@ function ordenarFazenda(
   }
 }
 
+const ABAS_PRODUCAO = [
+  { id: "fazenda", label: "Fazenda", title: "Por fazenda", description: "Área e produtividade por imóvel e cultura." },
+  {
+    id: "historico",
+    label: "Histórico",
+    title: "Histórico",
+    description: "Safras realizadas — área, produtividade, preço e custo.",
+  },
+  {
+    id: "projecao",
+    label: "Projeções",
+    title: "Projeções",
+    description: "Metas de área por safra e cultura.",
+  },
+] as const;
+
+type AbaProducao = (typeof ABAS_PRODUCAO)[number]["id"];
+
 function FiltrosProducao({
   safras,
   fazendas,
@@ -137,10 +155,7 @@ function FiltrosProducao({
   mostrarFazenda?: boolean;
 }) {
   return (
-    <aside className="w-full shrink-0 space-y-4 rounded-2xl border border-border/80 bg-surface-soft p-4 lg:w-56">
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        Filtros
-      </p>
+    <>
       <div className="space-y-2">
         <Label className="text-xs">Safra</Label>
         <Select value={safra} onValueChange={onSafra}>
@@ -191,7 +206,7 @@ function FiltrosProducao({
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2 border-t border-border/60 pt-4">
+      <div className="space-y-2 border-t border-border/60 pt-3">
         <Label className="text-xs">Ordenar tabela</Label>
         <Select value={ordenacao} onValueChange={(v) => onOrdenacao(v as Ordenacao)}>
           <SelectTrigger>
@@ -205,11 +220,12 @@ function FiltrosProducao({
           </SelectContent>
         </Select>
       </div>
-    </aside>
+    </>
   );
 }
 
 function ProducaoPage() {
+  const [abaAtiva, setAbaAtiva] = useState<AbaProducao>("fazenda");
   const [safraFiltro, setSafraFiltro] = useState("2026/27");
   const [fazendaFiltro, setFazendaFiltro] = useState("todas");
   const [culturaFiltro, setCulturaFiltro] = useState("todas");
@@ -308,6 +324,25 @@ function ProducaoPage() {
     return ordenarFazenda(rows, ordenacao, data?.culturaNome ?? {});
   }, [data?.fazenda, data?.culturaNome, safraFiltro, fazendaFiltro, culturaFiltro, ordenacao]);
 
+  const abaMeta = ABAS_PRODUCAO.find((a) => a.id === abaAtiva)!;
+
+  const filtrosProducao = (
+    <FiltrosProducao
+      safras={safras}
+      fazendas={data?.fazendasList ?? []}
+      culturas={data?.culturas ?? []}
+      safra={safraFiltro}
+      fazenda={fazendaFiltro}
+      cultura={culturaFiltro}
+      ordenacao={ordenacao}
+      onSafra={setSafraFiltro}
+      onFazenda={setFazendaFiltro}
+      onCultura={setCulturaFiltro}
+      onOrdenacao={setOrdenacao}
+      mostrarFazenda={abaAtiva === "fazenda"}
+    />
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -333,102 +368,29 @@ function ProducaoPage() {
         />
       </div>
 
-      <Tabs defaultValue="fazenda">
-        <TabsList>
-          <TabsTrigger value="fazenda">Fazenda</TabsTrigger>
-          <TabsTrigger value="historico">Histórico</TabsTrigger>
-          <TabsTrigger value="projecao">Projeções</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="fazenda" className="mt-4">
-          <SectionCard title="Por fazenda" description="Área e produtividade por imóvel e cultura.">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-              <div className="min-w-0 flex-1">
-                {isLoading ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
-                ) : (
-                  <TabelaPreview rows={porFazenda}>
-                    {(visiveis) => (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Safra</TableHead>
-                        <TableHead>Fazenda</TableHead>
-                        <TableHead>Cultura</TableHead>
-                        <TableHead className="text-right">Área</TableHead>
-                        <TableHead className="text-right">Produtividade</TableHead>
-                        <TableHead>Matrícula</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visiveis.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                            Nenhum registro com os filtros atuais.
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        visiveis.map((row) => (
-                          <TableRow key={row.id}>
-                            <TableCell>{row.safra}</TableCell>
-                            <TableCell className="font-medium">
-                              {row.fazendas?.nome ?? "—"}
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline">
-                                {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right font-mono-nums">
-                              {fmtHa(row.area_plantio_ha)}
-                            </TableCell>
-                            <TableCell className="text-right font-mono-nums">
-                              {fmtScHa(row.produtividade_sc_ha)}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground">
-                              {row.matricula ?? "—"}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                    )}
-                  </TabelaPreview>
-                )}
-              </div>
-              <FiltrosProducao
-                safras={safras}
-                fazendas={data?.fazendasList ?? []}
-                culturas={data?.culturas ?? []}
-                safra={safraFiltro}
-                fazenda={fazendaFiltro}
-                cultura={culturaFiltro}
-                ordenacao={ordenacao}
-                onSafra={setSafraFiltro}
-                onFazenda={setFazendaFiltro}
-                onCultura={setCulturaFiltro}
-                onOrdenacao={setOrdenacao}
-              />
-            </div>
-          </SectionCard>
-        </TabsContent>
-
-        <TabsContent value="historico" className="mt-4">
-          <SectionCard title="Histórico" description="Safras realizadas — área, produtividade, preço e custo.">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-              <div className="min-w-0 flex-1">
-                <TabelaPreview rows={historico}>
+      <SectionCard title={abaMeta.title} description={abaMeta.description}>
+        <LayoutAbasFiltros
+          abas={[...ABAS_PRODUCAO]}
+          abaAtiva={abaAtiva}
+          onAbaChange={(id) => setAbaAtiva(id as AbaProducao)}
+          filtros={filtrosProducao}
+        >
+          <div className="p-4 sm:p-5">
+            {abaAtiva === "fazenda" ? (
+              isLoading ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
+              ) : (
+                <TabelaPreview rows={porFazenda}>
                   {(visiveis) => (
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Safra</TableHead>
+                      <TableHead>Fazenda</TableHead>
                       <TableHead>Cultura</TableHead>
                       <TableHead className="text-right">Área</TableHead>
-                      <TableHead className="text-right">sc/ha</TableHead>
-                      <TableHead className="text-right">Preço/sc</TableHead>
-                      <TableHead className="text-right">Custo/sc</TableHead>
+                      <TableHead className="text-right">Produtividade</TableHead>
+                      <TableHead>Matrícula</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -441,12 +403,14 @@ function ProducaoPage() {
                     ) : (
                       visiveis.map((row) => (
                         <TableRow key={row.id}>
-                          <TableCell>
-                            {row.safra}
-                            {row.ciclo === "safrinha" ? " · safrinha" : ""}
+                          <TableCell>{row.safra}</TableCell>
+                          <TableCell className="font-medium">
+                            {row.fazendas?.nome ?? "—"}
                           </TableCell>
                           <TableCell>
-                            {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
+                            <Badge variant="outline">
+                              {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-right font-mono-nums">
                             {fmtHa(row.area_plantio_ha)}
@@ -454,21 +418,8 @@ function ProducaoPage() {
                           <TableCell className="text-right font-mono-nums">
                             {fmtScHa(row.produtividade_sc_ha)}
                           </TableCell>
-                          <TableCell className="text-right font-mono-nums">
-                            {row.preco_saca != null
-                              ? row.preco_saca.toLocaleString("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                })
-                              : "—"}
-                          </TableCell>
-                          <TableCell className="text-right font-mono-nums">
-                            {row.custo_saca != null
-                              ? row.custo_saca.toLocaleString("pt-BR", {
-                                  style: "currency",
-                                  currency: "BRL",
-                                })
-                              : "—"}
+                          <TableCell className="text-muted-foreground">
+                            {row.matricula ?? "—"}
                           </TableCell>
                         </TableRow>
                       ))
@@ -477,85 +428,113 @@ function ProducaoPage() {
                 </Table>
                   )}
                 </TabelaPreview>
-              </div>
-              <FiltrosProducao
-                safras={safras}
-                fazendas={data?.fazendasList ?? []}
-                culturas={data?.culturas ?? []}
-                safra={safraFiltro}
-                fazenda={fazendaFiltro}
-                cultura={culturaFiltro}
-                ordenacao={ordenacao}
-                onSafra={setSafraFiltro}
-                onFazenda={setFazendaFiltro}
-                onCultura={setCulturaFiltro}
-                onOrdenacao={setOrdenacao}
-                mostrarFazenda={false}
-              />
-            </div>
-          </SectionCard>
-        </TabsContent>
+              )
+            ) : null}
 
-        <TabsContent value="projecao" className="mt-4">
-          <SectionCard title="Projeções" description="Metas de área por safra e cultura.">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-              <div className="min-w-0 flex-1">
-                <TabelaPreview rows={projecao}>
-                  {(visiveis) => (
-                <Table>
-                  <TableHeader>
+            {abaAtiva === "historico" ? (
+              <TabelaPreview rows={historico}>
+                {(visiveis) => (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Safra</TableHead>
+                    <TableHead>Cultura</TableHead>
+                    <TableHead className="text-right">Área</TableHead>
+                    <TableHead className="text-right">sc/ha</TableHead>
+                    <TableHead className="text-right">Preço/sc</TableHead>
+                    <TableHead className="text-right">Custo/sc</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visiveis.length === 0 ? (
                     <TableRow>
-                      <TableHead>Safra</TableHead>
-                      <TableHead>Cultura</TableHead>
-                      <TableHead className="text-right">Área projetada</TableHead>
+                      <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                        Nenhum registro com os filtros atuais.
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {visiveis.length === 0 ? (
-                      <TableRow>
-                        <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
-                          Nenhum registro com os filtros atuais.
+                  ) : (
+                    visiveis.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          {row.safra}
+                          {row.ciclo === "safrinha" ? " · safrinha" : ""}
+                        </TableCell>
+                        <TableCell>
+                          {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {fmtHa(row.area_plantio_ha)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {fmtScHa(row.produtividade_sc_ha)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {row.preco_saca != null
+                            ? row.preco_saca.toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })
+                            : "—"}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {row.custo_saca != null
+                            ? row.custo_saca.toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })
+                            : "—"}
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      visiveis.map((row) => (
-                        <TableRow key={row.id}>
-                          <TableCell>
-                            {row.safra}
-                            {row.ciclo === "safrinha" ? " · safrinha" : ""}
-                          </TableCell>
-                          <TableCell>
-                            {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
-                          </TableCell>
-                          <TableCell className="text-right font-mono-nums">
-                            {fmtHa(row.area_plantio_ha)}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                    ))
                   )}
-                </TabelaPreview>
-              </div>
-              <FiltrosProducao
-                safras={safras}
-                fazendas={data?.fazendasList ?? []}
-                culturas={data?.culturas ?? []}
-                safra={safraFiltro}
-                fazenda={fazendaFiltro}
-                cultura={culturaFiltro}
-                ordenacao={ordenacao}
-                onSafra={setSafraFiltro}
-                onFazenda={setFazendaFiltro}
-                onCultura={setCulturaFiltro}
-                onOrdenacao={setOrdenacao}
-                mostrarFazenda={false}
-              />
-            </div>
-          </SectionCard>
-        </TabsContent>
-      </Tabs>
+                </TableBody>
+              </Table>
+                )}
+              </TabelaPreview>
+            ) : null}
+
+            {abaAtiva === "projecao" ? (
+              <TabelaPreview rows={projecao}>
+                {(visiveis) => (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Safra</TableHead>
+                    <TableHead>Cultura</TableHead>
+                    <TableHead className="text-right">Área projetada</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visiveis.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
+                        Nenhum registro com os filtros atuais.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    visiveis.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          {row.safra}
+                          {row.ciclo === "safrinha" ? " · safrinha" : ""}
+                        </TableCell>
+                        <TableCell>
+                          {data?.culturaNome[row.cultura_codigo] ?? row.cultura_codigo}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {fmtHa(row.area_plantio_ha)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+                )}
+              </TabelaPreview>
+            ) : null}
+          </div>
+        </LayoutAbasFiltros>
+      </SectionCard>
     </div>
   );
 }
