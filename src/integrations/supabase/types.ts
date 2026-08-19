@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      configuracoes_grupo: {
-        Row: {
-          created_at: string
-          dia_limite_envio: number
-          email_hrm: string | null
-          id: string
-          meta_hectares_grupo: number
-          modo_contabilidade: Database["public"]["Enums"]["modo_contabilidade"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          dia_limite_envio?: number
-          email_hrm?: string | null
-          id?: string
-          meta_hectares_grupo?: number
-          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          dia_limite_envio?: number
-          email_hrm?: string | null
-          id?: string
-          meta_hectares_grupo?: number
-          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
-          updated_at?: string
-        }
-        Relationships: []
-      }
       categorias_financeiras: {
         Row: {
           ativo: boolean
@@ -126,6 +96,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      configuracoes_grupo: {
+        Row: {
+          created_at: string
+          dia_limite_envio: number
+          email_hrm: string | null
+          fonte_bancario_pct: number | null
+          fonte_principal_banco: string | null
+          fonte_proprio_pct: number | null
+          id: string
+          meta_hectares_grupo: number
+          modo_contabilidade: Database["public"]["Enums"]["modo_contabilidade"]
+          perfil_grupo: string | null
+          tempo_agricultura_anos: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dia_limite_envio?: number
+          email_hrm?: string | null
+          fonte_bancario_pct?: number | null
+          fonte_principal_banco?: string | null
+          fonte_proprio_pct?: number | null
+          id?: string
+          meta_hectares_grupo?: number
+          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
+          perfil_grupo?: string | null
+          tempo_agricultura_anos?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dia_limite_envio?: number
+          email_hrm?: string | null
+          fonte_bancario_pct?: number | null
+          fonte_principal_banco?: string | null
+          fonte_proprio_pct?: number | null
+          id?: string
+          meta_hectares_grupo?: number
+          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
+          perfil_grupo?: string | null
+          tempo_agricultura_anos?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       emissores: {
         Row: {
@@ -368,6 +383,45 @@ export type Database = {
           },
         ]
       }
+      grupo_contatos: {
+        Row: {
+          agencia: string | null
+          categoria: string
+          cidade: string | null
+          contato_nome: string | null
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          origem: string
+          updated_at: string
+        }
+        Insert: {
+          agencia?: string | null
+          categoria: string
+          cidade?: string | null
+          contato_nome?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          origem?: string
+          updated_at?: string
+        }
+        Update: {
+          agencia?: string | null
+          categoria?: string
+          cidade?: string | null
+          contato_nome?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          origem?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       lancamentos: {
         Row: {
           categoria_id: string | null
@@ -446,8 +500,8 @@ export type Database = {
           cor: string | null
           created_at: string
           custo_manutencao_acumulado: number
-          depreciacao_anual_pct: number | null
           deleted_at: string | null
+          depreciacao_anual_pct: number | null
           emissor_id: string
           fazenda_id: string | null
           fazenda_nome: string | null
@@ -467,8 +521,8 @@ export type Database = {
           cor?: string | null
           created_at?: string
           custo_manutencao_acumulado?: number
-          depreciacao_anual_pct?: number | null
           deleted_at?: string | null
+          depreciacao_anual_pct?: number | null
           emissor_id: string
           fazenda_id?: string | null
           fazenda_nome?: string | null
@@ -488,8 +542,8 @@ export type Database = {
           cor?: string | null
           created_at?: string
           custo_manutencao_acumulado?: number
-          depreciacao_anual_pct?: number | null
           deleted_at?: string | null
+          depreciacao_anual_pct?: number | null
           emissor_id?: string
           fazenda_id?: string | null
           fazenda_nome?: string | null
@@ -539,122 +593,29 @@ export type Database = {
         }
         Relationships: []
       }
-      producao_fazenda_safra: {
+      passivo_por_instituicao: {
         Row: {
-          area_plantio_ha: number | null
           created_at: string
-          cultura_codigo: string
-          fazenda_id: string | null
           id: string
-          matricula: string | null
+          instituicao: string
           origem: string
-          produtividade_sc_ha: number | null
-          safra: string
+          saldo_devedor: number
           updated_at: string
         }
         Insert: {
-          area_plantio_ha?: number | null
           created_at?: string
-          cultura_codigo: string
-          fazenda_id?: string | null
           id?: string
-          matricula?: string | null
+          instituicao: string
           origem?: string
-          produtividade_sc_ha?: number | null
-          safra: string
+          saldo_devedor?: number
           updated_at?: string
         }
         Update: {
-          area_plantio_ha?: number | null
           created_at?: string
-          cultura_codigo?: string
-          fazenda_id?: string | null
           id?: string
-          matricula?: string | null
+          instituicao?: string
           origem?: string
-          produtividade_sc_ha?: number | null
-          safra?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      producao_grupo_safra: {
-        Row: {
-          area_plantio_ha: number | null
-          ciclo: string
-          created_at: string
-          cultura_codigo: string
-          custo_saca: number | null
-          id: string
-          origem: string
-          preco_saca: number | null
-          produtividade_sc_ha: number | null
-          safra: string
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          area_plantio_ha?: number | null
-          ciclo?: string
-          created_at?: string
-          cultura_codigo: string
-          custo_saca?: number | null
-          id?: string
-          origem?: string
-          preco_saca?: number | null
-          produtividade_sc_ha?: number | null
-          safra: string
-          tipo?: string
-          updated_at?: string
-        }
-        Update: {
-          area_plantio_ha?: number | null
-          ciclo?: string
-          created_at?: string
-          cultura_codigo?: string
-          custo_saca?: number | null
-          id?: string
-          origem?: string
-          preco_saca?: number | null
-          produtividade_sc_ha?: number | null
-          safra?: string
-          tipo?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      produtos_agricolas: {
-        Row: {
-          ativo: boolean
-          codigo: string
-          cor_token: string | null
-          created_at: string
-          id: string
-          nome: string
-          ordem: number
-          tipo: string
-          updated_at: string
-        }
-        Insert: {
-          ativo?: boolean
-          codigo: string
-          cor_token?: string | null
-          created_at?: string
-          id?: string
-          nome: string
-          ordem?: number
-          tipo?: string
-          updated_at?: string
-        }
-        Update: {
-          ativo?: boolean
-          codigo?: string
-          cor_token?: string | null
-          created_at?: string
-          id?: string
-          nome?: string
-          ordem?: number
-          tipo?: string
+          saldo_devedor?: number
           updated_at?: string
         }
         Relationships: []
@@ -733,6 +694,39 @@ export type Database = {
           },
         ]
       }
+      patrimonio_bens: {
+        Row: {
+          created_at: string
+          descricao: string
+          id: string
+          municipio: string | null
+          ordem: number
+          origem: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          id?: string
+          municipio?: string | null
+          ordem?: number
+          origem?: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          id?: string
+          municipio?: string | null
+          ordem?: number
+          origem?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       perfis: {
         Row: {
           ativo: boolean
@@ -799,62 +793,183 @@ export type Database = {
         }
         Relationships: []
       }
-      resumo_patrimonial: {
+      producao_fazenda_safra: {
         Row: {
-          animais: number
+          area_plantio_ha: number | null
           created_at: string
-          endividamento_pct: number
+          cultura_codigo: string
+          fazenda_id: string | null
           id: string
-          imoveis: number
-          maquinarios_veiculos: number
+          matricula: string | null
           origem: string
-          outros_bens: number
-          participacoes_societarias: number
-          passivo_eder: number | null
-          passivo_nagyla: number | null
-          passivo_total: number
-          patrimonio_liquido: number
-          patrimonio_total: number
-          referencia: string
-          total_projetado_juros: number | null
+          produtividade_sc_ha: number | null
+          safra: string
           updated_at: string
         }
         Insert: {
-          animais?: number
+          area_plantio_ha?: number | null
           created_at?: string
-          endividamento_pct?: number
+          cultura_codigo: string
+          fazenda_id?: string | null
           id?: string
-          imoveis?: number
-          maquinarios_veiculos?: number
+          matricula?: string | null
           origem?: string
-          outros_bens?: number
-          participacoes_societarias?: number
-          passivo_eder?: number | null
-          passivo_nagyla?: number | null
-          passivo_total?: number
-          patrimonio_liquido?: number
-          patrimonio_total?: number
-          referencia?: string
-          total_projetado_juros?: number | null
+          produtividade_sc_ha?: number | null
+          safra: string
           updated_at?: string
         }
         Update: {
-          animais?: number
+          area_plantio_ha?: number | null
           created_at?: string
-          endividamento_pct?: number
+          cultura_codigo?: string
+          fazenda_id?: string | null
           id?: string
-          imoveis?: number
-          maquinarios_veiculos?: number
+          matricula?: string | null
           origem?: string
-          outros_bens?: number
-          participacoes_societarias?: number
-          passivo_eder?: number | null
-          passivo_nagyla?: number | null
-          passivo_total?: number
-          patrimonio_liquido?: number
-          patrimonio_total?: number
-          referencia?: string
-          total_projetado_juros?: number | null
+          produtividade_sc_ha?: number | null
+          safra?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_fazenda_safra_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "producao_fazenda_safra_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      producao_grupo_safra: {
+        Row: {
+          area_plantio_ha: number | null
+          ciclo: string
+          created_at: string
+          cultura_codigo: string
+          custo_saca: number | null
+          id: string
+          origem: string
+          preco_saca: number | null
+          produtividade_sc_ha: number | null
+          safra: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          area_plantio_ha?: number | null
+          ciclo?: string
+          created_at?: string
+          cultura_codigo: string
+          custo_saca?: number | null
+          id?: string
+          origem?: string
+          preco_saca?: number | null
+          produtividade_sc_ha?: number | null
+          safra: string
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          area_plantio_ha?: number | null
+          ciclo?: string
+          created_at?: string
+          cultura_codigo?: string
+          custo_saca?: number | null
+          id?: string
+          origem?: string
+          preco_saca?: number | null
+          produtividade_sc_ha?: number | null
+          safra?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producao_grupo_safra_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      produtividade_institucional: {
+        Row: {
+          created_at: string
+          cultura_codigo: string
+          id: string
+          origem: string
+          produtividade_sc_ha: number | null
+          safra: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cultura_codigo: string
+          id?: string
+          origem?: string
+          produtividade_sc_ha?: number | null
+          safra: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cultura_codigo?: string
+          id?: string
+          origem?: string
+          produtividade_sc_ha?: number | null
+          safra?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "produtividade_institucional_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+        ]
+      }
+      produtos_agricolas: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          cor_token: string | null
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          cor_token?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          cor_token?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          tipo?: string
           updated_at?: string
         }
         Relationships: []
@@ -909,6 +1024,84 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      resumo_patrimonial: {
+        Row: {
+          animais: number
+          created_at: string
+          cronograma_apos_jun30: number | null
+          cronograma_ate_jun26: number | null
+          cronograma_jul26_jun27: number | null
+          cronograma_jul27_jun28: number | null
+          cronograma_jul28_jun29: number | null
+          cronograma_jul29_jun30: number | null
+          endividamento_pct: number
+          id: string
+          imoveis: number
+          maquinarios_veiculos: number
+          origem: string
+          outros_bens: number
+          participacoes_societarias: number
+          passivo_eder: number | null
+          passivo_nagyla: number | null
+          passivo_total: number
+          patrimonio_liquido: number
+          patrimonio_total: number
+          referencia: string
+          total_projetado_juros: number | null
+          updated_at: string
+        }
+        Insert: {
+          animais?: number
+          created_at?: string
+          cronograma_apos_jun30?: number | null
+          cronograma_ate_jun26?: number | null
+          cronograma_jul26_jun27?: number | null
+          cronograma_jul27_jun28?: number | null
+          cronograma_jul28_jun29?: number | null
+          cronograma_jul29_jun30?: number | null
+          endividamento_pct?: number
+          id?: string
+          imoveis?: number
+          maquinarios_veiculos?: number
+          origem?: string
+          outros_bens?: number
+          participacoes_societarias?: number
+          passivo_eder?: number | null
+          passivo_nagyla?: number | null
+          passivo_total?: number
+          patrimonio_liquido?: number
+          patrimonio_total?: number
+          referencia?: string
+          total_projetado_juros?: number | null
+          updated_at?: string
+        }
+        Update: {
+          animais?: number
+          created_at?: string
+          cronograma_apos_jun30?: number | null
+          cronograma_ate_jun26?: number | null
+          cronograma_jul26_jun27?: number | null
+          cronograma_jul27_jun28?: number | null
+          cronograma_jul28_jun29?: number | null
+          cronograma_jul29_jun30?: number | null
+          endividamento_pct?: number
+          id?: string
+          imoveis?: number
+          maquinarios_veiculos?: number
+          origem?: string
+          outros_bens?: number
+          participacoes_societarias?: number
+          passivo_eder?: number | null
+          passivo_nagyla?: number | null
+          passivo_total?: number
+          patrimonio_liquido?: number
+          patrimonio_total?: number
+          referencia?: string
+          total_projetado_juros?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       xml_importacoes: {
         Row: {

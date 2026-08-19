@@ -9,6 +9,10 @@ Saídas:
   supabase/seed_maquinarios.sql
   supabase/seed_producao.sql
   supabase/seed_resumo_patrimonial.sql
+  supabase/seed_patrimonio_bens.sql
+  supabase/seed_grupo_contatos.sql
+  supabase/seed_produtividade_institucional.sql
+  supabase/seed_config_grupo.sql
 """
 
 from __future__ import annotations
@@ -298,7 +302,173 @@ def parse_resumo(wb: openpyxl.Workbook) -> dict:
         "total_projetado_juros": ws.cell(13, 2).value,
         "passivo_eder": ws.cell(6, 5).value,
         "passivo_nagyla": ws.cell(7, 5).value,
+        "cronograma_ate_jun26": ws.cell(6, 8).value,
+        "cronograma_jul26_jun27": ws.cell(6, 9).value,
+        "cronograma_jul27_jun28": ws.cell(6, 10).value,
+        "cronograma_jul28_jun29": ws.cell(6, 11).value,
+        "cronograma_jul29_jun30": ws.cell(6, 12).value,
+        "cronograma_apos_jun30": ws.cell(6, 13).value,
     }
+
+
+def parse_passivo_instituicao(wb: openpyxl.Workbook) -> list[dict]:
+    ws = wb["Resumo Executivo"]
+    rows = []
+    for r in range(12, 20):
+        inst = ws.cell(r, 4).value
+        saldo = ws.cell(r, 5).value
+        if not inst or not saldo:
+            continue
+        if "critério" in str(inst).lower():
+            continue
+        rows.append({"instituicao": str(inst).strip(), "saldo_devedor": float(saldo)})
+    return rows
+
+
+def parse_patrimonio_bens(wb: openpyxl.Workbook) -> list[dict]:
+    ws = wb["Dados Patrimoniais"]
+    rows: list[dict] = []
+    mode = None
+    ordem = 0
+    for r in range(6, 45):
+        b = ws.cell(r, 2).value
+        if not b:
+            continue
+        text = str(b).strip()
+        upper = strip_accents(text.upper())
+        if "PARTICIPA" in upper and "EMPRESA" in upper:
+            mode = "participacao"
+            continue
+        if "BENS IM" in upper:
+            mode = "imovel"
+            continue
+        if "BENFEITORIA" in upper or "MAQUINAS / VEICULOS" in upper:
+            break
+        if text.startswith("  ") and "-" in text[:6]:
+            continue
+        if mode == "participacao":
+            ordem += 1
+            rows.append({"tipo": "participacao", "descricao": text, "municipio": None, "ordem": ordem})
+        elif mode == "imovel":
+            municipio = ws.cell(r, 8).value
+            muni = str(municipio).strip() if municipio else None
+            b3 = ws.cell(r, 3).value
+            if isinstance(b, (int, float)) and b3:
+                desc = str(b3).strip()
+            else:
+                desc = text
+            if desc in ("1-", "1.0") or len(desc) <= 2:
+                continue
+            ordem += 1
+            rows.append({"tipo": "imovel", "descricao": desc, "municipio": muni, "ordem": ordem})
+    return rows
+
+
+def parse_grupo_contatos(wb: openpyxl.Workbook) -> list[dict]:
+    ws = wb["Dados Cadastrais"]
+    rows: list[dict] = []
+    mode = None
+    ordem = 0
+
+    def add(cat: str, nome: str, cidade=None, contato=None, agencia=None):
+        nonlocal ordem
+        ordem += 1
+        ag = str(int(agencia)) if isinstance(agencia, (int, float)) else agencia
+        rows.append(
+            {
+                "categoria": cat,
+                "nome": nome.strip(),
+                "cidade": str(cidade).strip() if cidade else None,
+                "contato_nome": str(contato).strip() if contato else None,
+                "agencia": str(ag).strip() if ag else None,
+                "ordem": ordem,
+            }
+        )
+
+    for r in range(36, 70):
+        b = ws.cell(r, 2).value
+        if not b:
+            continue
+        text = str(b).strip()
+        upper = strip_accents(text.upper())
+        if "FONTES DE REFER" in upper:
+            mode = "ref"
+            continue
+        if "PRINCIPAIS FORNECEDORES" in upper:
+            mode = "fornecedor"
+            continue
+        if "DESTINO DA PRODU" in upper:
+            mode = "destino"
+            continue
+        if "CONDOM" in upper:
+            break
+        if text.startswith("  ") or text in ("NOME DA EMPRESA", "BANCÁRIA : NOME DO BANCO", "RUA, AVENIDA, TRAVESSA, ETC"):
+            continue
+        if mode == "ref":
+            if upper == "COMERCIAL":
+                nxt = ws.cell(r + 1, 2).value
+                if nxt:
+                    add("referencia_comercial", str(nxt))
+                continue
+            if upper == "PESSOAL":
+                nxt = ws.cell(r + 1, 2).value
+                if nxt:
+                    add("referencia_pessoal", str(nxt))
+                continue
+            if "BANC" in upper:
+                banco = text.split(":")[-1].strip() if ":" in text else text
+                contato = ws.cell(r, 8).value
+                agencia = ws.cell(r, 12).value
+                add("referencia_bancaria", banco or "Banco", contato=contato, agencia=agencia)
+        elif mode == "fornecedor":
+            cidade = ws.cell(r, 11).value
+            if "NOME" not in upper:
+                add("fornecedor", text, cidade=cidade)
+        elif mode == "destino":
+            cidade = ws.cell(r, 11).value
+            if "NOME" not in upper:
+                add("destino_producao", text, cidade=cidade)
+    return rows
+
+
+def parse_institucional(wb: openpyxl.Workbook) -> tuple[dict, list[dict]]:
+    ws = wb["Institucional"]
+    config = {
+        "tempo_agricultura_anos": 25,
+        "perfil_grupo": None,
+        "fonte_bancario_pct": None,
+        "fonte_proprio_pct": None,
+        "fonte_principal_banco": None,
+    }
+    perfil = ws.cell(8, 2).value
+    if perfil:
+        config["perfil_grupo"] = str(perfil).replace("\n", " ").strip()[:2000]
+    tempo = ws.cell(6, 2).value
+    if tempo and "25" in str(tempo):
+        config["tempo_agricultura_anos"] = 25
+
+    ws_op = wb["Dados Operacionais"]
+    config["fonte_bancario_pct"] = ws_op.cell(34, 5).value
+    config["fonte_proprio_pct"] = ws_op.cell(34, 10).value
+    config["fonte_principal_banco"] = ws_op.cell(34, 17).value
+    if config["fonte_principal_banco"]:
+        config["fonte_principal_banco"] = str(config["fonte_principal_banco"]).strip()
+
+    benchmarks = []
+    for r in range(25, 28):
+        safra_soja = ws.cell(r, 2).value
+        prod_soja = ws.cell(r, 3).value
+        safra_milho = ws.cell(r, 5).value
+        prod_milho = ws.cell(r, 6).value
+        if safra_soja and prod_soja:
+            benchmarks.append(
+                {"safra": norm_safra(safra_soja), "cultura_codigo": "soja", "produtividade_sc_ha": float(prod_soja)}
+            )
+        if safra_milho and prod_milho:
+            benchmarks.append(
+                {"safra": norm_safra(safra_milho), "cultura_codigo": "milho", "produtividade_sc_ha": float(prod_milho)}
+            )
+    return config, benchmarks
 
 
 def write_fazendas_seed(out_dir: Path) -> None:
@@ -510,7 +680,9 @@ def write_resumo_seed(out_dir: Path, resumo: dict) -> None:
             "insert into public.resumo_patrimonial (",
             "  id, participacoes_societarias, imoveis, maquinarios_veiculos, animais,",
             "  outros_bens, patrimonio_total, passivo_total, patrimonio_liquido,",
-            "  endividamento_pct, total_projetado_juros, passivo_eder, passivo_nagyla, referencia",
+            "  endividamento_pct, total_projetado_juros, passivo_eder, passivo_nagyla, referencia,",
+            "  cronograma_ate_jun26, cronograma_jul26_jun27, cronograma_jul27_jun28,",
+            "  cronograma_jul28_jun29, cronograma_jul29_jun30, cronograma_apos_jun30",
             ") values (",
             "  'd0000000-0000-4000-8000-000000000001'::uuid,",
             f"  {sql_num(resumo['participacoes_societarias'])},",
@@ -525,7 +697,13 @@ def write_resumo_seed(out_dir: Path, resumo: dict) -> None:
             f"  {sql_num(resumo['total_projetado_juros'])},",
             f"  {sql_num(resumo['passivo_eder'])},",
             f"  {sql_num(resumo['passivo_nagyla'])},",
-            f"  '{date.today().isoformat()}'::date",
+            f"  '{date.today().isoformat()}'::date,",
+            f"  {sql_num(resumo.get('cronograma_ate_jun26'))},",
+            f"  {sql_num(resumo.get('cronograma_jul26_jun27'))},",
+            f"  {sql_num(resumo.get('cronograma_jul27_jun28'))},",
+            f"  {sql_num(resumo.get('cronograma_jul28_jun29'))},",
+            f"  {sql_num(resumo.get('cronograma_jul29_jun30'))},",
+            f"  {sql_num(resumo.get('cronograma_apos_jun30'))}",
             ")",
             "on conflict (id) do update set",
             "  participacoes_societarias = excluded.participacoes_societarias,",
@@ -541,10 +719,150 @@ def write_resumo_seed(out_dir: Path, resumo: dict) -> None:
             "  passivo_eder = excluded.passivo_eder,",
             "  passivo_nagyla = excluded.passivo_nagyla,",
             "  referencia = excluded.referencia,",
+            "  cronograma_ate_jun26 = excluded.cronograma_ate_jun26,",
+            "  cronograma_jul26_jun27 = excluded.cronograma_jul26_jun27,",
+            "  cronograma_jul27_jun28 = excluded.cronograma_jul27_jun28,",
+            "  cronograma_jul28_jun29 = excluded.cronograma_jul28_jun29,",
+            "  cronograma_jul29_jun30 = excluded.cronograma_jul29_jun30,",
+            "  cronograma_apos_jun30 = excluded.cronograma_apos_jun30,",
             "  updated_at = now();",
         ]
     )
     (out_dir / "seed_resumo_patrimonial.sql").write_text(content + "\n", encoding="utf-8")
+
+
+def _generic_upsert_seed(
+    out_dir: Path,
+    filename: str,
+    table: str,
+    columns: list[str],
+    conflict: str,
+    rows: list[dict],
+) -> None:
+    if not rows:
+        return
+    vals = []
+    for row in rows:
+        vals.append("  (" + ", ".join(sql_str(row.get(c)) if c != "ordem" else str(row.get(c, 0)) for c in columns) + ")")
+    content = "\n".join(
+        [
+            f"-- Gerado por scripts/import_ficha_cadastral.py",
+            "",
+            f"insert into public.{table} ({', '.join(columns)}) values",
+            ",\n".join(vals),
+            f"on conflict {conflict} do update set",
+            ",\n".join(f"  {c} = excluded.{c}" for c in columns if c not in conflict.strip("()").split(",")[0].split()[-1:]),
+            "  updated_at = now();",
+        ]
+    )
+    (out_dir / filename).write_text(content + "\n", encoding="utf-8")
+
+
+def write_complement_seeds(
+    out_dir: Path,
+    patrimonio: list[dict],
+    contatos: list[dict],
+    benchmarks: list[dict],
+    passivo_inst: list[dict],
+    config: dict,
+) -> None:
+    if patrimonio:
+        vals = []
+        for r in patrimonio:
+            vals.append(
+                f"  ({sql_str(r['tipo'])}, {sql_str(r['descricao'])}, {sql_str(r['municipio'])}, {r['ordem']})"
+            )
+        (out_dir / "seed_patrimonio_bens.sql").write_text(
+            "\n".join(
+                [
+                    "-- aba Dados Patrimoniais",
+                    "delete from public.patrimonio_bens where origem = 'planilha';",
+                    "insert into public.patrimonio_bens (tipo, descricao, municipio, ordem) values",
+                    ",\n".join(vals),
+                    ";",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    if contatos:
+        vals = []
+        for r in contatos:
+            vals.append(
+                "  ("
+                + f"{sql_str(r['categoria'])}, {sql_str(r['nome'])}, {sql_str(r['cidade'])}, "
+                + f"{sql_str(r['contato_nome'])}, {sql_str(r['agencia'])}, {r['ordem']}"
+                + ")"
+            )
+        (out_dir / "seed_grupo_contatos.sql").write_text(
+            "\n".join(
+                [
+                    "-- aba Dados Cadastrais (referências, fornecedores, destinos)",
+                    "delete from public.grupo_contatos where origem = 'planilha';",
+                    "insert into public.grupo_contatos (categoria, nome, cidade, contato_nome, agencia, ordem) values",
+                    ",\n".join(vals),
+                    ";",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    if benchmarks:
+        vals = []
+        for r in benchmarks:
+            vals.append(
+                f"  ({sql_str(r['safra'])}, {sql_str(r['cultura_codigo'])}, {sql_num(r['produtividade_sc_ha'])})"
+            )
+        (out_dir / "seed_produtividade_institucional.sql").write_text(
+            "\n".join(
+                [
+                    "-- aba Institucional (benchmarks produtividade)",
+                    "insert into public.produtividade_institucional (safra, cultura_codigo, produtividade_sc_ha) values",
+                    ",\n".join(vals),
+                    "on conflict (safra, cultura_codigo) do update set",
+                    "  produtividade_sc_ha = excluded.produtividade_sc_ha, updated_at = now();",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+
+    if passivo_inst:
+        vals = []
+        for r in passivo_inst:
+            vals.append(f"  ({sql_str(r['instituicao'])}, {sql_num(r['saldo_devedor'])})")
+        extra = "\n".join(
+            [
+                "-- passivo por instituição (Resumo Executivo)",
+                "insert into public.passivo_por_instituicao (instituicao, saldo_devedor) values",
+                ",\n".join(vals),
+                "on conflict (instituicao) do update set saldo_devedor = excluded.saldo_devedor, updated_at = now();",
+            ]
+        )
+        (out_dir / "seed_resumo_patrimonial.sql").write_text(
+            (out_dir / "seed_resumo_patrimonial.sql").read_text(encoding="utf-8") + "\n" + extra + "\n",
+            encoding="utf-8",
+        )
+
+    (out_dir / "seed_config_grupo.sql").write_text(
+        "\n".join(
+            [
+                "-- Institucional + fontes de recurso (Operacional)",
+                "update public.configuracoes_grupo set",
+                f"  tempo_agricultura_anos = {config.get('tempo_agricultura_anos') or 'null'},",
+                f"  perfil_grupo = {sql_str(config.get('perfil_grupo'))},",
+                f"  fonte_bancario_pct = {sql_num(config.get('fonte_bancario_pct'))},",
+                f"  fonte_proprio_pct = {sql_num(config.get('fonte_proprio_pct'))},",
+                f"  fonte_principal_banco = {sql_str(config.get('fonte_principal_banco'))},",
+                "  updated_at = now()",
+                "where id = 'c0000000-0000-4000-8000-000000000001'::uuid;",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
@@ -561,14 +879,22 @@ def main() -> None:
     grupo = parse_producao_grupo(wb)
     fazenda = parse_producao_fazenda(wb)
     resumo = parse_resumo(wb)
+    config, benchmarks = parse_institucional(wb)
+    patrimonio = parse_patrimonio_bens(wb)
+    contatos = parse_grupo_contatos(wb)
+    passivo_inst = parse_passivo_instituicao(wb)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     write_fazendas_seed(args.out_dir)
     write_maquinarios_seed(args.out_dir, maquinarios)
     write_producao_seed(args.out_dir, grupo, fazenda)
     write_resumo_seed(args.out_dir, resumo)
+    write_complement_seeds(args.out_dir, patrimonio, contatos, benchmarks, passivo_inst, config)
 
-    print(f"OK — {len(maquinarios)} maquinários, {len(grupo)} safras grupo, {len(fazenda)} linhas fazenda")
+    print(
+        f"OK — {len(maquinarios)} maquinários, {len(grupo)} safras, {len(fazenda)} fazendas, "
+        f"{len(patrimonio)} bens, {len(contatos)} contatos, {len(benchmarks)} benchmarks"
+    )
     print(f"Seeds em {args.out_dir.resolve()}")
 
 
