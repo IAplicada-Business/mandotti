@@ -56,7 +56,7 @@ function AuthPage() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) return;
-      const mustChange = data.session.user.user_metadata?.must_change_password;
+      const mustChange = data.session.user.user_metadata?.["must_change_password"];
       navigate({ to: mustChange ? "/trocar-senha" : "/dashboard" });
     });
   }, [navigate]);
@@ -94,7 +94,7 @@ function AuthPage() {
       toast.error(error.message);
       return;
     }
-    const mustChange = data.user?.user_metadata?.must_change_password;
+    const mustChange = data.user?.user_metadata?.["must_change_password"];
     navigate({ to: mustChange ? "/trocar-senha" : "/dashboard" });
   };
 
