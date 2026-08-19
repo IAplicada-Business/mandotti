@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { MandottiMark } from "@/components/MandottiMark";
+import { MandottiLogo } from "@/components/MandottiLogo";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/auth")({
@@ -203,7 +203,9 @@ function AuthPage() {
             </div>
             <div className="mark-3d">
               <div className="mark-tilt" ref={markRef}>
-                <MandottiMark />
+                <div className="mark-plate">
+                  <MandottiLogo hires className="mark-logo" />
+                </div>
               </div>
             </div>
           </div>
@@ -319,6 +321,11 @@ const AUTH_CSS = `
   --m-green: #3f7d49;
   --m-green-deep: #16301a;
   --m-amber: #c99012;
+
+  /* Cores exatas da marca oficial, usadas na aura sob o ícone */
+  --m-logo-leaf: #037638;
+  --m-logo-field: #16472c;
+  --m-logo-seed: #ca8921;
   --m-ink: #f1f7f1;
   --m-dim: rgba(241, 247, 241, 0.55);
   --m-line: rgba(241, 247, 241, 0.14);
@@ -399,21 +406,12 @@ const AUTH_CSS = `
   margin-bottom: 30px;
 }
 
-/* Contraste sob a marca, para as nervuras claras não sumirem na massa verde */
-.mandotti-auth .brand-stage::after {
-  content: "";
-  position: absolute;
-  inset: -14%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 46%, rgba(6, 18, 10, 0.72), transparent 66%);
-  z-index: 1;
-}
-
+/* A massa líquida extrapola o disco para virar halo em volta da marca */
 .mandotti-auth .liquid {
   position: absolute;
-  inset: -12%;
+  inset: -22%;
   filter: var(--m-goo);
-  opacity: 0.58;
+  opacity: 0.62;
 }
 
 .mandotti-auth .drop {
@@ -424,49 +422,49 @@ const AUTH_CSS = `
 }
 
 /*
- * Cada gota espelha a geometria do SVG da marca (viewBox 0 0 120 120), então a
- * massa líquida funciona como aura do ícone em vez de uma silhueta paralela.
- * Folha: centro 60/48, 56x88. Curvas: centros 27/91 e 93/91, 40x38.
- * Semente: centro 60/95, 19x27.
+ * Cada gota espelha a posição real da arte dentro do PNG 512x512 da marca, então
+ * a massa líquida funciona como aura do ícone e não como silhueta paralela.
+ * Medido no arquivo oficial: folha centro 50%/38% (35x58), curvas centro 50%/75%
+ * (70x32, largura cheia) e semente centro 50%/78% (10x18).
  */
 .mandotti-auth .drop-leaf {
   left: 50%;
-  top: 40%;
-  width: 52%;
-  height: 80%;
+  top: 38%;
+  width: 40%;
+  height: 64%;
   transform: translate(-50%, -50%);
   border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
-  background: linear-gradient(150deg, var(--m-leaf), var(--m-green) 58%, var(--m-green-deep));
+  background: linear-gradient(150deg, #0a9d48, var(--m-logo-leaf) 55%, var(--m-logo-field));
 }
 
 .mandotti-auth .drop-arc {
-  top: 76%;
+  top: 75%;
   width: 40%;
-  height: 33%;
-  background: linear-gradient(120deg, var(--m-green), var(--m-green-deep));
+  height: 36%;
+  background: linear-gradient(120deg, var(--m-logo-leaf), var(--m-logo-field));
   animation-duration: 11s;
 }
 
 .mandotti-auth .drop-arc-left {
-  left: 22%;
+  left: 31%;
   transform: translate(-50%, -50%);
   border-radius: 60% 40% 46% 54% / 58% 52% 48% 42%;
 }
 
 .mandotti-auth .drop-arc-right {
-  left: 78%;
+  left: 69%;
   transform: translate(-50%, -50%);
   border-radius: 40% 60% 54% 46% / 52% 58% 42% 48%;
 }
 
 .mandotti-auth .drop-seed {
   left: 50%;
-  top: 79%;
-  width: 20%;
-  height: 27%;
+  top: 78%;
+  width: 16%;
+  height: 24%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 34% 28%, #f2cd7a, var(--m-amber) 60%, #8f6207);
+  background: radial-gradient(circle at 34% 28%, #f2cd7a, var(--m-logo-seed) 60%, #8f6207);
   animation-duration: 7s;
 }
 
@@ -484,14 +482,35 @@ const AUTH_CSS = `
 }
 
 .mandotti-auth .mark-tilt {
+  display: grid;
+  place-items: center;
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
   transition: transform 0.35s cubic-bezier(0.2, 1, 0.3, 1);
   animation: mandotti-bob 7s infinite alternate ease-in-out;
-  filter:
-    drop-shadow(0 18px 32px rgba(4, 16, 8, 0.75))
-    drop-shadow(0 0 26px rgba(127, 168, 50, 0.35));
+}
+
+/*
+ * A marca oficial é verde-escura, então precisa de base clara para as nervuras
+ * brancas e as curvas de plantio aparecerem — sobre o fundo escuro ela sumia.
+ */
+.mandotti-auth .mark-plate {
+  display: grid;
+  place-items: center;
+  width: 84%;
+  height: 84%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 26%, #ffffff, #f1f7f1 56%, #d9e7db);
+  box-shadow:
+    inset 0 -12px 26px rgba(22, 71, 44, 0.18),
+    0 22px 46px rgba(3, 18, 9, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+.mandotti-auth .mark-logo {
+  width: 78%;
+  height: 78%;
 }
 
 @keyframes mandotti-bob {

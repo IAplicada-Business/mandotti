@@ -30,6 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmissorSelector } from "@/components/EmissorSelector";
+import { MandottiLogo } from "@/components/MandottiLogo";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
@@ -123,17 +124,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         />
 
         <div className="flex items-center gap-3 border-b border-sidebar-border px-4 py-4">
-          <div className="relative grid size-11 place-items-center rounded-full bg-card">
-            <span
-              className="absolute -inset-0.5 rounded-full"
-              style={{
-                background:
-                  "conic-gradient(from 130deg, #2E6636, #7FA832, #C99012, #B5541C, #6E5537, #2E6636)",
-                WebkitMask: "radial-gradient(circle, transparent 18px, #000 19.5px)",
-                mask: "radial-gradient(circle, transparent 18px, #000 19.5px)",
-              }}
-            />
-            <span className="relative z-10 text-sm font-extrabold text-primary">GM</span>
+          {/* Base clara fixa: a marca é verde-escura e some no tema escuro */}
+          <div className="grid size-11 shrink-0 place-items-center rounded-full bg-white ring-1 ring-black/5">
+            <MandottiLogo className="size-8" />
           </div>
           <div className="min-w-0 leading-tight">
             <p className="truncate text-sm font-extrabold tracking-wide">GRUPO MANDOTTI</p>
@@ -199,7 +192,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                         {active ? (
                           <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
                         ) : null}
-                        <item.icon className={cn("size-4", active ? "opacity-100" : "opacity-60")} />
+                        <item.icon
+                          className={cn("size-4", active ? "opacity-100" : "opacity-60")}
+                        />
                         {item.label}
                       </Link>
                     </li>
@@ -249,6 +244,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Menu className="size-5" />
           </Button>
+
+          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-white ring-1 ring-black/5 lg:hidden">
+            <MandottiLogo className="size-7" />
+          </div>
 
           <div className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm text-muted-foreground md:flex">
             <Search className="size-4 shrink-0 opacity-60" />
