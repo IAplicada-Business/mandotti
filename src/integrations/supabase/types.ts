@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      categorias_financeiras: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          created_at: string
+          id: string
+          nome: string
+          tipo: Database["public"]["Enums"]["categoria_tipo"]
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          created_at?: string
+          id?: string
+          nome: string
+          tipo?: Database["public"]["Enums"]["categoria_tipo"]
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          tipo?: Database["public"]["Enums"]["categoria_tipo"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       certificados: {
         Row: {
           ativo: boolean
@@ -121,6 +151,110 @@ export type Database = {
         }
         Relationships: []
       }
+      extrato_movimentos: {
+        Row: {
+          conciliado: boolean
+          created_at: string
+          data_movimento: string
+          deleted_at: string | null
+          descricao: string
+          extrato_id: string
+          id: string
+          lancamento_id: string | null
+          tipo: Database["public"]["Enums"]["movimento_tipo"]
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          conciliado?: boolean
+          created_at?: string
+          data_movimento: string
+          deleted_at?: string | null
+          descricao?: string
+          extrato_id: string
+          id?: string
+          lancamento_id?: string | null
+          tipo: Database["public"]["Enums"]["movimento_tipo"]
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          conciliado?: boolean
+          created_at?: string
+          data_movimento?: string
+          deleted_at?: string | null
+          descricao?: string
+          extrato_id?: string
+          id?: string
+          lancamento_id?: string | null
+          tipo?: Database["public"]["Enums"]["movimento_tipo"]
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extrato_movimentos_extrato_id_fkey"
+            columns: ["extrato_id"]
+            isOneToOne: false
+            referencedRelation: "extratos_bancarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "extrato_movimentos_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "lancamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      extratos_bancarios: {
+        Row: {
+          banco: string
+          conta_mascara: string | null
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          id: string
+          nome_arquivo: string
+          periodo_fim: string | null
+          periodo_inicio: string | null
+          updated_at: string
+        }
+        Insert: {
+          banco?: string
+          conta_mascara?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          id?: string
+          nome_arquivo: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          updated_at?: string
+        }
+        Update: {
+          banco?: string
+          conta_mascara?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          id?: string
+          nome_arquivo?: string
+          periodo_fim?: string | null
+          periodo_inicio?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "extratos_bancarios_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fazendas: {
         Row: {
           area_hectares: number | null
@@ -177,6 +311,150 @@ export type Database = {
           },
         ]
       }
+      lancamentos: {
+        Row: {
+          categoria_id: string | null
+          conciliado: boolean
+          created_at: string
+          data_competencia: string
+          data_pagamento: string | null
+          deleted_at: string | null
+          descricao: string
+          emissor_id: string
+          fornecedor: string | null
+          id: string
+          origem: Database["public"]["Enums"]["lancamento_origem"]
+          tipo: Database["public"]["Enums"]["lancamento_tipo"]
+          updated_at: string
+          valor: number
+          xml_chave: string | null
+        }
+        Insert: {
+          categoria_id?: string | null
+          conciliado?: boolean
+          created_at?: string
+          data_competencia?: string
+          data_pagamento?: string | null
+          deleted_at?: string | null
+          descricao?: string
+          emissor_id: string
+          fornecedor?: string | null
+          id?: string
+          origem?: Database["public"]["Enums"]["lancamento_origem"]
+          tipo?: Database["public"]["Enums"]["lancamento_tipo"]
+          updated_at?: string
+          valor: number
+          xml_chave?: string | null
+        }
+        Update: {
+          categoria_id?: string | null
+          conciliado?: boolean
+          created_at?: string
+          data_competencia?: string
+          data_pagamento?: string | null
+          deleted_at?: string | null
+          descricao?: string
+          emissor_id?: string
+          fornecedor?: string | null
+          id?: string
+          origem?: Database["public"]["Enums"]["lancamento_origem"]
+          tipo?: Database["public"]["Enums"]["lancamento_tipo"]
+          updated_at?: string
+          valor?: number
+          xml_chave?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lancamentos_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_financeiras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      maquinarios: {
+        Row: {
+          ano: number | null
+          ativo: boolean
+          categoria: string
+          chassi_serie: string | null
+          cor: string | null
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          fazenda_id: string | null
+          fazenda_nome: string | null
+          id: string
+          marca: string | null
+          modelo: string | null
+          nome: string
+          ordem: number
+          updated_at: string
+          valor_aquisicao: number | null
+        }
+        Insert: {
+          ano?: number | null
+          ativo?: boolean
+          categoria?: string
+          chassi_serie?: string | null
+          cor?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          fazenda_id?: string | null
+          fazenda_nome?: string | null
+          id?: string
+          marca?: string | null
+          modelo?: string | null
+          nome: string
+          ordem?: number
+          updated_at?: string
+          valor_aquisicao?: number | null
+        }
+        Update: {
+          ano?: number | null
+          ativo?: boolean
+          categoria?: string
+          chassi_serie?: string | null
+          cor?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          fazenda_id?: string | null
+          fazenda_nome?: string | null
+          id?: string
+          marca?: string | null
+          modelo?: string | null
+          nome?: string
+          ordem?: number
+          updated_at?: string
+          valor_aquisicao?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maquinarios_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "maquinarios_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       papeis_usuario: {
         Row: {
           created_at: string
@@ -197,6 +475,80 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      passivos: {
+        Row: {
+          apos_jun_2030: number
+          ate_jun_2026: number
+          contrato_finalidade: string
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          id: string
+          instituicao: string
+          jul26_jun27: number
+          jul27_jun28: number
+          jul28_jun29: number
+          jul29_jun30: number
+          origem: string
+          saldo_devedor: number | null
+          sem_cronograma: number
+          taxa_juros: number | null
+          total_projetado: number | null
+          updated_at: string
+          vencimento_final: string | null
+        }
+        Insert: {
+          apos_jun_2030?: number
+          ate_jun_2026?: number
+          contrato_finalidade: string
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          id?: string
+          instituicao: string
+          jul26_jun27?: number
+          jul27_jun28?: number
+          jul28_jun29?: number
+          jul29_jun30?: number
+          origem?: string
+          saldo_devedor?: number | null
+          sem_cronograma?: number
+          taxa_juros?: number | null
+          total_projetado?: number | null
+          updated_at?: string
+          vencimento_final?: string | null
+        }
+        Update: {
+          apos_jun_2030?: number
+          ate_jun_2026?: number
+          contrato_finalidade?: string
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          id?: string
+          instituicao?: string
+          jul26_jun27?: number
+          jul27_jun28?: number
+          jul28_jun29?: number
+          jul29_jun30?: number
+          origem?: string
+          saldo_devedor?: number | null
+          sem_cronograma?: number
+          taxa_juros?: number | null
+          total_projetado?: number | null
+          updated_at?: string
+          vencimento_final?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "passivos_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       perfis: {
         Row: {
@@ -264,6 +616,123 @@ export type Database = {
         }
         Relationships: []
       }
+      proporcoes_emissores: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          deleted_at: string | null
+          emissor_a_id: string
+          emissor_b_id: string
+          id: string
+          percentual_a: number
+          updated_at: string
+          vigente_desde: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          emissor_a_id: string
+          emissor_b_id: string
+          id?: string
+          percentual_a?: number
+          updated_at?: string
+          vigente_desde?: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          emissor_a_id?: string
+          emissor_b_id?: string
+          id?: string
+          percentual_a?: number
+          updated_at?: string
+          vigente_desde?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proporcoes_emissores_emissor_a_id_fkey"
+            columns: ["emissor_a_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proporcoes_emissores_emissor_b_id_fkey"
+            columns: ["emissor_b_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      xml_importacoes: {
+        Row: {
+          categoria_sugerida: string | null
+          chave_nfe: string | null
+          created_at: string
+          deleted_at: string | null
+          emissor_id: string
+          emitente: string | null
+          erro: string | null
+          id: string
+          lancamento_id: string | null
+          nome_arquivo: string
+          payload_resumo: Json | null
+          status: Database["public"]["Enums"]["xml_status"]
+          updated_at: string
+          valor_total: number | null
+        }
+        Insert: {
+          categoria_sugerida?: string | null
+          chave_nfe?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id: string
+          emitente?: string | null
+          erro?: string | null
+          id?: string
+          lancamento_id?: string | null
+          nome_arquivo: string
+          payload_resumo?: Json | null
+          status?: Database["public"]["Enums"]["xml_status"]
+          updated_at?: string
+          valor_total?: number | null
+        }
+        Update: {
+          categoria_sugerida?: string | null
+          chave_nfe?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          emissor_id?: string
+          emitente?: string | null
+          erro?: string | null
+          id?: string
+          lancamento_id?: string | null
+          nome_arquivo?: string
+          payload_resumo?: Json | null
+          status?: Database["public"]["Enums"]["xml_status"]
+          updated_at?: string
+          valor_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xml_importacoes_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "xml_importacoes_lancamento_id_fkey"
+            columns: ["lancamento_id"]
+            isOneToOne: false
+            referencedRelation: "lancamentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -291,8 +760,13 @@ export type Database = {
     }
     Enums: {
       app_role: "administrador" | "gestor" | "operador" | "visualizador"
+      categoria_tipo: "despesa" | "receita" | "folha" | "outros"
+      lancamento_origem: "manual" | "xml" | "extrato" | "romaneio"
+      lancamento_tipo: "despesa" | "receita" | "transferencia"
+      movimento_tipo: "credito" | "debito"
       perfil_usuario: "admin" | "funcionario" | "contabilidade"
       tipo_certificado: "A1" | "A3"
+      xml_status: "pendente" | "processado" | "erro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -421,8 +895,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["administrador", "gestor", "operador", "visualizador"],
+      categoria_tipo: ["despesa", "receita", "folha", "outros"],
+      lancamento_origem: ["manual", "xml", "extrato", "romaneio"],
+      lancamento_tipo: ["despesa", "receita", "transferencia"],
+      movimento_tipo: ["credito", "debito"],
       perfil_usuario: ["admin", "funcionario", "contabilidade"],
       tipo_certificado: ["A1", "A3"],
+      xml_status: ["pendente", "processado", "erro"],
     },
   },
 } as const
