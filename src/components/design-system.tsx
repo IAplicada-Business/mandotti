@@ -75,20 +75,15 @@ export function RingStat({
   return (
     <div
       className={cn(
-        "flex flex-col items-center rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
+        // Linha em vez de coluna: o anel centralizado deixava muito vazio
+        // lateral quando o card cresce em telas largas.
+        "flex items-center gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
         className,
       )}
     >
-      <div className="relative size-[96px]">
+      <div className="relative size-[88px] shrink-0">
         <svg viewBox="0 0 96 96" className="size-full -rotate-90">
-          <circle
-            cx="48"
-            cy="48"
-            r={r}
-            fill="none"
-            stroke="var(--surface-soft)"
-            strokeWidth="10"
-          />
+          <circle cx="48" cy="48" r={r} fill="none" stroke="var(--surface-soft)" strokeWidth="10" />
           <circle
             cx="48"
             cy="48"
@@ -108,7 +103,12 @@ export function RingStat({
           </span>
         </div>
       </div>
-      <p className="mt-3 text-center text-xs font-semibold text-muted-foreground">{label}</p>
+      <div className="min-w-0">
+        <p className="text-sm font-bold leading-tight text-foreground">{label}</p>
+        <p className="mt-1 font-mono-nums text-xs font-semibold text-muted-foreground">
+          {pct}% do total
+        </p>
+      </div>
     </div>
   );
 }
