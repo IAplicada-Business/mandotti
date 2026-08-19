@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Mail, Plus } from "lucide-react";
+import { Copy, Plus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession, type Perfil } from "@/hooks/useAuth";
+import { SENHA_INICIAL_PADRAO } from "@/lib/auth-defaults";
 
 export const Route = createFileRoute("/_authenticated/usuarios")({
   head: () => ({
@@ -185,8 +186,11 @@ function UsuariosPage() {
       if (data?.error) throw new Error(data.error);
       return data;
     },
-    onSuccess: () => {
-      toast.success("Convite enviado");
+    onSuccess: (data) => {
+      toast.success(
+        `Usuário criado. Senha inicial: ${data?.senha_inicial ?? SENHA_INICIAL_PADRAO} — informe ao colaborador.`,
+        { duration: 12000 },
+      );
       setConvidarAberto(false);
       setEmail("");
       setNome("");
@@ -261,7 +265,7 @@ function UsuariosPage() {
         action={
           <Button onClick={() => setConvidarAberto(true)}>
             <Plus className="mr-2 size-4" />
-            Convidar usuário
+            Criar usuário
           </Button>
         }
       />
@@ -316,7 +320,7 @@ function UsuariosPage() {
       <Dialog open={convidarAberto} onOpenChange={setConvidarAberto}>
         <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Convidar usuário</DialogTitle>
+            <DialogTitle>Criar usuário</DialogTitle>
           </DialogHeader>
           <form
             className="space-y-4"
@@ -338,6 +342,27 @@ function UsuariosPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="senha-inicial">Senha inicial (automática)</Label>
+              <div className="flex gap-2">
+                <Input id="senha-inicial" value={SENHA_INICIAL_PADRAO} readOnly className="font-mono" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  title="Copiar senha"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(SENHA_INICIAL_PADRAO);
+                    toast.success("Senha copiada");
+                  }}
+                >
+                  <Copy className="size-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Não enviamos e-mail. No primeiro login, a pessoa será orientada a trocar esta senha.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="perfil">Perfil *</Label>
@@ -365,8 +390,8 @@ function UsuariosPage() {
                 Cancelar
               </Button>
               <Button type="submit" disabled={convidar.isPending}>
-                <Mail className="mr-2 size-4" />
-                Enviar convite
+                <UserPlus className="mr-2 size-4" />
+                Criar usuário
               </Button>
             </DialogFooter>
           </form>

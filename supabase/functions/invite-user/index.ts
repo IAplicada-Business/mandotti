@@ -6,6 +6,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const SENHA_INICIAL = Deno.env.get("DEFAULT_USER_PASSWORD") ?? "mandotti2026";
+
 type Grant = { rota: string; pode_ver: boolean; pode_editar: boolean };
 type InviteBody = {
   email: string;
@@ -70,19 +72,22 @@ Deno.serve(async (req: Request) => {
 
   const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-  const { data: inviteData, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
+  const { data: createData, error: createError } = await adminClient.auth.admin.createUser({
     email,
-    {
-      data: { nome },
+    password: SENHA_INICIAL,
+    email_confirm: true,
+    user_metadata: {
+      nome,
+      must_change_password: true,
     },
-  );
+  });
 
-  if (inviteError || !inviteData.user) {
-    const status = inviteError?.status === 422 ? 409 : 500;
-    return jsonResponse({ error: inviteError?.message ?? "Falha ao convidar usuário." }, status);
+  if (createError || !createData.user) {
+    const status = createError?.status === 422 ? 409 : 500;
+    return jsonResponse({ error: createError?.message ?? "Falha ao criar usuário." }, status);
   }
 
-  const userId = inviteData.user.id;
+  const userId = createData.user.id;
 
   const { error: updateError } = await adminClient
     .from("perfis")
@@ -91,7 +96,7 @@ Deno.serve(async (req: Request) => {
 
   if (updateError) {
     return jsonResponse(
-      { error: `Convite enviado, mas falhou ao definir perfil: ${updateError.message}` },
+      { error: `Usuário criado, mas falhou ao definir perfil: ${updateError.message}` },
       500,
     );
   }
@@ -109,11 +114,18 @@ Deno.serve(async (req: Request) => {
 
     if (grantsError) {
       return jsonResponse(
-        { error: `Convite enviado, mas falhou ao salvar acessos: ${grantsError.message}` },
+        { error: `Usuário criado, mas falhou ao salvar acessos: ${grantsError.message}` },
         500,
       );
     }
   }
 
-  return jsonResponse({ ok: true, user_id: userId }, 200);
+  return jsonResponse(
+    {
+      ok: true,
+      user_id: userId,
+      senha_inicial: SENHA_INICIAL,
+    },
+    200,
+  );
 });
