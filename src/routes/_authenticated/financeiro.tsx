@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { ArrowRight, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -46,7 +47,7 @@ import {
 } from "@/components/ui/table";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBRL, formatDateBR } from "@/lib/format";
+import { formatBRL, formatDateBR, formatPctDecimal } from "@/lib/format";
 import { useEmissor } from "@/lib/emissor-context";
 
 export const Route = createFileRoute("/_authenticated/financeiro")({
@@ -55,6 +56,25 @@ export const Route = createFileRoute("/_authenticated/financeiro")({
   }),
   component: FinanceiroPage,
 });
+
+const CRONOGRAMA = [
+  { key: "cronograma_ate_jun26", label: "Até jun/26" },
+  { key: "cronograma_jul26_jun27", label: "Jul/26–jun/27" },
+  { key: "cronograma_jul27_jun28", label: "Jul/27–jun/28" },
+  { key: "cronograma_jul28_jun29", label: "Jul/28–jun/29" },
+  { key: "cronograma_jul29_jun30", label: "Jul/29–jun/30" },
+  { key: "cronograma_apos_jun30", label: "Após jun/30" },
+] as const;
+
+function KpiSkeleton() {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton key={i} className="h-24 rounded-2xl" />
+      ))}
+    </div>
+  );
+}
 
 function FinanceiroPage() {
   const qc = useQueryClient();
@@ -73,90 +93,77 @@ function FinanceiroPage() {
     fornecedor: "",
   });
 
-  const { data: categorias = [] } = useQuery({
-    queryKey: ["categorias_financeiras"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("categorias_financeiras")
-        .select("*")
-        .eq("ativo", true)
-        .order("nome");
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: proporcao } = useQuery({
-    queryKey: ["proporcoes_emissores"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("proporcoes_emissores")
-        .select("*")
-        .is("deleted_at", null)
-        .eq("ativo", true)
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: lancamentos = [], isLoading } = useQuery({
-    queryKey: ["lancamentos", emissorIds],
+  const { data, isLoading } = useQuery({
+    queryKey: ["financeiro-painel", emissorIds],
     enabled: emissorIds.length > 0,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("lancamentos")
-        .select("*")
-        .is("deleted_at", null)
-        .in("emissor_id", emissorIds)
-        .order("data_competencia", { ascending: false })
-        .limit(200);
-      if (error) throw error;
-      return data;
+      const [resumo, inst, passivos, categorias, lancamentos] = await Promise.all([
+        supabase.from("resumo_patrimonial").select("*").limit(1).maybeSingle(),
+        supabase
+          .from("passivo_por_instituicao")
+          .select("*")
+          .order("saldo_devedor", { ascending: false }),
+        supabase
+          .from("passivos")
+          .select("*")
+          .is("deleted_at", null)
+          .in("emissor_id", emissorIds)
+          .order("saldo_devedor", { ascending: false }),
+        supabase.from("categorias_financeiras").select("*").eq("ativo", true).order("nome"),
+        supabase
+          .from("lancamentos")
+          .select("*")
+          .is("deleted_at", null)
+          .in("emissor_id", emissorIds)
+          .order("data_competencia", { ascending: false })
+          .limit(200),
+      ]);
+      if (resumo.error) throw resumo.error;
+      if (inst.error) throw inst.error;
+      if (passivos.error) throw passivos.error;
+      if (categorias.error) throw categorias.error;
+      if (lancamentos.error) throw lancamentos.error;
+
+      return {
+        resumo: resumo.data,
+        inst: inst.data ?? [],
+        passivos: passivos.data ?? [],
+        categorias: categorias.data ?? [],
+        lancamentos: lancamentos.data ?? [],
+      };
     },
   });
+
+  const resumo = data?.resumo;
+  const passivos = data?.passivos ?? [];
+  const instituicoes = data?.inst ?? [];
+  const categorias = data?.categorias ?? [];
+  const lancamentos = data?.lancamentos ?? [];
+
+  const saldoPassivos = passivos.reduce((acc, p) => acc + (p.saldo_devedor ?? 0), 0);
+  const jurosProjetados = passivos.reduce((acc, p) => acc + (p.total_projetado ?? 0), 0);
+
+  const cronograma = useMemo(
+    () =>
+      CRONOGRAMA.map((c) => ({
+        periodo: c.label,
+        valor: Number(resumo?.[c.key] ?? 0),
+      })),
+    [resumo],
+  );
+
+  const porTitular = useMemo(() => {
+    if (!resumo) return [];
+    return [
+      { name: "Eder Mandotti", value: resumo.passivo_eder ?? 0, color: "var(--emissor-eder)" },
+      { name: "Nagyla Pollyanna", value: resumo.passivo_nagyla ?? 0, color: "var(--emissor-nagyla)" },
+    ].filter((d) => d.value > 0);
+  }, [resumo]);
 
   const despesas = lancamentos.filter((l) => l.tipo === "despesa");
   const receitas = lancamentos.filter((l) => l.tipo === "receita");
   const totalDespesas = despesas.reduce((a, l) => a + Number(l.valor), 0);
   const totalReceitas = receitas.reduce((a, l) => a + Number(l.valor), 0);
-
-  const porCategoria = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const l of despesas) {
-      const nome = categorias.find((c) => c.id === l.categoria_id)?.nome ?? "Sem categoria";
-      map.set(nome, (map.get(nome) ?? 0) + Number(l.valor));
-    }
-    return [...map.entries()].map(([nome, valor]) => ({ nome, valor }));
-  }, [despesas, categorias]);
-
-  const balanco = useMemo(() => {
-    if (!proporcao) return null;
-    const aId = proporcao.emissor_a_id;
-    const bId = proporcao.emissor_b_id;
-    const alvoA = Number(proporcao.percentual_a);
-    const alvoB = 100 - alvoA;
-    const somaA = despesas
-      .filter((l) => l.emissor_id === aId)
-      .reduce((acc, l) => acc + Number(l.valor), 0);
-    const somaB = despesas
-      .filter((l) => l.emissor_id === bId)
-      .reduce((acc, l) => acc + Number(l.valor), 0);
-    const total = somaA + somaB;
-    const realA = total > 0 ? (somaA / total) * 100 : alvoA;
-    const realB = total > 0 ? (somaB / total) * 100 : alvoB;
-    const nomeA =
-      emissores.find((e) => e.id === aId)?.nome_fantasia ||
-      emissores.find((e) => e.id === aId)?.razao_social ||
-      "Emissor A";
-    const nomeB =
-      emissores.find((e) => e.id === bId)?.nome_fantasia ||
-      emissores.find((e) => e.id === bId)?.razao_social ||
-      "Emissor B";
-    const recomendar = realA > alvoA + 2 ? nomeB : realB > alvoB + 2 ? nomeA : "Equilibrado";
-    return { nomeA, nomeB, alvoA, alvoB, realA, realB, somaA, somaB, recomendar, total };
-  }, [proporcao, despesas, emissores]);
 
   const criar = useMutation({
     mutationFn: async () => {
@@ -175,7 +182,7 @@ function FinanceiroPage() {
     onSuccess: () => {
       toast.success("Lançamento criado");
       setAberto(false);
-      qc.invalidateQueries({ queryKey: ["lancamentos"] });
+      qc.invalidateQueries({ queryKey: ["financeiro-painel"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -198,9 +205,14 @@ function FinanceiroPage() {
       <PageHeader
         breadcrumb="Financeiro"
         title="Painel financeiro"
-        description="Lançamentos, categorias e balanço parametrizável entre emissores."
+        description="Endividamento, cronograma SCR e passivos da ficha cadastral — mais lançamentos operacionais (XML/manual)."
         action={
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/passivos">
+                Passivos · SCR <ArrowRight className="ml-1 size-4" />
+              </Link>
+            </Button>
             <Button variant="outline" asChild>
               <Link to="/financeiro/xml">Importar XML</Link>
             </Button>
@@ -221,33 +233,63 @@ function FinanceiroPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Receitas" value={formatBRL(totalReceitas)} tone="success" />
-        <KpiCard label="Despesas" value={formatBRL(totalDespesas)} tone="warning" />
-        <KpiCard label="Resultado" value={formatBRL(totalReceitas - totalDespesas)} />
-        <KpiCard label="Lançamentos" value={lancamentos.length} />
-      </div>
+      {isLoading ? (
+        <KpiSkeleton />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <KpiCard
+            label="Passivo total"
+            value={formatBRL(resumo?.passivo_total ?? saldoPassivos)}
+            tone="warning"
+          />
+          <KpiCard
+            label="Patrimônio líquido"
+            value={formatBRL(resumo?.patrimonio_liquido)}
+            tone="success"
+          />
+          <KpiCard
+            label="Endividamento"
+            value={resumo ? formatPctDecimal(resumo.endividamento_pct) : "—"}
+          />
+          <KpiCard
+            label="Contratos SCR"
+            value={passivos.length}
+            hint={jurosProjetados > 0 ? `Juros proj. ${formatBRL(jurosProjetados)}` : undefined}
+          />
+        </div>
+      )}
 
       <div className="grid gap-4 xl:grid-cols-5">
         <SectionCard
           className="xl:col-span-3"
-          title="Despesas por categoria"
-          description="Baseado nos lançamentos do filtro atual."
+          title="Passivo por instituição"
+          description="Saldo devedor por banco — Resumo Executivo da planilha."
         >
           <div className="h-[260px]">
-            {porCategoria.length ? (
+            {isLoading ? (
+              <Skeleton className="h-full w-full rounded-xl" />
+            ) : instituicoes.length ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={porCategoria} barSize={28}>
+                <BarChart data={instituicoes} barSize={32}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="nome" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                  <YAxis tickLine={false} axisLine={false} />
+                  <XAxis
+                    dataKey="instituicao"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 11 }}
+                    interval={0}
+                    angle={-12}
+                    textAnchor="end"
+                    height={56}
+                  />
+                  <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1e6).toFixed(0)}M`} />
                   <Tooltip formatter={(v: number) => formatBRL(v)} />
-                  <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="saldo_devedor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <div className="grid h-full place-items-center text-sm text-muted-foreground">
-                Sem despesas ainda — importe XML ou lance manualmente.
+                Sem dados de passivo por instituição.
               </div>
             )}
           </div>
@@ -255,69 +297,137 @@ function FinanceiroPage() {
 
         <SectionCard
           className="xl:col-span-2"
-          title="Balanço parametrizável"
-          description={
-            proporcao
-              ? `Meta ${proporcao.percentual_a.toFixed(0)}/${(100 - Number(proporcao.percentual_a)).toFixed(0)}`
-              : "Configure um par de emissores"
-          }
+          title="Passivo por titular"
+          description="Distribuição Eder × Nagyla (SCR)."
         >
-          {balanco && balanco.total > 0 ? (
+          {isLoading ? (
+            <Skeleton className="h-[220px] w-full rounded-xl" />
+          ) : porTitular.length ? (
             <>
-              <div className="h-[180px]">
+              <div className="h-[160px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={[
-                        { name: balanco.nomeA, value: balanco.somaA, color: "var(--emissor-eder)" },
-                        { name: balanco.nomeB, value: balanco.somaB, color: "var(--emissor-nagyla)" },
-                      ]}
+                      data={porTitular}
                       dataKey="value"
                       nameKey="name"
-                      innerRadius={50}
-                      outerRadius={72}
+                      innerRadius={48}
+                      outerRadius={68}
                       paddingAngle={3}
                     >
-                      <Cell fill="var(--emissor-eder)" />
-                      <Cell fill="var(--emissor-nagyla)" />
+                      {porTitular.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
                     </Pie>
                     <Tooltip formatter={(v: number) => formatBRL(v)} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
-              <div className="space-y-2 text-sm">
-                <p>
-                  {balanco.nomeA}:{" "}
-                  <strong className="font-mono-nums">{balanco.realA.toFixed(1)}%</strong> (meta{" "}
-                  {balanco.alvoA}%)
-                </p>
-                <p>
-                  {balanco.nomeB}:{" "}
-                  <strong className="font-mono-nums">{balanco.realB.toFixed(1)}%</strong> (meta{" "}
-                  {balanco.alvoB}%)
-                </p>
-                <Badge variant={balanco.recomendar === "Equilibrado" ? "success" : "warning"}>
-                  {balanco.recomendar === "Equilibrado"
-                    ? "Proporção equilibrada"
-                    : `Emitir próxima nota em: ${balanco.recomendar}`}
-                </Badge>
+              <div className="space-y-1 text-sm">
+                {porTitular.map((d) => (
+                  <p key={d.name}>
+                    {d.name}: <strong className="font-mono-nums">{formatBRL(d.value)}</strong>
+                  </p>
+                ))}
               </div>
             </>
           ) : (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              O balanço aparece quando houver despesas nos dois emissores do par (hoje: Eder ×
-              Nagyla, 50/50 parametrizável).
+              Dados de titular indisponíveis no resumo.
             </p>
           )}
         </SectionCard>
       </div>
 
-      <SectionCard title="Últimos lançamentos">
+      <SectionCard
+        title="Cronograma de amortização"
+        description="Vencimentos projetados do endividamento (Resumo Executivo)."
+      >
+        <div className="h-[240px]">
+          {isLoading ? (
+            <Skeleton className="h-full w-full rounded-xl" />
+          ) : cronograma.some((c) => c.valor > 0) ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={cronograma} barSize={28}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                <XAxis dataKey="periodo" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
+                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
+                <Tooltip formatter={(v: number) => formatBRL(v)} />
+                <Bar dataKey="valor" fill="var(--chart-2)" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="grid h-full place-items-center text-sm text-muted-foreground">
+              Cronograma não disponível no resumo.
+            </div>
+          )}
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        title="Contratos SCR"
+        description={`${passivos.length} contrato(s) nos emissores selecionados.`}
+        action={
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/passivos">Ver todos</Link>
+          </Button>
+        }
+      >
         {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : lancamentos.length === 0 ? (
+          <Skeleton className="h-48 w-full rounded-xl" />
+        ) : passivos.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">
-            Nenhum lançamento. Use importação XML ou cadastro manual.
+            Nenhum contrato para os emissores selecionados.
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Titular</TableHead>
+                <TableHead>Banco</TableHead>
+                <TableHead>Contrato</TableHead>
+                <TableHead>Vencimento</TableHead>
+                <TableHead className="text-right">Saldo</TableHead>
+                <TableHead className="text-right">Taxa</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {passivos.slice(0, 12).map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell>
+                    {emissores.find((e) => e.id === p.emissor_id)?.nome_fantasia ||
+                      emissores.find((e) => e.id === p.emissor_id)?.razao_social}
+                  </TableCell>
+                  <TableCell>{p.instituicao}</TableCell>
+                  <TableCell className="max-w-[220px] truncate">{p.contrato_finalidade}</TableCell>
+                  <TableCell>{p.vencimento_final ? formatDateBR(p.vencimento_final) : "—"}</TableCell>
+                  <TableCell className="text-right font-mono-nums">
+                    {formatBRL(p.saldo_devedor)}
+                  </TableCell>
+                  <TableCell className="text-right font-mono-nums">
+                    {p.taxa_juros != null ? formatPctDecimal(p.taxa_juros) : "—"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </SectionCard>
+
+      <SectionCard
+        title="Lançamentos operacionais"
+        description="Receitas e despesas via XML ou cadastro manual (separado do SCR da planilha)."
+      >
+        <div className="mb-4 grid gap-4 sm:grid-cols-3">
+          <KpiCard label="Receitas" value={formatBRL(totalReceitas)} tone="success" />
+          <KpiCard label="Despesas" value={formatBRL(totalDespesas)} tone="warning" />
+          <KpiCard label="Lançamentos" value={lancamentos.length} />
+        </div>
+        {isLoading ? (
+          <Skeleton className="h-32 w-full rounded-xl" />
+        ) : lancamentos.length === 0 ? (
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            Nenhum lançamento operacional ainda. Use importação XML ou cadastro manual acima.
           </p>
         ) : (
           <Table>
@@ -388,9 +498,7 @@ function FinanceiroPage() {
                 <Label>Tipo</Label>
                 <Select
                   value={form.tipo}
-                  onValueChange={(v) =>
-                    setForm((f) => ({ ...f, tipo: v as typeof form.tipo }))
-                  }
+                  onValueChange={(v) => setForm((f) => ({ ...f, tipo: v as typeof form.tipo }))}
                 >
                   <SelectTrigger>
                     <SelectValue />

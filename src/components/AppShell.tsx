@@ -147,6 +147,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { perfil, pode } = usePerfil(user);
   const { theme, toggleTheme } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
 
   const navVisivel =
     ctx === "contabilidade"
@@ -200,6 +201,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     const link = (
       <Link
         to={item.to}
+        preload="intent"
         onClick={() => setOpen(false)}
         className={cn(
           "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
@@ -514,7 +516,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Fluido de propósito: o conteúdo acompanha a largura da tela em vez de
             ficar preso a uma coluna central com sobra nas laterais. */}
-          <main className="w-full flex-1 px-4 py-6 lg:px-8 lg:py-8 2xl:px-10">{children}</main>
+          <main className="relative w-full flex-1 px-4 py-6 lg:px-8 lg:py-8 2xl:px-10">
+            {isNavigating ? (
+              <div
+                className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/10"
+                aria-hidden
+              >
+                <div className="h-full w-full animate-pulse bg-primary" />
+              </div>
+            ) : null}
+            {children}
+          </main>
         </div>
       </div>
     </TooltipProvider>
