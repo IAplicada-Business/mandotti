@@ -372,28 +372,27 @@ function MaquinarioPage() {
         </div>
       ) : null}
 
-      <SectionCard title="Frota" description="Dados importados da aba Maquinários.">
-        <LayoutAbasFiltros
-          filtros={
-            <FiltrosMaquinario
-              anos={anos}
-              proprietarios={proprietarios}
-              equipamentos={equipamentos}
-              ano={anoFiltro}
-              proprietario={proprietarioFiltro}
-              equipamento={equipamentoFiltro}
-              status={statusFiltro}
-              ordenacao={ordenacao}
-              onAno={setAnoFiltro}
-              onProprietario={setProprietarioFiltro}
-              onEquipamento={setEquipamentoFiltro}
-              onStatus={setStatusFiltro}
-              onOrdenacao={setOrdenacao}
-            />
-          }
-        >
-          <div className="p-4 sm:p-5">
-            {isLoading ? (
+      <LayoutAbasFiltros
+        title="Frota"
+        filtros={
+          <FiltrosMaquinario
+            anos={anos}
+            proprietarios={proprietarios}
+            equipamentos={equipamentos}
+            ano={anoFiltro}
+            proprietario={proprietarioFiltro}
+            equipamento={equipamentoFiltro}
+            status={statusFiltro}
+            ordenacao={ordenacao}
+            onAno={setAnoFiltro}
+            onProprietario={setProprietarioFiltro}
+            onEquipamento={setEquipamentoFiltro}
+            onStatus={setStatusFiltro}
+            onOrdenacao={setOrdenacao}
+          />
+        }
+      >
+          {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (
               <TabelaPreview rows={filtrados}>
@@ -466,9 +465,7 @@ function MaquinarioPage() {
                 )}
               </TabelaPreview>
             )}
-          </div>
-        </LayoutAbasFiltros>
-      </SectionCard>
+      </LayoutAbasFiltros>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent>

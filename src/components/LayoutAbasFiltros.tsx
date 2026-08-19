@@ -1,4 +1,4 @@
-import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
@@ -9,20 +9,23 @@ export type AbaLateral = {
 };
 
 type LayoutAbasFiltrosProps = {
-  /** Sub-abas verticais à esquerda (opcional) */
+  /** Título à esquerda quando não há sub-abas */
+  title?: string;
+  /** Sub-abas em pílula, acima da tabela, à esquerda */
   abas?: AbaLateral[];
   abaAtiva?: string;
   onAbaChange?: (id: string) => void;
-  /** Campos de filtro (Selects) exibidos ao expandir o painel direito */
+  /** Campos de filtro — abrem acima da tabela, à direita */
   filtros: ReactNode;
   children: ReactNode;
 };
 
 /**
- * Layout padrão: sub-abas à esquerda, conteúdo no centro, painel "Filtros"
- * colapsável à direita (clique abre os dropdowns de seleção).
+ * Barra acima da tabela: sub-abas à esquerda (formato de pílula) e
+ * Filtros à direita. A tabela fica abaixo, sem trilhos internos.
  */
 export function LayoutAbasFiltros({
+  title,
   abas,
   abaAtiva,
   onAbaChange,
@@ -32,68 +35,71 @@ export function LayoutAbasFiltros({
   const [filtrosAbertos, setFiltrosAbertos] = useState(false);
 
   return (
-    <div className="flex min-h-[280px] overflow-hidden rounded-xl border border-border/80">
-      {abas?.length ? (
-        <nav
-          aria-label="Sub-abas"
-          className="flex w-[9.5rem] shrink-0 flex-col gap-1 border-r border-border/80 bg-surface-soft p-2"
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {abas?.length ? (
+          <nav
+            aria-label="Sub-abas"
+            className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
+          >
+            {abas.map((aba) => {
+              const ativa = abaAtiva === aba.id;
+              return (
+                <button
+                  key={aba.id}
+                  type="button"
+                  onClick={() => onAbaChange?.(aba.id)}
+                  className={cn(
+                    "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                    ativa
+                      ? "bg-card text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {aba.label}
+                </button>
+              );
+            })}
+          </nav>
+        ) : title ? (
+          <h3 className="text-base font-bold tracking-tight">{title}</h3>
+        ) : (
+          <span />
+        )}
+
+        <button
+          type="button"
+          onClick={() => setFiltrosAbertos((v) => !v)}
+          aria-expanded={filtrosAbertos}
+          aria-label={filtrosAbertos ? "Fechar filtros" : "Abrir filtros"}
+          className={cn(
+            "inline-flex items-center gap-2 rounded-full border border-border/80 bg-card px-4 py-2 text-sm font-semibold transition-all duration-200 hover:border-primary/30 hover:text-primary",
+            filtrosAbertos && "border-primary/30 bg-surface-soft text-primary",
+          )}
         >
-          {abas.map((aba) => (
-            <button
-              key={aba.id}
-              type="button"
-              onClick={() => onAbaChange?.(aba.id)}
-              className={cn(
-                "rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-colors",
-                abaAtiva === aba.id
-                  ? "bg-card text-primary shadow-sm"
-                  : "text-muted-foreground hover:bg-card/70 hover:text-foreground",
-              )}
-            >
-              {aba.label}
-            </button>
-          ))}
-        </nav>
+          <SlidersHorizontal className="size-4" />
+          Filtros
+          <ChevronDown
+            className={cn("size-4 transition-transform duration-200", filtrosAbertos && "rotate-180")}
+            aria-hidden
+          />
+        </button>
+      </div>
+
+      {filtrosAbertos ? (
+        <div className="flex justify-end duration-200 animate-in fade-in-0 slide-in-from-top-2">
+          <div className="w-full max-w-xs space-y-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
+            {filtros}
+          </div>
+        </div>
       ) : null}
 
-      <div className="min-w-0 flex-1">{children}</div>
-
-      <aside
-        className={cn(
-          "shrink-0 border-l border-border/80 bg-surface-soft transition-[width] duration-200",
-          filtrosAbertos ? "w-52" : "w-11",
-        )}
+      <div
+        key={abaAtiva ?? "conteudo"}
+        className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm duration-300 animate-in fade-in-0 slide-in-from-left-2"
       >
-        {filtrosAbertos ? (
-          <div className="flex h-full flex-col p-3">
-            <button
-              type="button"
-              onClick={() => setFiltrosAbertos(false)}
-              className="mb-3 flex w-full items-center justify-between rounded-lg px-1 py-1 text-[11px] font-bold uppercase tracking-[0.12em] text-primary transition-colors hover:bg-card/70"
-            >
-              Filtros
-              <ChevronRight className="size-4 rotate-180 opacity-70" aria-hidden />
-            </button>
-            <div className="space-y-3 overflow-y-auto overflow-x-hidden pb-1">{filtros}</div>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setFiltrosAbertos(true)}
-            aria-label="Abrir filtros"
-            aria-expanded={false}
-            className="flex h-full min-h-[12rem] w-full flex-col items-center justify-center gap-2 py-6 text-muted-foreground transition-colors hover:bg-card/50 hover:text-primary"
-          >
-            <SlidersHorizontal className="size-4 shrink-0 opacity-70" aria-hidden />
-            <span
-              className="text-[10px] font-bold uppercase tracking-[0.14em]"
-              style={{ writingMode: "vertical-rl" }}
-            >
-              Filtros
-            </span>
-          </button>
-        )}
-      </aside>
+        <div className="p-4 sm:p-5">{children}</div>
+      </div>
     </div>
   );
 }
