@@ -1,5 +1,4 @@
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -16,24 +15,26 @@ type LayoutAbasFiltrosProps = {
   abas?: AbaLateral[];
   abaAtiva?: string;
   onAbaChange?: (id: string) => void;
-  /** Cards de filtro — abrem acima da tabela */
+  /** Cards de filtro sempre visíveis */
   filtros: ReactNode;
   children: ReactNode;
 };
 
-/** Um filtro por card, com o dropdown dentro */
+/** Card compacto com um dropdown */
 export function FiltroCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="min-w-[11rem] rounded-2xl border border-border/80 bg-card p-3 shadow-sm">
-      <Label className="mb-2 block text-xs text-muted-foreground">{label}</Label>
+    <div className="w-[9.5rem] shrink-0 rounded-xl border border-border/80 bg-card px-2 py-1.5 shadow-xs [&_button]:h-8 [&_button]:px-2.5 [&_button]:text-xs">
+      <Label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        {label}
+      </Label>
       {children}
     </div>
   );
 }
 
 /**
- * Barra acima da tabela: sub-abas à esquerda (formato de pílula) e
- * Filtros à direita. Cada filtro abre como card separado.
+ * Sub-abas à esquerda e filtros compactos sempre visíveis à direita,
+ * acima da tabela — sem botão para abrir.
  */
 export function LayoutAbasFiltros({
   title,
@@ -43,8 +44,6 @@ export function LayoutAbasFiltros({
   filtros,
   children,
 }: LayoutAbasFiltrosProps) {
-  const [filtrosAbertos, setFiltrosAbertos] = useState(false);
-
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -78,30 +77,8 @@ export function LayoutAbasFiltros({
           <span />
         )}
 
-        <button
-          type="button"
-          onClick={() => setFiltrosAbertos((v) => !v)}
-          aria-expanded={filtrosAbertos}
-          aria-label={filtrosAbertos ? "Fechar filtros" : "Abrir filtros"}
-          className={cn(
-            "inline-flex items-center gap-2 rounded-full border border-border/80 bg-card px-4 py-2 text-sm font-semibold transition-all duration-200 hover:border-primary/30 hover:text-primary",
-            filtrosAbertos && "border-primary/30 bg-surface-soft text-primary",
-          )}
-        >
-          <SlidersHorizontal className="size-4" />
-          Filtros
-          <ChevronDown
-            className={cn("size-4 transition-transform duration-200", filtrosAbertos && "rotate-180")}
-            aria-hidden
-          />
-        </button>
+        <div className="flex flex-wrap items-center justify-end gap-2">{filtros}</div>
       </div>
-
-      {filtrosAbertos ? (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-3 duration-200 animate-in fade-in-0 slide-in-from-top-2">
-          {filtros}
-        </div>
-      ) : null}
 
       <div
         key={abaAtiva ?? "conteudo"}
