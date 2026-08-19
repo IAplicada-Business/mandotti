@@ -4,7 +4,7 @@ import { Sprout, Wheat } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
-import { KpiCard, SectionCard } from "@/components/design-system";
+import { KpiCard } from "@/components/design-system";
 import { LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
@@ -110,19 +110,9 @@ function ordenarFazenda(
 }
 
 const ABAS_PRODUCAO = [
-  { id: "fazenda", label: "Fazenda", title: "Por fazenda", description: "Área e produtividade por imóvel e cultura." },
-  {
-    id: "historico",
-    label: "Histórico",
-    title: "Histórico",
-    description: "Safras realizadas — área, produtividade, preço e custo.",
-  },
-  {
-    id: "projecao",
-    label: "Projeções",
-    title: "Projeções",
-    description: "Metas de área por safra e cultura.",
-  },
+  { id: "fazenda", label: "Fazenda" },
+  { id: "historico", label: "Histórico" },
+  { id: "projecao", label: "Projeções" },
 ] as const;
 
 type AbaProducao = (typeof ABAS_PRODUCAO)[number]["id"];
@@ -324,8 +314,6 @@ function ProducaoPage() {
     return ordenarFazenda(rows, ordenacao, data?.culturaNome ?? {});
   }, [data?.fazenda, data?.culturaNome, safraFiltro, fazendaFiltro, culturaFiltro, ordenacao]);
 
-  const abaMeta = ABAS_PRODUCAO.find((a) => a.id === abaAtiva)!;
-
   const filtrosProducao = (
     <FiltrosProducao
       safras={safras}
@@ -367,14 +355,12 @@ function ProducaoPage() {
         />
       </div>
 
-      <SectionCard title={abaMeta.title} description={abaMeta.description}>
-        <LayoutAbasFiltros
-          abas={[...ABAS_PRODUCAO]}
-          abaAtiva={abaAtiva}
-          onAbaChange={(id) => setAbaAtiva(id as AbaProducao)}
-          filtros={filtrosProducao}
-        >
-          <div className="p-4 sm:p-5">
+      <LayoutAbasFiltros
+        abas={[...ABAS_PRODUCAO]}
+        abaAtiva={abaAtiva}
+        onAbaChange={(id) => setAbaAtiva(id as AbaProducao)}
+        filtros={filtrosProducao}
+      >
             {abaAtiva === "fazenda" ? (
               isLoading ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
@@ -531,9 +517,7 @@ function ProducaoPage() {
                 )}
               </TabelaPreview>
             ) : null}
-          </div>
-        </LayoutAbasFiltros>
-      </SectionCard>
+      </LayoutAbasFiltros>
     </div>
   );
 }
