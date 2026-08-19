@@ -191,7 +191,10 @@ function FinanceiroPage() {
   if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader breadcrumb="Financeiro" title="Painel financeiro" />
+        <PageHeader
+          title="Painel financeiro"
+          description="Endividamento, cronograma SCR e passivos da ficha cadastral — mais lançamentos operacionais (XML/manual)."
+        />
         <SectionCard title="Selecione emissores">
           <p className="py-8 text-center text-sm text-muted-foreground">
             Selecione ao menos um emissor no topo.
@@ -204,7 +207,6 @@ function FinanceiroPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Financeiro"
         title="Painel financeiro"
         description="Endividamento, cronograma SCR e passivos da ficha cadastral — mais lançamentos operacionais (XML/manual)."
         action={

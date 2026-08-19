@@ -21,7 +21,7 @@ import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
+import { useEmissor } from "@/lib/emissor-context";
 import { formatBRL, formatPctDecimal } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -75,7 +75,7 @@ const PIE_COLORS = [
 ];
 
 function Dashboard() {
-  const { emissores, emissorIds } = useEmissor();
+  const { emissorIds } = useEmissor();
 
   const { data } = useQuery({
     queryKey: ["dashboard-patrimonio"],
@@ -106,9 +106,8 @@ function Dashboard() {
     return (
       <div>
         <PageHeader
-          breadcrumb="Operação · Visão geral"
           title="Dashboard"
-          description="Selecione ao menos um emissor para ver os indicadores."
+          description="Panorama patrimonial e operacional do Grupo Mandotti."
         />
         <SectionCard title="Sem visão selecionada">
           <div className="py-10 text-center text-sm text-muted-foreground">
@@ -122,12 +121,8 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Operação · Visão geral"
-        title="Painel central"
-        description={resumoEmissores(
-          emissores.filter((e) => emissorIds.includes(e.id)),
-          emissores.length,
-        )}
+        title="Dashboard"
+        description="Panorama patrimonial e operacional do Grupo Mandotti."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

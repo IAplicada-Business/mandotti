@@ -4,6 +4,7 @@ import {
   Building2,
   Calculator,
   ChevronDown,
+  CircleHelp,
   FileSpreadsheet,
   FileText,
   FolderOpen,
@@ -552,23 +553,31 @@ export function PageHeader({
   title,
   description,
   action,
-  breadcrumb,
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
-  breadcrumb?: string;
 }) {
   return (
-    <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        {breadcrumb ? (
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
-            {breadcrumb}
-          </p>
-        ) : null}
+    <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+      <div className="flex min-w-0 items-center gap-2">
         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{title}</h1>
-        {description ? <p className="mt-1.5 text-sm text-muted-foreground">{description}</p> : null}
+        {description ? (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-surface-soft hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                aria-label={`Sobre: ${title}`}
+              >
+                <CircleHelp className="size-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="max-w-sm text-left font-normal leading-relaxed">
+              {description}
+            </TooltipContent>
+          </Tooltip>
+        ) : null}
       </div>
       {action}
     </div>

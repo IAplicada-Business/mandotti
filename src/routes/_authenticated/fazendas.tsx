@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
+import { useEmissor } from "@/lib/emissor-context";
 import { REGIME_LABEL, REGIME_VARIANT, type FazendaRegime } from "@/lib/fazenda-labels";
 import { formatBRL } from "@/lib/format";
 import { usePerfil, useSession } from "@/hooks/useAuth";
@@ -225,7 +225,10 @@ function FazendasPage() {
   if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader title="Fazendas & Áreas" description="Selecione ao menos um emissor no topo." />
+        <PageHeader
+          title="Fazendas & Áreas"
+          description="Fazendas, áreas e culturas por emissor."
+        />
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
             Selecione ao menos um emissor para gerenciar as fazendas.
@@ -238,12 +241,8 @@ function FazendasPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Operação"
         title="Fazendas & Áreas"
-        description={`${resumoEmissores(
-          emissores.filter((e) => emissorIds.includes(e.id)),
-          emissores.length,
-        )} · dados da planilha validados na call de 29/jul.`}
+        description="Fazendas, áreas e culturas por emissor."
         action={
           podeEditar ? (
             <Button

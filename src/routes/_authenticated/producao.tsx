@@ -346,9 +346,8 @@ function ProducaoPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Operação · Produção"
         title="Produção & Safras"
-        description="Visão por fazenda, histórico realizado e projeções — dados da ficha cadastral."
+        description="Visão por fazenda, histórico realizado e projeções."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

@@ -93,7 +93,6 @@ function ConfiguracoesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Configurações"
         title="Parâmetros"
         description="Preferências do sistema e dados cadastrais importados da ficha Mandotti."
       />

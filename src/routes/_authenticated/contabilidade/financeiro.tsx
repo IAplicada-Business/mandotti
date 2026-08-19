@@ -66,7 +66,6 @@ function ContabilidadeFinanceiroPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Contabilidade · Financeiro"
         title="Dados financeiros"
         description="Mesmos dados do painel de Gestão — somente leitura e exportação para o escritório."
         action={

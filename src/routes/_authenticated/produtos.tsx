@@ -43,9 +43,8 @@ function ProdutosPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Produção"
         title="Culturas da operação"
-        description="Soja, milho, sorgo e milheto — base para safras, contratos e comparativos (planilha de produtividade)."
+        description="Soja, milho, sorgo e milheto — base para safras, contratos e comparativos."
       />
 
       <SectionCard title="Cadastro de referência">

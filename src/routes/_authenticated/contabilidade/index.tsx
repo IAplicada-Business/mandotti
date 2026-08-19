@@ -46,8 +46,7 @@ function ContabilidadeDashboard() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Contabilidade"
-        title="Dashboard contabilidade"
+        title="Dashboard"
         description="Visão para exportação e consumo. Os dados vêm do módulo Gestão — sem retrabalho de lançamento."
         action={
           <Button variant="outline" onClick={exportResumo} disabled={!data?.resumo}>

@@ -326,7 +326,10 @@ function MaquinarioPage() {
   if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader breadcrumb="Cadastros" title="Maquinário" />
+        <PageHeader
+          title="Maquinário"
+          description="Frota de máquinas e veículos. Alerta quando manutenção supera depreciação ou 12% do valor."
+        />
         <SectionCard title="Selecione emissores">
           <p className="py-8 text-center text-sm text-muted-foreground">
             Selecione ao menos um emissor no topo.
@@ -339,9 +342,8 @@ function MaquinarioPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Cadastros · Ativos"
         title="Maquinário"
-        description="Frota da planilha (78 itens). Alerta quando manutenção supera depreciação ou 12% do valor."
+        description="Frota de máquinas e veículos. Alerta quando manutenção supera depreciação ou 12% do valor."
         action={
           podeEditar ? (
             <Button

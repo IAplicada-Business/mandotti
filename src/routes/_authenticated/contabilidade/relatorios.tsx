@@ -134,9 +134,8 @@ function RelatoriosContabilidadePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Contabilidade"
         title="Relatórios mensais"
-        description="Exportação CSV para o escritório (HRM). Dados espelham gestão — sem reentrada."
+        description="Exportação CSV para o escritório. Dados espelham gestão — sem reentrada."
       />
 
       <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
