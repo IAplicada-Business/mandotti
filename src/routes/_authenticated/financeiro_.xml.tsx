@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-/** Rota legada — redireciona para a tela fiscal de importação. */
-export const Route = createFileRoute("/_authenticated/financeiro/xml")({
+/** URL antiga — não aninha em /financeiro (que não tem Outlet). */
+export const Route = createFileRoute("/_authenticated/financeiro_/xml")({
   beforeLoad: () => {
     throw redirect({ to: "/importacao-xml" });
   },

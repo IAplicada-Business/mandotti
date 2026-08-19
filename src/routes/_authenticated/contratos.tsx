@@ -4,6 +4,7 @@ import { ArrowRight, Handshake, Scale, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -69,20 +70,6 @@ function ContratosPage() {
         title="Contratos · Tradings"
         description="Parceiros comerciais e destinos da produção (ficha cadastral). Negociações forward entram aqui; dívidas bancárias ficam em Passivos · SCR."
       />
-
-      <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">Sem redundância:</span> esta tela cobre{" "}
-        <strong>tradings, fornecedores e referências comerciais</strong>. Contratos SCR / Bacen com cronograma
-        estão em{" "}
-        <Link to="/passivos" className="font-semibold text-primary hover:underline">
-          Passivos · SCR
-        </Link>
-        ; patrimônio consolidado em{" "}
-        <Link to="/patrimonio" className="font-semibold text-primary hover:underline">
-          Patrimônio
-        </Link>
-        .
-      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Destinos" value={destinos.length} icon={Handshake} tone="info" hint="Tradings / esmagadoras" />
@@ -178,6 +165,8 @@ function TabelaContatos({
   }
 
   return (
+    <TabelaPreview rows={rows}>
+      {(visiveis) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -190,7 +179,7 @@ function TabelaContatos({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((row) => (
+        {visiveis.map((row) => (
           <TableRow key={row.id}>
             <TableCell className="font-medium">{row.nome}</TableCell>
             <TableCell>
@@ -210,5 +199,7 @@ function TabelaContatos({
         ))}
       </TableBody>
     </Table>
+      )}
+    </TabelaPreview>
   );
 }

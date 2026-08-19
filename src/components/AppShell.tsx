@@ -175,7 +175,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const grupoComRotaAtiva = useMemo(
     () =>
       navVisivel.find((section) =>
-        section.items.some((item) => pathname.startsWith(item.to)),
+        section.items.some(
+          (item) => pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`)),
+        ),
       )?.group,
     [navVisivel, pathname],
   );
@@ -207,7 +209,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     item: { to: string; label: string; icon: typeof LayoutDashboard },
     rail: boolean,
   ) => {
-    const active = pathname.startsWith(item.to);
+    const active =
+      pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
     const link = (
       <Link
         to={item.to}

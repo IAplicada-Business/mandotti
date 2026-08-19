@@ -39,8 +39,8 @@ import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './rout
 import { Route as AuthenticatedContabilidadeExtratosRouteImport } from './routes/_authenticated/contabilidade/extratos'
 import { Route as AuthenticatedContabilidadeFinanceiroRouteImport } from './routes/_authenticated/contabilidade/financeiro'
 import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade/relatorios'
-import { Route as AuthenticatedFinanceiroConciliacaoRouteImport } from './routes/_authenticated/financeiro.conciliacao'
-import { Route as AuthenticatedFinanceiroXmlRouteImport } from './routes/_authenticated/financeiro.xml'
+import { Route as AuthenticatedFinanceiroConciliacaoRouteImport } from './routes/_authenticated/financeiro_.conciliacao'
+import { Route as AuthenticatedFinanceiroXmlRouteImport } from './routes/_authenticated/financeiro_.xml'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -204,15 +204,15 @@ const AuthenticatedContabilidadeRelatoriosRoute =
   } as any)
 const AuthenticatedFinanceiroConciliacaoRoute =
   AuthenticatedFinanceiroConciliacaoRouteImport.update({
-    id: '/conciliacao',
-    path: '/conciliacao',
-    getParentRoute: () => AuthenticatedFinanceiroRoute,
+    id: '/financeiro_/conciliacao',
+    path: '/financeiro/conciliacao',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedFinanceiroXmlRoute =
   AuthenticatedFinanceiroXmlRouteImport.update({
-    id: '/xml',
-    path: '/xml',
-    getParentRoute: () => AuthenticatedFinanceiroRoute,
+    id: '/financeiro_/xml',
+    path: '/financeiro/xml',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -230,7 +230,7 @@ export interface FileRoutesByFullPath {
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
-  '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
+  '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/importacao-xml': typeof AuthenticatedImportacaoXmlRoute
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
@@ -263,7 +263,7 @@ export interface FileRoutesByTo {
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
-  '/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
+  '/financeiro': typeof AuthenticatedFinanceiroRoute
   '/importacao-xml': typeof AuthenticatedImportacaoXmlRoute
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
@@ -298,7 +298,7 @@ export interface FileRoutesById {
   '/_authenticated/emissores': typeof AuthenticatedEmissoresRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/fazendas': typeof AuthenticatedFazendasRoute
-  '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRouteWithChildren
+  '/_authenticated/financeiro': typeof AuthenticatedFinanceiroRoute
   '/_authenticated/importacao-xml': typeof AuthenticatedImportacaoXmlRoute
   '/_authenticated/maquinario': typeof AuthenticatedMaquinarioRoute
   '/_authenticated/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
@@ -312,8 +312,8 @@ export interface FileRoutesById {
   '/_authenticated/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
   '/_authenticated/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
   '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
-  '/_authenticated/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
-  '/_authenticated/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
+  '/_authenticated/financeiro_/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
+  '/_authenticated/financeiro_/xml': typeof AuthenticatedFinanceiroXmlRoute
   '/_authenticated/contabilidade/': typeof AuthenticatedContabilidadeIndexRoute
 }
 export interface FileRouteTypes {
@@ -414,8 +414,8 @@ export interface FileRouteTypes {
     | '/_authenticated/contabilidade/extratos'
     | '/_authenticated/contabilidade/financeiro'
     | '/_authenticated/contabilidade/relatorios'
-    | '/_authenticated/financeiro/conciliacao'
-    | '/_authenticated/financeiro/xml'
+    | '/_authenticated/financeiro_/conciliacao'
+    | '/_authenticated/financeiro_/xml'
     | '/_authenticated/contabilidade/'
   fileRoutesById: FileRoutesById
 }
@@ -638,39 +638,22 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedContabilidadeRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/financeiro/conciliacao': {
-      id: '/_authenticated/financeiro/conciliacao'
-      path: '/conciliacao'
+    '/_authenticated/financeiro_/conciliacao': {
+      id: '/_authenticated/financeiro_/conciliacao'
+      path: '/financeiro/conciliacao'
       fullPath: '/financeiro/conciliacao'
       preLoaderRoute: typeof AuthenticatedFinanceiroConciliacaoRouteImport
-      parentRoute: typeof AuthenticatedFinanceiroRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/financeiro/xml': {
-      id: '/_authenticated/financeiro/xml'
-      path: '/xml'
+    '/_authenticated/financeiro_/xml': {
+      id: '/_authenticated/financeiro_/xml'
+      path: '/financeiro/xml'
       fullPath: '/financeiro/xml'
       preLoaderRoute: typeof AuthenticatedFinanceiroXmlRouteImport
-      parentRoute: typeof AuthenticatedFinanceiroRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
-
-interface AuthenticatedFinanceiroRouteChildren {
-  AuthenticatedFinanceiroConciliacaoRoute: typeof AuthenticatedFinanceiroConciliacaoRoute
-  AuthenticatedFinanceiroXmlRoute: typeof AuthenticatedFinanceiroXmlRoute
-}
-
-const AuthenticatedFinanceiroRouteChildren: AuthenticatedFinanceiroRouteChildren =
-  {
-    AuthenticatedFinanceiroConciliacaoRoute:
-      AuthenticatedFinanceiroConciliacaoRoute,
-    AuthenticatedFinanceiroXmlRoute: AuthenticatedFinanceiroXmlRoute,
-  }
-
-const AuthenticatedFinanceiroRouteWithChildren =
-  AuthenticatedFinanceiroRoute._addFileChildren(
-    AuthenticatedFinanceiroRouteChildren,
-  )
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAssinaturasRoute: typeof AuthenticatedAssinaturasRoute
@@ -684,7 +667,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEmissoresRoute: typeof AuthenticatedEmissoresRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFazendasRoute: typeof AuthenticatedFazendasRoute
-  AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRouteWithChildren
+  AuthenticatedFinanceiroRoute: typeof AuthenticatedFinanceiroRoute
   AuthenticatedImportacaoXmlRoute: typeof AuthenticatedImportacaoXmlRoute
   AuthenticatedMaquinarioRoute: typeof AuthenticatedMaquinarioRoute
   AuthenticatedNotasFiscaisRoute: typeof AuthenticatedNotasFiscaisRoute
@@ -698,6 +681,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedContabilidadeExtratosRoute: typeof AuthenticatedContabilidadeExtratosRoute
   AuthenticatedContabilidadeFinanceiroRoute: typeof AuthenticatedContabilidadeFinanceiroRoute
   AuthenticatedContabilidadeRelatoriosRoute: typeof AuthenticatedContabilidadeRelatoriosRoute
+  AuthenticatedFinanceiroConciliacaoRoute: typeof AuthenticatedFinanceiroConciliacaoRoute
+  AuthenticatedFinanceiroXmlRoute: typeof AuthenticatedFinanceiroXmlRoute
   AuthenticatedContabilidadeIndexRoute: typeof AuthenticatedContabilidadeIndexRoute
 }
 
@@ -713,7 +698,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEmissoresRoute: AuthenticatedEmissoresRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFazendasRoute: AuthenticatedFazendasRoute,
-  AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRouteWithChildren,
+  AuthenticatedFinanceiroRoute: AuthenticatedFinanceiroRoute,
   AuthenticatedImportacaoXmlRoute: AuthenticatedImportacaoXmlRoute,
   AuthenticatedMaquinarioRoute: AuthenticatedMaquinarioRoute,
   AuthenticatedNotasFiscaisRoute: AuthenticatedNotasFiscaisRoute,
@@ -731,6 +716,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedContabilidadeFinanceiroRoute,
   AuthenticatedContabilidadeRelatoriosRoute:
     AuthenticatedContabilidadeRelatoriosRoute,
+  AuthenticatedFinanceiroConciliacaoRoute:
+    AuthenticatedFinanceiroConciliacaoRoute,
+  AuthenticatedFinanceiroXmlRoute: AuthenticatedFinanceiroXmlRoute,
   AuthenticatedContabilidadeIndexRoute: AuthenticatedContabilidadeIndexRoute,
 }
 

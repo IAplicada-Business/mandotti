@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -201,6 +202,8 @@ function ImportacaoXmlPage() {
         ) : imports.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">Nenhum XML importado.</p>
         ) : (
+          <TabelaPreview rows={imports}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -213,7 +216,7 @@ function ImportacaoXmlPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {imports.map((row) => (
+              {visiveis.map((row) => (
                 <TableRow key={row.id}>
                   <TableCell className="max-w-[180px] truncate font-medium">
                     {row.nome_arquivo}
@@ -243,6 +246,8 @@ function ImportacaoXmlPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
     </div>
