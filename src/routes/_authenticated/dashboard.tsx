@@ -8,6 +8,7 @@ import {
   Sprout,
   TriangleAlert,
 } from "lucide-react";
+import { useMemo } from "react";
 import {
   Area,
   AreaChart,
@@ -24,7 +25,6 @@ import {
 } from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
-import { FluxoAcompanhamento } from "@/components/FluxoAcompanhamento";
 import { KpiCard, RingStat, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,6 +71,14 @@ const EMPTY_PIE = [
   { name: "Nagyla", value: 1, color: "var(--emissor-nagyla)" },
   { name: "Mandotti", value: 1, color: "var(--emissor-mandotti)" },
   { name: "Tractor", value: 1, color: "var(--emissor-tractor)" },
+];
+
+const PIE_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
 ];
 
 function Dashboard() {
@@ -137,7 +145,19 @@ function Dashboard() {
   }
 
   const certTotal = data?.certificados ?? 0;
-  const certOk = Math.max(0, certTotal - (data?.vencendo ?? 0));
+  const certOk = Math.max(0, certTotal - (data?.vencendo ?? 0);
+
+  const composicaoPatrimonio = useMemo(() => {
+    const r = data?.resumo;
+    if (!r) return [];
+    return [
+      { name: "Imóveis", value: r.imoveis },
+      { name: "Maquinários", value: r.maquinarios_veiculos },
+      { name: "Participações", value: r.participacoes_societarias },
+      { name: "Animais", value: r.animais },
+      { name: "Outros", value: r.outros_bens },
+    ].filter((x) => x.value > 0);
+  }, [data?.resumo]);
 
   return (
     <div className="space-y-6">
@@ -150,7 +170,98 @@ function Dashboard() {
         )}
       />
 
-      <FluxoAcompanhamento />
+      <div className="grid gap-4 xl:grid-cols-5">
+        <SectionCard
+          className="xl:col-span-3"
+          title="Gestão visual · Patrimônio"
+          description="Composição consolidada do grupo — dados da ficha cadastral"
+        >
+          <div className="grid gap-6 md:grid-cols-2 md:items-center">
+            <div className="h-[220px]">
+              {composicaoPatrimonio.length ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={composicaoPatrimonio}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={52}
+                      outerRadius={78}
+                      paddingAngle={2}
+                    >
+                      {composicaoPatrimonio.map((entry, i) => (
+                        <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(v: number) => formatBRL(v)} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
+                  Sem dados patrimoniais
+                </p>
+              )}
+            </div>
+            <div className="space-y-3">
+              {composicaoPatrimonio.map((item, i) => (
+                <div key={item.name} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="inline-flex items-center gap-2">
+                    <i
+                      className="size-2.5 rounded-sm"
+                      style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                    />
+                    {item.name}
+                  </span>
+                  <span className="font-mono-nums font-semibold">{formatBRL(item.value)}</span>
+                </div>
+              ))}
+              <Link
+                to="/patrimonio"
+                className="inline-block pt-2 text-sm font-semibold text-primary hover:underline"
+              >
+                Ver patrimônio completo →
+              </Link>
+            </div>
+          </div>
+        </SectionCard>
+
+        <SectionCard
+          className="xl:col-span-2"
+          title="Indicadores-chave"
+          description="Safra 26/27 e estrutura do grupo"
+        >
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+            <RingStat
+              label="Área soja 26/27"
+              value={data?.areaSafra2627 ?? 0}
+              total={data?.metaHa ?? 6000}
+              color="var(--chart-2)"
+            />
+            <RingStat
+              label="Endividamento"
+              value={Math.round((data?.resumo?.endividamento_pct ?? 0) * 100)}
+              total={100}
+              color="var(--chart-4)"
+            />
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 text-center">
+            <div className="rounded-xl border border-border/80 bg-surface-soft px-3 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Fazendas
+              </p>
+              <p className="mt-1 text-2xl font-extrabold">{data?.fazendas ?? 0}</p>
+            </div>
+            <div className="rounded-xl border border-border/80 bg-surface-soft px-3 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Patrimônio líquido
+              </p>
+              <p className="mt-1 text-sm font-extrabold leading-tight">
+                {formatBRL(data?.resumo?.patrimonio_liquido)}
+              </p>
+            </div>
+          </div>
+        </SectionCard>
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
