@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Briefcase,
   Building2,
@@ -102,17 +102,13 @@ export const NAV = [
   },
 ] as const;
 
-/** Rotas visíveis no contexto Contabilidade (HRM) */
+/** Rotas visíveis no contexto Contabilidade (HRM) — consumo e exportação, sem retrabalho de gestão */
 export const NAV_CONTABILIDADE = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
-  { to: "/financeiro/xml", label: "Importação XML", icon: FileSpreadsheet },
-  { to: "/financeiro/conciliacao", label: "Conciliação", icon: Landmark },
-  { to: "/passivos", label: "Passivos · SCR", icon: Scale },
-  { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
-  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
-  { to: "/contabilidade/relatorios", label: "Relatórios mensais", icon: FileSpreadsheet },
+  { to: "/contabilidade", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/contabilidade/financeiro", label: "Dados financeiros", icon: Wallet },
   { to: "/contabilidade/documentos", label: "Documentos fiscais", icon: FileText },
+  { to: "/contabilidade/relatorios", label: "Relatórios", icon: FileSpreadsheet },
+  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
 ] as const;
 
 const PERFIL_LABEL: Record<string, string> = {
@@ -146,11 +142,25 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user } = useSession();
   const { perfil, pode } = usePerfil(user);
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
 
+  const podeAlternarContexto = perfil === "admin";
+  const ctxEfetivo: "gestao" | "contabilidade" =
+    perfil === "contabilidade" ? "contabilidade" : ctx;
+
+  useEffect(() => {
+    if (perfil === "contabilidade") {
+      setCtx("contabilidade");
+      if (!pathname.startsWith("/contabilidade")) {
+        navigate({ to: "/contabilidade", replace: true });
+      }
+    }
+  }, [perfil, pathname, navigate]);
+
   const navVisivel =
-    ctx === "contabilidade"
+    ctxEfetivo === "contabilidade"
       ? [
           {
             group: "Contabilidade",
@@ -285,7 +295,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className={cn("min-w-0 leading-tight", soRail)}>
               <p className="truncate text-sm font-extrabold tracking-wide">GRUPO MANDOTTI</p>
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                Gestão Agrícola
+                {ctxEfetivo === "contabilidade" ? "Contabilidade" : "Gestão Agrícola"}
               </p>
             </div>
             <Button
@@ -299,36 +309,38 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
           </div>
 
-          <div
-            className={cn(
-              "mx-3 mt-4 flex rounded-xl border border-primary/10 bg-surface-soft p-1",
-              soRail,
-            )}
-          >
-            {(
-              [
-                ["gestao", "Gestão"],
-                ["contabilidade", "Contabilidade"],
-              ] as const
-            ).map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setCtx(key)}
-                className={cn(
-                  "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
-                  ctx === key
-                    ? "bg-card text-primary shadow-sm"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {podeAlternarContexto ? (
+            <div
+              className={cn(
+                "mx-3 mt-4 flex rounded-xl border border-primary/10 bg-surface-soft p-1",
+                soRail,
+              )}
+            >
+              {(
+                [
+                  ["gestao", "Gestão"],
+                  ["contabilidade", "Contabilidade"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setCtx(key)}
+                  className={cn(
+                    "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+                    ctx === key
+                      ? "bg-card text-primary shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
-          {/* Recolhida, o seletor de contexto vira um botão que alterna entre os dois */}
-          {colapsada ? (
+          {/* Recolhida: admin alterna contexto; contabilidade não vê este controle */}
+          {podeAlternarContexto && colapsada ? (
             <div className="mx-2 mt-4 hidden justify-center lg:flex">
               <Tooltip>
                 <TooltipTrigger asChild>

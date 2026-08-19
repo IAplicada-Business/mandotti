@@ -30,7 +30,7 @@ function rotaEFiscalFinanceira(rota: string) {
   return (
     ["/financeiro", "/passivos", "/notas-fiscais", "/contabilidade"].includes(rota) ||
     rota.startsWith("/financeiro/") ||
-    rota.startsWith("/contabilidade/")
+    rota.startsWith("/contabilidade")
   );
 }
 
@@ -68,6 +68,9 @@ export function usePerfil(user: User | null) {
   const pode = (rota: string, acao: "ver" | "editar"): boolean => {
     if (perfil === "admin") return true;
     if (acao === "ver" && perfil === "contabilidade" && rotaEFiscalFinanceira(rota)) return true;
+    if (acao === "editar" && perfil === "contabilidade" && rota === "/contabilidade/documentos") {
+      return true;
+    }
     const g = grants.find((x) => x.rota === rota);
     return acao === "ver" ? !!g?.pode_ver : !!g?.pode_editar;
   };
