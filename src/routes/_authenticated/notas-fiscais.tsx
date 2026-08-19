@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -105,12 +106,6 @@ function NotasFiscaisPage() {
         }
       />
 
-      <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">Fluxo previsto:</span> negociação com comprador
-        → entrega → validação de pagamento no extrato → emissão de NF. Nenhuma NF foi emitida pelo
-        sistema ainda; a fila abaixo mostra negociações prontas para evoluir nesse fluxo.
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Negociações ativas" value={data?.negociacoes.length ?? 0} icon={ScrollText} />
         <KpiCard
@@ -149,6 +144,8 @@ function NotasFiscaisPage() {
                 contrato firmado ou pagamento confirmado.
               </p>
             ) : (
+              <TabelaPreview rows={filaNf}>
+                {(visiveis) => (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -162,7 +159,7 @@ function NotasFiscaisPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filaNf.map((n) => (
+                  {visiveis.map((n) => (
                     <TableRow key={n.id}>
                       <TableCell className="font-medium">{n.grupo_contatos?.nome ?? "—"}</TableCell>
                       <TableCell>
@@ -193,6 +190,8 @@ function NotasFiscaisPage() {
                   ))}
                 </TableBody>
               </Table>
+                )}
+              </TabelaPreview>
             )}
           </SectionCard>
         </TabsContent>
@@ -210,6 +209,8 @@ function NotasFiscaisPage() {
                 </p>
               </div>
             ) : (
+              <TabelaPreview rows={data?.notas ?? []}>
+                {(visiveis) => (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -221,7 +222,7 @@ function NotasFiscaisPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {data?.notas.map((nf) => (
+                  {visiveis.map((nf) => (
                     <TableRow key={nf.id}>
                       <TableCell className="font-mono-nums">
                         {nf.numero ?? "—"}
@@ -239,6 +240,8 @@ function NotasFiscaisPage() {
                   ))}
                 </TableBody>
               </Table>
+                )}
+              </TabelaPreview>
             )}
           </SectionCard>
         </TabsContent>
@@ -279,6 +282,8 @@ function TabelaNegociacoes({
     );
   }
   return (
+    <TabelaPreview rows={rows}>
+      {(visiveis) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -289,7 +294,7 @@ function TabelaNegociacoes({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((n) => (
+        {visiveis.map((n) => (
           <TableRow key={n.id}>
             <TableCell className="font-medium">
               {n.grupo_contatos?.nome ?? "—"}
@@ -308,5 +313,7 @@ function TabelaNegociacoes({
         ))}
       </TableBody>
     </Table>
+      )}
+    </TabelaPreview>
   );
 }

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -377,6 +378,8 @@ function MaquinarioPage() {
             {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (
+              <TabelaPreview rows={filtrados}>
+                {(visiveis) => (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -393,14 +396,14 @@ function MaquinarioPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtrados.length === 0 ? (
+                  {visiveis.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
                         Nenhum ativo com os filtros atuais.
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filtrados.map((m) => {
+                    visiveis.map((m) => {
                       const st = statusDoAtivo(m);
                       return (
                         <TableRow key={m.id}>
@@ -442,6 +445,8 @@ function MaquinarioPage() {
                   )}
                 </TableBody>
               </Table>
+                )}
+              </TabelaPreview>
             )}
           </div>
           <FiltrosMaquinario

@@ -19,6 +19,7 @@ import {
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -182,6 +183,8 @@ function PatrimonioPage() {
           title="Cronograma de amortização (grupo)"
           description="Totais consolidados — detalhe por contrato em Passivos · SCR"
         >
+          <TabelaPreview rows={CRONOGRAMA}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -190,7 +193,7 @@ function PatrimonioPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {CRONOGRAMA.map((p) => (
+              {visiveis.map((p) => (
                 <TableRow key={p.key}>
                   <TableCell>{p.label}</TableCell>
                   <TableCell className="text-right font-mono-nums">
@@ -200,6 +203,8 @@ function PatrimonioPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         </SectionCard>
       </div>
 
@@ -287,6 +292,8 @@ function PatrimonioPage() {
             title="Saldo por instituição"
             description="Consolidado do resumo executivo — contratos individuais em Passivos · SCR"
           >
+            <TabelaPreview rows={data?.passivoInst ?? []}>
+              {(visiveis) => (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -295,7 +302,7 @@ function PatrimonioPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.passivoInst.map((row) => (
+                {visiveis.map((row) => (
                   <TableRow key={row.id}>
                     <TableCell className="font-medium">{row.instituicao}</TableCell>
                     <TableCell className="text-right font-mono-nums">{formatBRL(row.saldo_devedor)}</TableCell>
@@ -303,6 +310,8 @@ function PatrimonioPage() {
                 ))}
               </TableBody>
             </Table>
+              )}
+            </TabelaPreview>
           </SectionCard>
         </TabsContent>
       </Tabs>
@@ -332,6 +341,8 @@ function TabelaBens({
     return <p className="py-8 text-center text-sm text-muted-foreground">Nenhum registro</p>;
   }
   return (
+    <TabelaPreview rows={rows}>
+      {(visiveis) => (
     <Table>
       <TableHeader>
         <TableRow>
@@ -341,7 +352,7 @@ function TabelaBens({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {rows.map((row) => (
+        {visiveis.map((row) => (
           <TableRow key={row.id}>
             <TableCell className="font-mono-nums text-muted-foreground">{row.ordem}</TableCell>
             <TableCell>{row.descricao}</TableCell>
@@ -350,5 +361,7 @@ function TabelaBens({
         ))}
       </TableBody>
     </Table>
+      )}
+    </TabelaPreview>
   );
 }

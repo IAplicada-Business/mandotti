@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
@@ -346,6 +347,8 @@ function ProducaoPage() {
                 {isLoading ? (
                   <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
                 ) : (
+                  <TabelaPreview rows={porFazenda}>
+                    {(visiveis) => (
                   <Table>
                     <TableHeader>
                       <TableRow>
@@ -358,14 +361,14 @@ function ProducaoPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {porFazenda.length === 0 ? (
+                      {visiveis.length === 0 ? (
                         <TableRow>
                           <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                             Nenhum registro com os filtros atuais.
                           </TableCell>
                         </TableRow>
                       ) : (
-                        porFazenda.map((row) => (
+                        visiveis.map((row) => (
                           <TableRow key={row.id}>
                             <TableCell>{row.safra}</TableCell>
                             <TableCell className="font-medium">
@@ -390,6 +393,8 @@ function ProducaoPage() {
                       )}
                     </TableBody>
                   </Table>
+                    )}
+                  </TabelaPreview>
                 )}
               </div>
               <FiltrosProducao
@@ -413,6 +418,8 @@ function ProducaoPage() {
           <SectionCard title="Histórico" description="Safras realizadas — área, produtividade, preço e custo.">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
               <div className="min-w-0 flex-1">
+                <TabelaPreview rows={historico}>
+                  {(visiveis) => (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -425,14 +432,14 @@ function ProducaoPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {historico.length === 0 ? (
+                    {visiveis.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                           Nenhum registro com os filtros atuais.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      historico.map((row) => (
+                      visiveis.map((row) => (
                         <TableRow key={row.id}>
                           <TableCell>
                             {row.safra}
@@ -468,6 +475,8 @@ function ProducaoPage() {
                     )}
                   </TableBody>
                 </Table>
+                  )}
+                </TabelaPreview>
               </div>
               <FiltrosProducao
                 safras={safras}
@@ -491,6 +500,8 @@ function ProducaoPage() {
           <SectionCard title="Projeções" description="Metas de área por safra e cultura.">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
               <div className="min-w-0 flex-1">
+                <TabelaPreview rows={projecao}>
+                  {(visiveis) => (
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -500,14 +511,14 @@ function ProducaoPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {projecao.length === 0 ? (
+                    {visiveis.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={3} className="py-8 text-center text-muted-foreground">
                           Nenhum registro com os filtros atuais.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      projecao.map((row) => (
+                      visiveis.map((row) => (
                         <TableRow key={row.id}>
                           <TableCell>
                             {row.safra}
@@ -524,6 +535,8 @@ function ProducaoPage() {
                     )}
                   </TableBody>
                 </Table>
+                  )}
+                </TabelaPreview>
               </div>
               <FiltrosProducao
                 safras={safras}

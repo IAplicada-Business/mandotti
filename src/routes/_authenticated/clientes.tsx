@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -162,16 +163,6 @@ function ClientesPage() {
         }
       />
 
-      <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
-        <span className="font-semibold text-foreground">Dados da planilha:</span> compradores importados
-        da aba <strong>Dados Cadastrais → Destino da produção</strong> (ADM, Agronorte). Negociações
-        iniciais vinculam culturas e safras da produção. Parceiros completos também em{" "}
-        <Link to="/contratos" className="font-semibold text-primary hover:underline">
-          Contratos · Tradings
-        </Link>
-        .
-      </div>
-
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Compradores" value={compradoresUnicos.length} icon={UserCircle} tone="info" />
         <KpiCard label="Negociações" value={negociacoes.length} icon={Handshake} hint="Por safra/cultura" />
@@ -191,6 +182,8 @@ function ClientesPage() {
         ) : compradoresUnicos.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">Nenhum comprador importado.</p>
         ) : (
+          <TabelaPreview rows={compradoresUnicos}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -203,7 +196,7 @@ function ClientesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {compradoresUnicos.map((c) => {
+              {visiveis.map((c) => {
                 const qtd = negociacoes.filter(
                   (n) => n.grupo_contatos?.nome === c.nome && n.grupo_contatos?.cidade === c.cidade,
                 ).length;
@@ -224,6 +217,8 @@ function ClientesPage() {
               })}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
 
@@ -238,6 +233,8 @@ function ClientesPage() {
             Nenhuma negociação para os filtros atuais.
           </p>
         ) : (
+          <TabelaPreview rows={negociacoes}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -251,7 +248,7 @@ function ClientesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {negociacoes.map((n) => (
+              {visiveis.map((n) => (
                 <TableRow key={n.id}>
                   <TableCell className="font-medium">
                     {n.grupo_contatos?.nome ?? "—"}
@@ -283,6 +280,8 @@ function ClientesPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
     </div>
