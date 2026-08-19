@@ -70,13 +70,169 @@ const STATUS_BADGE: Record<StatusManutencao, "default" | "secondary" | "destruct
   avaliar_troca: "destructive",
 };
 
+type Ordenacao = "valor" | "status";
+
+type MaquinarioRow = {
+  id: string;
+  emissor_id: string;
+  nome: string;
+  categoria: string;
+  fazenda_nome: string | null;
+  marca: string | null;
+  modelo: string | null;
+  ano: number | null;
+  valor_aquisicao: number | null;
+  custo_manutencao_acumulado: number;
+  depreciacao_anual_pct: number | null;
+  chassi_serie: string | null;
+  ordem: number;
+};
+
+const STATUS_ORDEM: Record<StatusManutencao, number> = {
+  avaliar_troca: 0,
+  atencao: 1,
+  saudavel: 2,
+};
+
+function statusDoAtivo(m: MaquinarioRow): StatusManutencao {
+  return statusManutencao(m.valor_aquisicao, m.custo_manutencao_acumulado, m.depreciacao_anual_pct);
+}
+
+function ordenarMaquinarios(rows: MaquinarioRow[], ordem: Ordenacao): MaquinarioRow[] {
+  const copia = [...rows];
+  if (ordem === "valor") {
+    return copia.sort((a, b) => (b.valor_aquisicao ?? 0) - (a.valor_aquisicao ?? 0));
+  }
+  return copia.sort((a, b) => {
+    const diff = STATUS_ORDEM[statusDoAtivo(a)] - STATUS_ORDEM[statusDoAtivo(b)];
+    if (diff !== 0) return diff;
+    return (b.valor_aquisicao ?? 0) - (a.valor_aquisicao ?? 0);
+  });
+}
+
+function FiltrosMaquinario({
+  anos,
+  proprietarios,
+  equipamentos,
+  ano,
+  proprietario,
+  equipamento,
+  status,
+  ordenacao,
+  onAno,
+  onProprietario,
+  onEquipamento,
+  onStatus,
+  onOrdenacao,
+}: {
+  anos: number[];
+  proprietarios: { id: string; nome: string }[];
+  equipamentos: string[];
+  ano: string;
+  proprietario: string;
+  equipamento: string;
+  status: string;
+  ordenacao: Ordenacao;
+  onAno: (v: string) => void;
+  onProprietario: (v: string) => void;
+  onEquipamento: (v: string) => void;
+  onStatus: (v: string) => void;
+  onOrdenacao: (v: Ordenacao) => void;
+}) {
+  return (
+    <aside className="w-full shrink-0 space-y-4 rounded-2xl border border-border/80 bg-surface-soft p-4 lg:w-56">
+      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        Filtros
+      </p>
+      <div className="space-y-2">
+        <Label className="text-xs">Ano</Label>
+        <Select value={ano} onValueChange={onAno}>
+          <SelectTrigger>
+            <SelectValue placeholder="Ano" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            {anos.map((a) => (
+              <SelectItem key={a} value={String(a)}>
+                {a}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Proprietário</Label>
+        <Select value={proprietario} onValueChange={onProprietario}>
+          <SelectTrigger>
+            <SelectValue placeholder="Proprietário" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            {proprietarios.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                {p.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Equipamento</Label>
+        <Select value={equipamento} onValueChange={onEquipamento}>
+          <SelectTrigger>
+            <SelectValue placeholder="Equipamento" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            {equipamentos.map((e) => (
+              <SelectItem key={e} value={e}>
+                {e}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2">
+        <Label className="text-xs">Status</Label>
+        <Select value={status} onValueChange={onStatus}>
+          <SelectTrigger>
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todos">Todos</SelectItem>
+            <SelectItem value="saudavel">{STATUS_MANUTENCAO_LABEL.saudavel}</SelectItem>
+            <SelectItem value="atencao">{STATUS_MANUTENCAO_LABEL.atencao}</SelectItem>
+            <SelectItem value="avaliar_troca">{STATUS_MANUTENCAO_LABEL.avaliar_troca}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-2 border-t border-border/60 pt-4">
+        <Label className="text-xs">Ordenar tabela</Label>
+        <Select value={ordenacao} onValueChange={(v) => onOrdenacao(v as Ordenacao)}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="valor">Valor</SelectItem>
+            <SelectItem value="status">Status</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </aside>
+  );
+}
+
 function MaquinarioPage() {
   const qc = useQueryClient();
   const { user } = useSession();
   const { pode } = usePerfil(user);
   const { emissores, emissorIds } = useEmissor();
   const podeEditar = pode("/maquinario", "editar");
-  const [categoria, setCategoria] = useState("todas");
+  const [anoFiltro, setAnoFiltro] = useState("todos");
+  const [proprietarioFiltro, setProprietarioFiltro] = useState("todos");
+  const [equipamentoFiltro, setEquipamentoFiltro] = useState("todos");
+  const [statusFiltro, setStatusFiltro] = useState("todos");
+  const [ordenacao, setOrdenacao] = useState<Ordenacao>("valor");
   const [aberto, setAberto] = useState(false);
   const [form, setForm] = useState(VAZIO);
 
@@ -91,25 +247,51 @@ function MaquinarioPage() {
         .in("emissor_id", emissorIds)
         .order("ordem", { ascending: true });
       if (error) throw error;
-      return data;
+      return data as MaquinarioRow[];
     },
   });
 
-  const categorias = useMemo(
-    () => [...new Set(data.map((m) => m.categoria).filter(Boolean))].sort(),
+  const proprietarios = useMemo(
+    () =>
+      emissores
+        .filter((e) => emissorIds.includes(e.id))
+        .map((e) => ({
+          id: e.id,
+          nome: e.nome_fantasia || e.razao_social || e.id,
+        }))
+        .sort((a, b) => a.nome.localeCompare(b.nome)),
+    [emissores, emissorIds],
+  );
+
+  const anos = useMemo(
+    () =>
+      [...new Set(data.map((m) => m.ano).filter((a): a is number => a != null))].sort(
+        (a, b) => b - a,
+      ),
     [data],
   );
 
-  const filtrados = useMemo(
-    () => (categoria === "todas" ? data : data.filter((m) => m.categoria === categoria)),
-    [data, categoria],
+  const equipamentos = useMemo(
+    () => [...new Set(data.map((m) => m.nome).filter(Boolean))].sort((a, b) => a.localeCompare(b)),
+    [data],
   );
+
+  const filtrados = useMemo(() => {
+    let rows = data;
+    if (anoFiltro !== "todos") rows = rows.filter((m) => m.ano === Number(anoFiltro));
+    if (proprietarioFiltro !== "todos") {
+      rows = rows.filter((m) => m.emissor_id === proprietarioFiltro);
+    }
+    if (equipamentoFiltro !== "todos") rows = rows.filter((m) => m.nome === equipamentoFiltro);
+    if (statusFiltro !== "todos") {
+      rows = rows.filter((m) => statusDoAtivo(m) === statusFiltro);
+    }
+    return ordenarMaquinarios(rows, ordenacao);
+  }, [data, anoFiltro, proprietarioFiltro, equipamentoFiltro, statusFiltro, ordenacao]);
 
   const valorTotal = filtrados.reduce((acc, m) => acc + (m.valor_aquisicao ?? 0), 0);
   const manutTotal = filtrados.reduce((acc, m) => acc + (m.custo_manutencao_acumulado ?? 0), 0);
-  const alertas = filtrados.filter(
-    (m) => statusManutencao(m.valor_aquisicao, m.custo_manutencao_acumulado, m.depreciacao_anual_pct) === "avaliar_troca",
-  ).length;
+  const alertas = filtrados.filter((m) => statusDoAtivo(m) === "avaliar_troca").length;
 
   const criar = useMutation({
     mutationFn: async () => {
@@ -162,31 +344,16 @@ function MaquinarioPage() {
         title="Maquinário"
         description="Frota da planilha (78 itens). Alerta quando manutenção supera depreciação ou 12% do valor."
         action={
-          <div className="flex flex-wrap gap-2">
-            <Select value={categoria} onValueChange={setCategoria}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Categoria" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas</SelectItem>
-                {categorias.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {podeEditar ? (
-              <Button
-                onClick={() => {
-                  setForm({ ...VAZIO, emissor_id: emissorIds[0] ?? "" });
-                  setAberto(true);
-                }}
-              >
-                <Plus className="size-4" /> Novo ativo
-              </Button>
-            ) : null}
-          </div>
+          podeEditar ? (
+            <Button
+              onClick={() => {
+                setForm({ ...VAZIO, emissor_id: emissorIds[0] ?? "" });
+                setAberto(true);
+              }}
+            >
+              <Plus className="size-4" /> Novo ativo
+            </Button>
+          ) : null
         }
       />
 
@@ -205,69 +372,94 @@ function MaquinarioPage() {
       ) : null}
 
       <SectionCard title="Frota" description="Dados importados da aba Maquinários.">
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Equipamento</TableHead>
-                <TableHead>Categoria</TableHead>
-                <TableHead>Proprietário</TableHead>
-                <TableHead>Fazenda</TableHead>
-                <TableHead>Marca / Modelo</TableHead>
-                <TableHead>Ano</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-                <TableHead className="text-right">Manut.</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtrados.map((m) => {
-                const st = statusManutencao(
-                  m.valor_aquisicao,
-                  m.custo_manutencao_acumulado,
-                  m.depreciacao_anual_pct,
-                );
-                return (
-                <TableRow key={m.id}>
-                  <TableCell className="font-mono-nums text-muted-foreground">{m.ordem}</TableCell>
-                  <TableCell>
-                    <div className="font-medium">{m.nome}</div>
-                    {m.chassi_serie ? (
-                      <div className="font-mono-nums text-xs text-muted-foreground">
-                        {m.chassi_serie}
-                      </div>
-                    ) : null}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{m.categoria}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    {emissores.find((e) => e.id === m.emissor_id)?.nome_fantasia ||
-                      emissores.find((e) => e.id === m.emissor_id)?.razao_social}
-                  </TableCell>
-                  <TableCell>{m.fazenda_nome || "—"}</TableCell>
-                  <TableCell>
-                    {[m.marca, m.modelo].filter(Boolean).join(" · ") || "—"}
-                  </TableCell>
-                  <TableCell className="font-mono-nums">{m.ano ?? "—"}</TableCell>
-                  <TableCell className="text-right font-mono-nums">
-                    {formatBRL(m.valor_aquisicao)}
-                  </TableCell>
-                  <TableCell className="text-right font-mono-nums">
-                    {formatBRL(m.custo_manutencao_acumulado)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={STATUS_BADGE[st]}>{STATUS_MANUTENCAO_LABEL[st]}</Badge>
-                  </TableCell>
-                </TableRow>
-              );
-              })}
-            </TableBody>
-          </Table>
-        )}
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <div className="min-w-0 flex-1">
+            {isLoading ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Equipamento</TableHead>
+                    <TableHead>Categoria</TableHead>
+                    <TableHead>Proprietário</TableHead>
+                    <TableHead>Fazenda</TableHead>
+                    <TableHead>Marca / Modelo</TableHead>
+                    <TableHead>Ano</TableHead>
+                    <TableHead className="text-right">Valor</TableHead>
+                    <TableHead className="text-right">Manut.</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtrados.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
+                        Nenhum ativo com os filtros atuais.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filtrados.map((m) => {
+                      const st = statusDoAtivo(m);
+                      return (
+                        <TableRow key={m.id}>
+                          <TableCell className="font-mono-nums text-muted-foreground">
+                            {m.ordem}
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">{m.nome}</div>
+                            {m.chassi_serie ? (
+                              <div className="font-mono-nums text-xs text-muted-foreground">
+                                {m.chassi_serie}
+                              </div>
+                            ) : null}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{m.categoria}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            {emissores.find((e) => e.id === m.emissor_id)?.nome_fantasia ||
+                              emissores.find((e) => e.id === m.emissor_id)?.razao_social}
+                          </TableCell>
+                          <TableCell>{m.fazenda_nome || "—"}</TableCell>
+                          <TableCell>
+                            {[m.marca, m.modelo].filter(Boolean).join(" · ") || "—"}
+                          </TableCell>
+                          <TableCell className="font-mono-nums">{m.ano ?? "—"}</TableCell>
+                          <TableCell className="text-right font-mono-nums">
+                            {formatBRL(m.valor_aquisicao)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono-nums">
+                            {formatBRL(m.custo_manutencao_acumulado)}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={STATUS_BADGE[st]}>{STATUS_MANUTENCAO_LABEL[st]}</Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <FiltrosMaquinario
+            anos={anos}
+            proprietarios={proprietarios}
+            equipamentos={equipamentos}
+            ano={anoFiltro}
+            proprietario={proprietarioFiltro}
+            equipamento={equipamentoFiltro}
+            status={statusFiltro}
+            ordenacao={ordenacao}
+            onAno={setAnoFiltro}
+            onProprietario={setProprietarioFiltro}
+            onEquipamento={setEquipamentoFiltro}
+            onStatus={setStatusFiltro}
+            onOrdenacao={setOrdenacao}
+          />
+        </div>
       </SectionCard>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
