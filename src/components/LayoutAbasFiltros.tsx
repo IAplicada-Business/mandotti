@@ -1,6 +1,7 @@
 import { ChevronDown, SlidersHorizontal } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 export type AbaLateral = {
@@ -15,14 +16,24 @@ type LayoutAbasFiltrosProps = {
   abas?: AbaLateral[];
   abaAtiva?: string;
   onAbaChange?: (id: string) => void;
-  /** Campos de filtro — abrem acima da tabela, à direita */
+  /** Cards de filtro — abrem acima da tabela */
   filtros: ReactNode;
   children: ReactNode;
 };
 
+/** Um filtro por card, com o dropdown dentro */
+export function FiltroCard({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="min-w-[11rem] rounded-2xl border border-border/80 bg-card p-3 shadow-sm">
+      <Label className="mb-2 block text-xs text-muted-foreground">{label}</Label>
+      {children}
+    </div>
+  );
+}
+
 /**
  * Barra acima da tabela: sub-abas à esquerda (formato de pílula) e
- * Filtros à direita. A tabela fica abaixo, sem trilhos internos.
+ * Filtros à direita. Cada filtro abre como card separado.
  */
 export function LayoutAbasFiltros({
   title,
@@ -87,10 +98,8 @@ export function LayoutAbasFiltros({
       </div>
 
       {filtrosAbertos ? (
-        <div className="flex justify-end duration-200 animate-in fade-in-0 slide-in-from-top-2">
-          <div className="w-full max-w-xs space-y-3 rounded-2xl border border-border/80 bg-card p-4 shadow-sm">
-            {filtros}
-          </div>
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(12.5rem,1fr))] gap-3 duration-200 animate-in fade-in-0 slide-in-from-top-2">
+          {filtros}
         </div>
       ) : null}
 

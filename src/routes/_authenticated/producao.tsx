@@ -5,10 +5,9 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard } from "@/components/design-system";
-import { LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
+import { LayoutAbasFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -146,8 +145,7 @@ function FiltrosProducao({
 }) {
   return (
     <>
-      <div className="space-y-2">
-        <Label className="text-xs">Safra</Label>
+      <FiltroCard label="Safra">
         <Select value={safra} onValueChange={onSafra}>
           <SelectTrigger>
             <SelectValue placeholder="Safra" />
@@ -161,10 +159,9 @@ function FiltrosProducao({
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </FiltroCard>
       {mostrarFazenda ? (
-        <div className="space-y-2">
-          <Label className="text-xs">Fazenda</Label>
+        <FiltroCard label="Fazenda">
           <Select value={fazenda} onValueChange={onFazenda}>
             <SelectTrigger>
               <SelectValue placeholder="Fazenda" />
@@ -178,10 +175,9 @@ function FiltrosProducao({
               ))}
             </SelectContent>
           </Select>
-        </div>
+        </FiltroCard>
       ) : null}
-      <div className="space-y-2">
-        <Label className="text-xs">Cultura</Label>
+      <FiltroCard label="Cultura">
         <Select value={cultura} onValueChange={onCultura}>
           <SelectTrigger>
             <SelectValue placeholder="Cultura" />
@@ -195,9 +191,8 @@ function FiltrosProducao({
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2 border-t border-border/60 pt-3">
-        <Label className="text-xs">Ordenar tabela</Label>
+      </FiltroCard>
+      <FiltroCard label="Ordenar tabela">
         <Select value={ordenacao} onValueChange={(v) => onOrdenacao(v as Ordenacao)}>
           <SelectTrigger>
             <SelectValue />
@@ -209,7 +204,7 @@ function FiltrosProducao({
             <SelectItem value="cultura">Cultura</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FiltroCard>
     </>
   );
 }
