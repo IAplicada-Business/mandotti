@@ -3,6 +3,7 @@ import {
   Briefcase,
   Building2,
   Calculator,
+  ChevronDown,
   FileSpreadsheet,
   FileText,
   FolderOpen,
@@ -30,7 +31,7 @@ import {
   Wheat,
   X,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -160,6 +161,76 @@ export function AppShell({ children }: { children: ReactNode }) {
           items: section.items.filter((item) => pode(item.to, "ver")),
         })).filter((section) => section.items.length > 0);
 
+  const grupoComRotaAtiva = useMemo(
+    () =>
+      navVisivel.find((section) =>
+        section.items.some((item) => pathname.startsWith(item.to)),
+      )?.group,
+    [navVisivel, pathname],
+  );
+
+  const [gruposAbertos, setGruposAbertos] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!grupoComRotaAtiva) return;
+    setGruposAbertos((prev) => {
+      if (prev.has(grupoComRotaAtiva)) return prev;
+      const next = new Set(prev);
+      next.add(grupoComRotaAtiva);
+      return next;
+    });
+  }, [grupoComRotaAtiva]);
+
+  const toggleGrupo = (group: string) => {
+    setGruposAbertos((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  };
+
+  const soRail = colapsada ? "lg:hidden" : undefined;
+
+  const renderNavItem = (
+    item: { to: string; label: string; icon: typeof LayoutDashboard },
+    rail: boolean,
+  ) => {
+    const active = pathname.startsWith(item.to);
+    const link = (
+      <Link
+        to={item.to}
+        onClick={() => setOpen(false)}
+        className={cn(
+          "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+          active
+            ? "bg-surface-soft font-semibold text-primary"
+            : "text-sidebar-foreground/75 hover:bg-surface-soft hover:text-foreground",
+          rail && "lg:justify-center lg:gap-0 lg:px-0",
+        )}
+      >
+        {active ? (
+          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
+        ) : null}
+        <item.icon className={cn("size-4 shrink-0", active ? "opacity-100" : "opacity-60")} />
+        <span className={cn("truncate", soRail)}>{item.label}</span>
+      </Link>
+    );
+
+    return (
+      <li key={item.to}>
+        {rail ? (
+          <Tooltip>
+            <TooltipTrigger asChild>{link}</TooltipTrigger>
+            <TooltipContent side="right">{item.label}</TooltipContent>
+          </Tooltip>
+        ) : (
+          link
+        )}
+      </li>
+    );
+  };
+
   const sair = async () => {
     await supabase.auth.signOut();
     toast.success("Sessão encerrada");
@@ -174,10 +245,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       /* preferência é opcional */
     }
   };
-
-  // O colapso vale só a partir de lg: no mobile a sidebar é uma gaveta, e quando
-  // o usuário a abre ele quer os rótulos.
-  const soRail = colapsada ? "lg:hidden" : undefined;
 
   return (
     <TooltipProvider delayDuration={200}>
@@ -285,65 +352,55 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           <nav
             className={cn(
-              "mt-3 flex-1 space-y-5 overflow-y-auto overflow-x-hidden px-3 pb-4",
+              "mt-3 flex-1 space-y-2 overflow-y-auto overflow-x-hidden px-3 pb-4",
               colapsada && "lg:px-2",
             )}
           >
-            {navVisivel.map((section) => (
-              <div key={section.group}>
-                <p
-                  className={cn(
-                    "px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground",
-                    soRail,
-                  )}
-                >
-                  {section.group}
-                </p>
-                {/* Sem os rótulos de grupo, uma régua mantém a separação visual */}
-                {colapsada ? (
-                  <div className="mx-2 mb-2 hidden h-px bg-sidebar-border lg:block" />
-                ) : null}
-                <ul className="space-y-0.5">
-                  {section.items.map((item) => {
-                    const active = pathname.startsWith(item.to);
-                    const link = (
-                      <Link
-                        to={item.to}
-                        onClick={() => setOpen(false)}
-                        className={cn(
-                          "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-                          active
-                            ? "bg-surface-soft font-semibold text-primary"
-                            : "text-sidebar-foreground/75 hover:bg-surface-soft hover:text-foreground",
-                          colapsada && "lg:justify-center lg:gap-0 lg:px-0",
-                        )}
-                      >
-                        {active ? (
-                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
-                        ) : null}
-                        <item.icon
-                          className={cn("size-4 shrink-0", active ? "opacity-100" : "opacity-60")}
-                        />
-                        <span className={cn("truncate", soRail)}>{item.label}</span>
-                      </Link>
-                    );
+            {navVisivel.map((section) => {
+              const aberto = gruposAbertos.has(section.group);
 
-                    return (
-                      <li key={item.to}>
-                        {colapsada ? (
-                          <Tooltip>
-                            <TooltipTrigger asChild>{link}</TooltipTrigger>
-                            <TooltipContent side="right">{item.label}</TooltipContent>
-                          </Tooltip>
-                        ) : (
-                          link
+              return (
+                <div key={section.group}>
+                  {/* Desktop recolhido: só ícones, sem agrupamento */}
+                  {colapsada ? (
+                    <div className="hidden lg:block">
+                      <div className="mx-2 mb-2 h-px bg-sidebar-border" />
+                      <ul className="space-y-0.5">
+                        {section.items.map((item) => renderNavItem(item, true))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {/* Mobile + desktop expandido: grupos colapsáveis */}
+                  <div className={cn("space-y-0.5", colapsada && "lg:hidden")}>
+                    <button
+                      type="button"
+                      onClick={() => toggleGrupo(section.group)}
+                      aria-expanded={aberto}
+                      className={cn(
+                        "flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
+                        aberto
+                          ? "bg-surface-soft text-primary"
+                          : "text-muted-foreground hover:bg-surface-soft/70 hover:text-foreground",
+                      )}
+                    >
+                      <span className="truncate">{section.group}</span>
+                      <ChevronDown
+                        className={cn(
+                          "size-3.5 shrink-0 opacity-70 transition-transform duration-200",
+                          aberto ? "rotate-0" : "-rotate-90",
                         )}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
+                      />
+                    </button>
+                    {aberto ? (
+                      <ul className="space-y-0.5 pb-1 pl-1">
+                        {section.items.map((item) => renderNavItem(item, false))}
+                      </ul>
+                    ) : null}
+                  </div>
+                </div>
+              );
+            })}
           </nav>
 
           <div
