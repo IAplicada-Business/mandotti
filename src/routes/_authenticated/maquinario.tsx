@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
-import { LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
+import { LayoutAbasFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -143,8 +143,7 @@ function FiltrosMaquinario({
 }) {
   return (
     <>
-      <div className="space-y-2">
-        <Label className="text-xs">Ano</Label>
+      <FiltroCard label="Ano">
         <Select value={ano} onValueChange={onAno}>
           <SelectTrigger>
             <SelectValue placeholder="Ano" />
@@ -158,9 +157,8 @@ function FiltrosMaquinario({
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs">Proprietário</Label>
+      </FiltroCard>
+      <FiltroCard label="Proprietário">
         <Select value={proprietario} onValueChange={onProprietario}>
           <SelectTrigger>
             <SelectValue placeholder="Proprietário" />
@@ -174,9 +172,8 @@ function FiltrosMaquinario({
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs">Equipamento</Label>
+      </FiltroCard>
+      <FiltroCard label="Equipamento">
         <Select value={equipamento} onValueChange={onEquipamento}>
           <SelectTrigger>
             <SelectValue placeholder="Equipamento" />
@@ -190,9 +187,8 @@ function FiltrosMaquinario({
             ))}
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2">
-        <Label className="text-xs">Status</Label>
+      </FiltroCard>
+      <FiltroCard label="Status">
         <Select value={status} onValueChange={onStatus}>
           <SelectTrigger>
             <SelectValue placeholder="Status" />
@@ -204,9 +200,8 @@ function FiltrosMaquinario({
             <SelectItem value="avaliar_troca">{STATUS_MANUTENCAO_LABEL.avaliar_troca}</SelectItem>
           </SelectContent>
         </Select>
-      </div>
-      <div className="space-y-2 border-t border-border/60 pt-3">
-        <Label className="text-xs">Ordenar tabela</Label>
+      </FiltroCard>
+      <FiltroCard label="Ordenar tabela">
         <Select value={ordenacao} onValueChange={(v) => onOrdenacao(v as Ordenacao)}>
           <SelectTrigger>
             <SelectValue />
@@ -216,7 +211,7 @@ function FiltrosMaquinario({
             <SelectItem value="status">Status</SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </FiltroCard>
     </>
   );
 }
