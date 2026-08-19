@@ -44,14 +44,10 @@ const DROPS = [
   { size: 130, left: 82, top: 22, delay: -11, duration: 25, from: "#c99012", to: "#6e5537" },
 ];
 
-type Modo = "entrar" | "cadastrar";
-
 function AuthPage() {
   const navigate = useNavigate();
-  const [modo, setModo] = useState<Modo>("entrar");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [nome, setNome] = useState("");
   const [carregando, setCarregando] = useState(false);
 
   const parallaxRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -97,25 +93,6 @@ function AuthPage() {
       return;
     }
     navigate({ to: "/dashboard" });
-  };
-
-  const cadastrar = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCarregando(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password: senha,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-        data: { nome },
-      },
-    });
-    setCarregando(false);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success("Cadastro criado. Verifique seu e-mail se a confirmação estiver ativa.");
   };
 
   const recuperarSenha = async () => {
@@ -210,47 +187,11 @@ function AuthPage() {
             </div>
           </div>
 
-          <span className="brand-id">Grupo Mandotti · Pedro Afonso / TO</span>
-          <h1>
-            ACESSO
-            <br />
-            INTEGRADO
-          </h1>
-          <p className="brand-sub">Gestão agrícola, fiscal e financeira em um só lugar.</p>
+          <span className="brand-id">Grupo Mandotti</span>
+          <h1>ACESSO INTEGRADO</h1>
         </header>
 
-        <nav className="mode-switch" aria-label="Alternar entre entrar e criar conta">
-          {(["entrar", "cadastrar"] as Modo[]).map((valor) => (
-            <button
-              key={valor}
-              type="button"
-              className={modo === valor ? "mode-btn is-active" : "mode-btn"}
-              aria-pressed={modo === valor}
-              onClick={() => setModo(valor)}
-            >
-              {valor === "entrar" ? "Entrar" : "Criar conta"}
-            </button>
-          ))}
-        </nav>
-
-        <form autoComplete="on" onSubmit={modo === "entrar" ? entrar : cadastrar}>
-          {modo === "cadastrar" ? (
-            <div className="form-group">
-              <label htmlFor="nome">Nome completo</label>
-              <input
-                id="nome"
-                name="nome"
-                type="text"
-                required
-                autoComplete="name"
-                placeholder="Eder Mandotti"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-              />
-              <span className="input-glow" />
-            </div>
-          ) : null}
-
+        <form autoComplete="on" onSubmit={entrar}>
           <div className="form-group">
             <label htmlFor="email">E-mail corporativo</label>
             <input
@@ -273,8 +214,7 @@ function AuthPage() {
               name="senha"
               type="password"
               required
-              minLength={modo === "cadastrar" ? 6 : undefined}
-              autoComplete={modo === "entrar" ? "current-password" : "new-password"}
+              autoComplete="current-password"
               placeholder="••••••••"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -285,29 +225,15 @@ function AuthPage() {
           <div className="submit-wrap">
             <span className="submit-liquid" aria-hidden="true" />
             <button type="submit" className="btn-base" disabled={carregando}>
-              {carregando
-                ? modo === "entrar"
-                  ? "Entrando..."
-                  : "Criando..."
-                : modo === "entrar"
-                  ? "Entrar na plataforma"
-                  : "Criar minha conta"}
+              {carregando ? "Entrando..." : "Entrar na plataforma"}
             </button>
           </div>
-
-          {modo === "cadastrar" ? (
-            <p className="fine-print">
-              Novas contas entram como <strong>visualizador</strong>. Um administrador ajusta o
-              papel depois.
-            </p>
-          ) : null}
         </form>
 
         <footer className="footer-nav">
           <button type="button" onClick={recuperarSenha}>
             Recuperar acesso
           </button>
-          <span className="footer-meta">Ambiente interno · 4 emissores</span>
         </footer>
       </main>
     </div>
@@ -541,56 +467,12 @@ const AUTH_CSS = `
 .mandotti-auth .header h1 {
   margin: 0;
   font-weight: 800;
-  font-size: clamp(2.4rem, 8vw, 3.1rem);
-  line-height: 0.92;
-  letter-spacing: -2px;
+  font-size: clamp(2rem, 7vw, 2.85rem);
+  line-height: 1;
+  letter-spacing: -1.5px;
   color: var(--m-ink);
+  white-space: nowrap;
 }
-
-.mandotti-auth .brand-sub {
-  margin: 14px 0 0;
-  font-size: 14px;
-  color: var(--m-dim);
-  max-width: 34ch;
-}
-
-/* ---------- Alternador ---------- */
-.mandotti-auth .mode-switch {
-  display: flex;
-  gap: 26px;
-  margin-bottom: 34px;
-  border-bottom: 1px solid var(--m-line);
-}
-
-.mandotti-auth .mode-btn {
-  position: relative;
-  background: none;
-  border: none;
-  padding: 0 0 12px;
-  cursor: pointer;
-  color: var(--m-dim);
-  font-family: var(--font-mono, "JetBrains Mono", monospace);
-  font-size: 11px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  transition: color 0.3s;
-}
-
-.mandotti-auth .mode-btn::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 0;
-  height: 2px;
-  background: var(--m-leaf);
-  box-shadow: 0 0 12px var(--m-leaf);
-  transition: width 0.45s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.mandotti-auth .mode-btn:hover { color: var(--m-ink); }
-.mandotti-auth .mode-btn.is-active { color: var(--m-ink); }
-.mandotti-auth .mode-btn.is-active::after { width: 100%; }
 
 /* ---------- Formulário ---------- */
 .mandotti-auth .form-group {
@@ -694,21 +576,10 @@ const AUTH_CSS = `
 .mandotti-auth .btn-base:hover:not(:disabled) { letter-spacing: 3.6px; }
 .mandotti-auth .btn-base:disabled { cursor: progress; opacity: 0.7; }
 
-.mandotti-auth .fine-print {
-  margin: 20px 0 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--m-dim);
-}
-
-.mandotti-auth .fine-print strong { color: var(--m-ink); font-weight: 700; }
-
 /* ---------- Rodapé ---------- */
 .mandotti-auth .footer-nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
   margin-top: 36px;
   font-family: var(--font-mono, "JetBrains Mono", monospace);
   font-size: 10px;
@@ -729,7 +600,6 @@ const AUTH_CSS = `
 }
 
 .mandotti-auth .footer-nav button:hover { color: var(--m-leaf); }
-.mandotti-auth .footer-meta { color: rgba(241, 247, 241, 0.3); }
 
 .mandotti-auth :focus-visible {
   outline: 2px solid var(--m-leaf);
