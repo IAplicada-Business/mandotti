@@ -9,15 +9,14 @@ import {
   Tractor,
   Users,
 } from "lucide-react";
-import {
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
+import { useMemo } from "react";
 
 import { PageHeader } from "@/components/AppShell";
+import {
+  CompositionDonut,
+  RankedBarList,
+  TimelineBarChart,
+} from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -54,14 +53,6 @@ const CRONOGRAMA = [
   { key: "cronograma_apos_jun30", label: "Após jun/30" },
 ] as const;
 
-const PIE_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
-
 function PatrimonioPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["patrimonio"],
@@ -89,15 +80,35 @@ function PatrimonioPage() {
   const participacoes = data?.bens.filter((b) => b.tipo === "participacao") ?? [];
   const imoveis = data?.bens.filter((b) => b.tipo === "imovel") ?? [];
 
-  const composicao = r
-    ? [
-        { name: "Imóveis", value: r.imoveis },
-        { name: "Maquinários", value: r.maquinarios_veiculos },
-        { name: "Participações", value: r.participacoes_societarias },
-        { name: "Animais", value: r.animais },
-        { name: "Outros", value: r.outros_bens },
-      ].filter((x) => x.value > 0)
-    : [];
+  const composicaoChart = useMemo(() => {
+    if (!r) return [];
+    return [
+      { label: "Imóveis", value: r.imoveis },
+      { label: "Maquinários", value: r.maquinarios_veiculos },
+      { label: "Participações", value: r.participacoes_societarias },
+      { label: "Animais", value: r.animais },
+      { label: "Outros", value: r.outros_bens },
+    ].filter((x) => x.value > 0);
+  }, [r]);
+
+  const cronogramaChart = useMemo(
+    () =>
+      CRONOGRAMA.map((p) => ({
+        label: p.label,
+        value: Number(r?.[p.key] ?? 0),
+      })),
+    [r],
+  );
+
+  const passivoInstChart = useMemo(
+    () =>
+      (data?.passivoInst ?? []).map((row, i) => ({
+        label: row.instituicao,
+        value: row.saldo_devedor ?? 0,
+        color: `var(--chart-${(i % 5) + 1})`,
+      })),
+    [data?.passivoInst],
+  );
 
   return (
     <div className="space-y-6">
@@ -153,53 +164,28 @@ function PatrimonioPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-5">
+      <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          className="xl:col-span-2"
           title="Composição do patrimônio"
-          description="Resumo executivo · planilha Mandotti"
+          description="Distribuição dos bens · resumo executivo Mandotti"
         >
-          <div className="h-[220px]">
-            {composicao.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={composicao} dataKey="value" nameKey="name" innerRadius={52} outerRadius={78} paddingAngle={2}>
-                    {composicao.map((entry, i) => (
-                      <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => formatBRL(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="py-16 text-center text-sm text-muted-foreground">Sem dados</p>
-            )}
-          </div>
+          <CompositionDonut
+            items={composicaoChart}
+            total={r?.patrimonio_total ?? undefined}
+            emptyLabel="Sem dados patrimoniais"
+          />
         </SectionCard>
 
         <SectionCard
-          className="xl:col-span-3"
           title="Cronograma de amortização (grupo)"
-          description="Totais consolidados — detalhe por contrato em Passivos · SCR"
+          description="Vencimentos projetados · detalhe por contrato em Passivos · SCR"
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Período</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {CRONOGRAMA.map((p) => (
-                <TableRow key={p.key}>
-                  <TableCell>{p.label}</TableCell>
-                  <TableCell className="text-right font-mono-nums">
-                    {formatBRL(r?.[p.key as keyof typeof r] as number | null | undefined)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <TimelineBarChart
+            items={cronogramaChart}
+            color="var(--chart-3)"
+            height={280}
+            emptyLabel="Cronograma não disponível no resumo."
+          />
         </SectionCard>
       </div>
 
@@ -285,24 +271,12 @@ function PatrimonioPage() {
         <TabsContent value="passivo-inst">
           <SectionCard
             title="Saldo por instituição"
-            description="Consolidado do resumo executivo — contratos individuais em Passivos · SCR"
+            description="Ranking consolidado · contratos individuais em Passivos · SCR"
           >
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Instituição</TableHead>
-                  <TableHead className="text-right">Saldo devedor</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data?.passivoInst.map((row) => (
-                  <TableRow key={row.id}>
-                    <TableCell className="font-medium">{row.instituicao}</TableCell>
-                    <TableCell className="text-right font-mono-nums">{formatBRL(row.saldo_devedor)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <RankedBarList
+              items={passivoInstChart}
+              emptyLabel="Sem dados de passivo por instituição."
+            />
           </SectionCard>
         </TabsContent>
       </Tabs>

@@ -1,17 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import {
+  DonutDistribution,
+  HorizontalBarChart,
+  RankedBarList,
+  TimelineBarChart,
+} from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -110,11 +107,31 @@ function PassivosPage() {
       .sort((a, b) => b.valor - a.valor);
   }, [filtrados]);
 
-  const cronograma = useMemo(
+  const porTitularChart = useMemo(
+    () =>
+      porTitular.map((row, i) => ({
+        label: row.nome,
+        value: row.valor,
+        color: `var(--chart-${(i % 5) + 1})`,
+      })),
+    [porTitular],
+  );
+
+  const porBancoChart = useMemo(
+    () =>
+      porBanco.map((row, i) => ({
+        label: row.nome,
+        value: row.valor,
+        color: `var(--chart-${(i % 5) + 1})`,
+      })),
+    [porBanco],
+  );
+
+  const cronogramaChart = useMemo(
     () =>
       PERIODOS.map((p) => ({
-        periodo: p.label,
-        valor: filtrados.reduce((acc, row) => acc + Number(row[p.key] ?? 0), 0),
+        label: p.label,
+        value: filtrados.reduce((acc, row) => acc + Number(row[p.key] ?? 0), 0),
       })),
     [filtrados],
   );
@@ -168,34 +185,18 @@ function PassivosPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <SectionCard title="Saldo por titular" description="Soma do saldo devedor atual.">
-          <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={porTitular} barSize={36}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="nome" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${Math.round(v / 1e6)}M`} />
-                <Tooltip formatter={(v: number) => formatBRL(v)} />
-                <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <SectionCard title="Saldo por titular" description="Participação de cada emissor no passivo filtrado.">
+          <DonutDistribution items={porTitularChart} centerLabel="Saldo" emptyLabel="Sem dados por titular." />
         </SectionCard>
 
-        <SectionCard title="Cronograma de vencimentos" description="Alocação por período (planilha).">
-          <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cronograma} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="periodo" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${Math.round(v / 1e6)}M`} />
-                <Tooltip formatter={(v: number) => formatBRL(v)} />
-                <Bar dataKey="valor" fill="var(--chart-3)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+        <SectionCard title="Saldo por banco" description="Ranking das instituições no filtro atual.">
+          <RankedBarList items={porBancoChart} emptyLabel="Sem dados por banco." />
         </SectionCard>
       </div>
+
+      <SectionCard title="Cronograma de vencimentos" description="Alocação por período · planilha SCR">
+        <TimelineBarChart items={cronogramaChart} color="var(--chart-3)" emptyLabel="Sem vencimentos no filtro." />
+      </SectionCard>
 
       <SectionCard title="Contratos" description={`${filtrados.length} registros`}>
         {isLoading ? (
@@ -241,16 +242,11 @@ function PassivosPage() {
           </Table>
         )}
 
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {porBanco.map((b) => (
-            <div
-              key={b.nome}
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-3 py-2 text-sm"
-            >
-              <span className="truncate font-medium">{b.nome}</span>
-              <span className="font-mono-nums text-muted-foreground">{formatBRL(b.valor)}</span>
-            </div>
-          ))}
+        <div className="mt-6 border-t border-border/60 pt-5">
+          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            Resumo por banco
+          </p>
+          <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />
         </div>
       </SectionCard>
     </div>
