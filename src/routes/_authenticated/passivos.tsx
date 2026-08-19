@@ -252,6 +252,7 @@ function PassivosPage() {
       </div>
 
       <LayoutAbasFiltros
+        title="Contratos"
         encapsular={false}
         filtros={
           <>
