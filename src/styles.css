@@ -61,6 +61,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-brand-leaf: var(--brand-leaf);
+  --color-brand-field: var(--brand-field);
+  --color-brand-seed: var(--brand-seed);
   --color-emissor-eder: var(--emissor-eder);
   --color-emissor-nagyla: var(--emissor-nagyla);
   --color-emissor-mandotti: var(--emissor-mandotti);
@@ -70,6 +73,11 @@
 
 :root {
   --radius: 0.75rem;
+
+  /* Cores da marca oficial, amostradas do ícone em /favicon-512.png */
+  --brand-leaf: #037638;
+  --brand-field: #16472c;
+  --brand-seed: #ca8921;
 
   /* Agro / mint primary scale */
   --primary-900: #16301a;
