@@ -43,9 +43,14 @@ export function EmissorSelector() {
           role="combobox"
           aria-expanded={open}
           aria-label="Emissores em exibição"
-          className="min-w-0 flex-1 justify-between gap-2 sm:w-[18rem] sm:flex-none"
+          className="min-w-0 flex-1 justify-between gap-2 rounded-xl border-border bg-card sm:w-[18rem] sm:flex-none"
         >
-          <span className="truncate">{label}</span>
+          <span className="truncate text-left">
+            <span className="mr-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              Emissores
+            </span>
+            {label}
+          </span>
           <ChevronDown className="size-4 shrink-0 opacity-60" />
         </Button>
       </PopoverTrigger>

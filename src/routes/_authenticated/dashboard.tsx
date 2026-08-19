@@ -1,9 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Building2, ShieldCheck, Sprout, TriangleAlert } from "lucide-react";
+import {
+  Building2,
+  ShieldCheck,
+  Sprout,
+  TriangleAlert,
+} from "lucide-react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { KpiCard, RingStat, SectionCard } from "@/components/design-system";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
 
@@ -25,27 +46,29 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
   component: Dashboard,
 });
 
-function Metric({
-  titulo,
-  valor,
-  icone: Icone,
-}: {
-  titulo: string;
-  valor: number | string;
-  icone: typeof Building2;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{titulo}</CardTitle>
-        <Icone className="size-4 text-primary" />
-      </CardHeader>
-      <CardContent>
-        <p className="text-3xl font-semibold">{valor}</p>
-      </CardContent>
-    </Card>
-  );
-}
+const EMPTY_TREND = [
+  { mes: "Mar", valor: 0 },
+  { mes: "Abr", valor: 0 },
+  { mes: "Mai", valor: 0 },
+  { mes: "Jun", valor: 0 },
+  { mes: "Jul", valor: 0 },
+  { mes: "Ago", valor: 0 },
+];
+
+const EMPTY_BARS = [
+  { nome: "Combustível", valor: 0 },
+  { nome: "Químicos", valor: 0 },
+  { nome: "Peças", valor: 0 },
+  { nome: "Manutenção", valor: 0 },
+  { nome: "Folha", valor: 0 },
+];
+
+const EMPTY_PIE = [
+  { name: "Eder", value: 1, color: "var(--emissor-eder)" },
+  { name: "Nagyla", value: 1, color: "var(--emissor-nagyla)" },
+  { name: "Mandotti", value: 1, color: "var(--emissor-mandotti)" },
+  { name: "Tractor", value: 1, color: "var(--emissor-tractor)" },
+];
 
 function Dashboard() {
   const { emissores, emissorIds } = useEmissor();
@@ -85,43 +108,203 @@ function Dashboard() {
     return (
       <div>
         <PageHeader
+          breadcrumb="Operação · Visão geral"
           title="Dashboard"
           description="Selecione ao menos um emissor para ver os indicadores."
         />
-        <Card>
-          <CardContent className="py-16 text-center text-muted-foreground">
+        <SectionCard title="Sem visão selecionada">
+          <div className="py-10 text-center text-sm text-muted-foreground">
             Selecione ao menos um emissor no topo da tela.
-          </CardContent>
-        </Card>
+          </div>
+        </SectionCard>
       </div>
     );
   }
 
+  const certTotal = data?.certificados ?? 0;
+  const certOk = Math.max(0, certTotal - (data?.vencendo ?? 0));
+
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
-        title="Dashboard"
+        breadcrumb="Operação · Visão geral"
+        title="Painel central"
         description={resumoEmissores(
           emissores.filter((e) => emissorIds.includes(e.id)),
           emissores.length,
         )}
+        action={<Badge variant="warning">Paleta provisória</Badge>}
       />
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metric titulo="Emissores selecionados" valor={emissorIds.length} icone={Building2} />
-        <Metric titulo="Fazendas" valor={data?.fazendas ?? 0} icone={Sprout} />
-        <Metric titulo="Certificados" valor={data?.certificados ?? 0} icone={ShieldCheck} />
-        <Metric titulo="Vencendo em 30 dias" valor={data?.vencendo ?? 0} icone={TriangleAlert} />
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          label="Emissores"
+          value={emissorIds.length}
+          icon={Building2}
+          hint="Visão filtrada no seletor"
+        />
+        <KpiCard
+          label="Fazendas"
+          value={data?.fazendas ?? 0}
+          icon={Sprout}
+          tone="success"
+          hint="Cadastro ativo"
+        />
+        <KpiCard
+          label="Certificados"
+          value={certTotal}
+          icon={ShieldCheck}
+          tone="info"
+          hint="Vinculados aos emissores"
+        />
+        <KpiCard
+          label="Vencendo · 30d"
+          value={data?.vencendo ?? 0}
+          icon={TriangleAlert}
+          tone={data?.vencendo ? "warning" : "default"}
+          hint="Atenção de validade"
+        />
       </div>
 
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="text-base">Próximos módulos</CardTitle>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          Produtos, notas fiscais, estoque e relatórios já possuem rota reservada na navegação e
-          serão liberados nas próximas entregas.
-        </CardContent>
-      </Card>
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <RingStat label="Certificados ok" value={certOk} total={Math.max(certTotal, 1)} />
+        <RingStat
+          label="Fazendas / meta"
+          value={data?.fazendas ?? 0}
+          total={11}
+          color="var(--chart-2)"
+        />
+        <RingStat
+          label="Emissores ativos"
+          value={emissorIds.length}
+          total={Math.max(emissores.length, 1)}
+          color="var(--chart-3)"
+        />
+        <RingStat
+          label="Alertas"
+          value={data?.vencendo ?? 0}
+          total={Math.max(certTotal, 1)}
+          color="var(--chart-4)"
+        />
+      </div>
+
+      <Tabs defaultValue="visao">
+        <TabsList>
+          <TabsTrigger value="visao">Esta safra</TabsTrigger>
+          <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
+          <TabsTrigger value="fiscal">Fiscal</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="visao" className="space-y-4">
+          <div className="grid gap-4 xl:grid-cols-5">
+            <SectionCard
+              className="xl:col-span-3"
+              title="Movimentação (encaixe)"
+              description="Será preenchida pelo módulo Financeiro — estado vazio real."
+            >
+              <div className="h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={EMPTY_TREND}>
+                    <defs>
+                      <linearGradient id="fillTrend" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
+                        <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.02} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="mes" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+                    <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+                    <Tooltip
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: "1px solid var(--border)",
+                        boxShadow: "var(--shadow-sm-token)",
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="valor"
+                      stroke="var(--primary)"
+                      fill="url(#fillTrend)"
+                      strokeWidth={2.5}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              className="xl:col-span-2"
+              title="Balanço por emissor"
+              description="Proporção 50/50 entra no módulo Financeiro."
+            >
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={EMPTY_PIE}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={58}
+                      outerRadius={82}
+                      paddingAngle={3}
+                    >
+                      {EMPTY_PIE.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} opacity={0.35} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="mt-2 flex flex-wrap justify-center gap-3">
+                {EMPTY_PIE.map((e) => (
+                  <span key={e.name} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <i className="size-2.5 rounded-sm" style={{ background: e.color }} />
+                    {e.name}
+                  </span>
+                ))}
+              </div>
+            </SectionCard>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="financeiro">
+          <SectionCard
+            title="Despesas por categoria"
+            description="Aguardando importação de XML — layout já no padrão do design system."
+          >
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={EMPTY_BARS} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                  <XAxis dataKey="nome" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+                  <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: 12,
+                      border: "1px solid var(--border)",
+                    }}
+                  />
+                  <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </SectionCard>
+        </TabsContent>
+
+        <TabsContent value="fiscal">
+          <SectionCard title="Fila fiscal">
+            <div className="rounded-xl border border-dashed border-border bg-surface-soft px-6 py-14 text-center">
+              <p className="text-base font-bold text-foreground">Sem lançamentos ainda</p>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                XMLs, notas e conciliação vão aparecer aqui. A navegação e o visual já estão
+                preparados para o MVP Financeiro & Fiscal.
+              </p>
+            </div>
+          </SectionCard>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
