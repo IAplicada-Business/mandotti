@@ -102,17 +102,13 @@ export const NAV = [
   },
 ] as const;
 
-/** Rotas visíveis no contexto Contabilidade (HRM) */
+/** Rotas visíveis no contexto Contabilidade (HRM) — consumo e exportação, sem retrabalho de gestão */
 export const NAV_CONTABILIDADE = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
-  { to: "/financeiro/xml", label: "Importação XML", icon: FileSpreadsheet },
-  { to: "/financeiro/conciliacao", label: "Conciliação", icon: Landmark },
-  { to: "/passivos", label: "Passivos · SCR", icon: Scale },
-  { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
-  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
-  { to: "/contabilidade/relatorios", label: "Relatórios mensais", icon: FileSpreadsheet },
+  { to: "/contabilidade", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/contabilidade/financeiro", label: "Dados financeiros", icon: Wallet },
   { to: "/contabilidade/documentos", label: "Documentos fiscais", icon: FileText },
+  { to: "/contabilidade/relatorios", label: "Relatórios", icon: FileSpreadsheet },
+  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
 ] as const;
 
 const PERFIL_LABEL: Record<string, string> = {
@@ -148,6 +144,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
+
+  useEffect(() => {
+    if (perfil === "contabilidade") setCtx("contabilidade");
+  }, [perfil]);
 
   const navVisivel =
     ctx === "contabilidade"

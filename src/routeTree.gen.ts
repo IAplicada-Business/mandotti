@@ -32,8 +32,10 @@ import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedContabilidadeIndexRouteImport } from './routes/_authenticated/contabilidade/index'
 import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './routes/_authenticated/contabilidade/documentos'
 import { Route as AuthenticatedContabilidadeExtratosRouteImport } from './routes/_authenticated/contabilidade/extratos'
+import { Route as AuthenticatedContabilidadeFinanceiroRouteImport } from './routes/_authenticated/contabilidade/financeiro'
 import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade/relatorios'
 import { Route as AuthenticatedFinanceiroConciliacaoRouteImport } from './routes/_authenticated/financeiro.conciliacao'
 import { Route as AuthenticatedFinanceiroXmlRouteImport } from './routes/_authenticated/financeiro.xml'
@@ -156,6 +158,12 @@ const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContabilidadeIndexRoute =
+  AuthenticatedContabilidadeIndexRouteImport.update({
+    id: '/contabilidade/',
+    path: '/contabilidade/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContabilidadeDocumentosRoute =
   AuthenticatedContabilidadeDocumentosRouteImport.update({
     id: '/contabilidade/documentos',
@@ -166,6 +174,12 @@ const AuthenticatedContabilidadeExtratosRoute =
   AuthenticatedContabilidadeExtratosRouteImport.update({
     id: '/contabilidade/extratos',
     path: '/contabilidade/extratos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeFinanceiroRoute =
+  AuthenticatedContabilidadeFinanceiroRouteImport.update({
+    id: '/contabilidade/financeiro',
+    path: '/contabilidade/financeiro',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedContabilidadeRelatoriosRoute =
@@ -212,9 +226,11 @@ export interface FileRoutesByFullPath {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
   '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
+  '/contabilidade/': typeof AuthenticatedContabilidadeIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -241,9 +257,11 @@ export interface FileRoutesByTo {
   '/usuarios': typeof AuthenticatedUsuariosRoute
   '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
   '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
+  '/contabilidade': typeof AuthenticatedContabilidadeIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -272,9 +290,11 @@ export interface FileRoutesById {
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
   '/_authenticated/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
   '/_authenticated/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/_authenticated/contabilidade/financeiro': typeof AuthenticatedContabilidadeFinanceiroRoute
   '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/_authenticated/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/_authenticated/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
+  '/_authenticated/contabilidade/': typeof AuthenticatedContabilidadeIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -303,9 +323,11 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/contabilidade/documentos'
     | '/contabilidade/extratos'
+    | '/contabilidade/financeiro'
     | '/contabilidade/relatorios'
     | '/financeiro/conciliacao'
     | '/financeiro/xml'
+    | '/contabilidade/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -332,9 +354,11 @@ export interface FileRouteTypes {
     | '/usuarios'
     | '/contabilidade/documentos'
     | '/contabilidade/extratos'
+    | '/contabilidade/financeiro'
     | '/contabilidade/relatorios'
     | '/financeiro/conciliacao'
     | '/financeiro/xml'
+    | '/contabilidade'
   id:
     | '__root__'
     | '/'
@@ -362,9 +386,11 @@ export interface FileRouteTypes {
     | '/_authenticated/usuarios'
     | '/_authenticated/contabilidade/documentos'
     | '/_authenticated/contabilidade/extratos'
+    | '/_authenticated/contabilidade/financeiro'
     | '/_authenticated/contabilidade/relatorios'
     | '/_authenticated/financeiro/conciliacao'
     | '/_authenticated/financeiro/xml'
+    | '/_authenticated/contabilidade/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -537,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contabilidade/': {
+      id: '/_authenticated/contabilidade/'
+      path: '/contabilidade'
+      fullPath: '/contabilidade/'
+      preLoaderRoute: typeof AuthenticatedContabilidadeIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/contabilidade/documentos': {
       id: '/_authenticated/contabilidade/documentos'
       path: '/contabilidade/documentos'
@@ -549,6 +582,13 @@ declare module '@tanstack/react-router' {
       path: '/contabilidade/extratos'
       fullPath: '/contabilidade/extratos'
       preLoaderRoute: typeof AuthenticatedContabilidadeExtratosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/financeiro': {
+      id: '/_authenticated/contabilidade/financeiro'
+      path: '/contabilidade/financeiro'
+      fullPath: '/contabilidade/financeiro'
+      preLoaderRoute: typeof AuthenticatedContabilidadeFinanceiroRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/contabilidade/relatorios': {
@@ -614,7 +654,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
   AuthenticatedContabilidadeDocumentosRoute: typeof AuthenticatedContabilidadeDocumentosRoute
   AuthenticatedContabilidadeExtratosRoute: typeof AuthenticatedContabilidadeExtratosRoute
+  AuthenticatedContabilidadeFinanceiroRoute: typeof AuthenticatedContabilidadeFinanceiroRoute
   AuthenticatedContabilidadeRelatoriosRoute: typeof AuthenticatedContabilidadeRelatoriosRoute
+  AuthenticatedContabilidadeIndexRoute: typeof AuthenticatedContabilidadeIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -641,8 +683,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
     AuthenticatedContabilidadeDocumentosRoute,
   AuthenticatedContabilidadeExtratosRoute:
     AuthenticatedContabilidadeExtratosRoute,
+  AuthenticatedContabilidadeFinanceiroRoute:
+    AuthenticatedContabilidadeFinanceiroRoute,
   AuthenticatedContabilidadeRelatoriosRoute:
     AuthenticatedContabilidadeRelatoriosRoute,
+  AuthenticatedContabilidadeIndexRoute: AuthenticatedContabilidadeIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
