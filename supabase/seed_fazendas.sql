@@ -1,0 +1,58 @@
+-- Carga inicial: fazendas da planilha / call (29/jul)
+-- Emissor padrão: Eder Mandotti (operacional/safra)
+-- custo_arrendamento: null = "a validar" (Nagyla vai enviar)
+
+insert into public.fazendas (
+  id, emissor_id, nome, codigo, municipio, uf, regime,
+  area_produtiva_ha, area_abertura_ha, area_hectares,
+  venc_arrendamento, inclui_quadro_produtivo, custo_arrendamento, observacoes, ativo
+) values
+  ('b0000001-0000-4000-8000-000000000001'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Cana Brava', 'CB-01', 'Pedro Afonso', 'TO', 'arrendada',
+   1430, 1000, 2430, '2044-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Sorgo', true),
+  ('b0000001-0000-4000-8000-000000000002'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'São José do Ribamar', 'SJR-01', 'Santa Maria do Tocantins', 'TO', 'arrendada',
+   1700, null, 1700, '2037-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Milho', true),
+  ('b0000001-0000-4000-8000-000000000003'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Pau Ferrado', 'PF-01', 'Pedro Afonso', 'TO', 'arrendada',
+   450, null, 450, '2032-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Milho', true),
+  ('b0000001-0000-4000-8000-000000000004'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'São Judas', 'SJ-01', 'Pedro Afonso', 'TO', 'arrendada',
+   450, null, 450, '2033-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Sorgo', true),
+  ('b0000001-0000-4000-8000-000000000005'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'São Bento', 'SB-01', 'Santa Maria do Tocantins', 'TO', 'arrendada',
+   400, null, 400, '2035-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Milho', true),
+  ('b0000001-0000-4000-8000-000000000006'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Salinas', 'SL-01', 'Pedro Afonso', 'TO', 'arrendada',
+   60, null, 60, '2032-12-31', true, null, '6 produtivas ativas (call). Culturas 26/27: Soja → Sorgo', true),
+  ('b0000001-0000-4000-8000-000000000007'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Cana Brava 2', 'CB-02', 'Pedro Afonso', 'TO', 'arrendada',
+   null, 430, 430, '2036-12-31', false, null, 'Área em abertura / licenciamento — não entra no quadro produtivo atual', true),
+  ('b0000001-0000-4000-8000-000000000008'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Brejão', 'BR-01', 'Pedro Afonso', 'TO', 'propria',
+   70, null, 70, null, true, null, 'Própria — sem custo de arrendamento', true),
+  ('b0000001-0000-4000-8000-000000000009'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Barracão e São José', 'BSJ-01', 'Pedro Afonso', 'TO', 'propria',
+   700, null, 700, null, true, null, 'Própria — confirmar projeção safra 2027', true),
+  ('b0000001-0000-4000-8000-000000000010'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Telha', 'TL-01', 'Pedro Afonso', 'TO', 'propria',
+   500, null, 500, null, true, null, 'Própria — milho safra', true),
+  ('b0000001-0000-4000-8000-000000000011'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Sol Nascente', 'SN-01', 'Pedro Afonso', 'TO', 'arrendada_a_terceiro',
+   null, null, null, null, false, null, 'Arrendada a terceiros (gado) — fora do quadro produtivo', true),
+  ('b0000001-0000-4000-8000-000000000012'::uuid, 'a0000000-0000-4000-8000-000000000001'::uuid,
+   'Cruz de Malta', 'CM-01', 'Pedro Afonso', 'TO', 'arrendada_a_terceiro',
+   null, null, null, null, false, null, 'Arrendada a terceiros (gado) — fora do quadro produtivo', true)
+on conflict (id) do update set
+  nome = excluded.nome,
+  codigo = excluded.codigo,
+  municipio = excluded.municipio,
+  uf = excluded.uf,
+  regime = excluded.regime,
+  area_produtiva_ha = excluded.area_produtiva_ha,
+  area_abertura_ha = excluded.area_abertura_ha,
+  area_hectares = excluded.area_hectares,
+  venc_arrendamento = excluded.venc_arrendamento,
+  inclui_quadro_produtivo = excluded.inclui_quadro_produtivo,
+  observacoes = excluded.observacoes,
+  updated_at = now();

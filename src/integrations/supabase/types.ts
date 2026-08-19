@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      configuracoes_grupo: {
+        Row: {
+          created_at: string
+          dia_limite_envio: number
+          email_hrm: string | null
+          id: string
+          meta_hectares_grupo: number
+          modo_contabilidade: Database["public"]["Enums"]["modo_contabilidade"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dia_limite_envio?: number
+          email_hrm?: string | null
+          id?: string
+          meta_hectares_grupo?: number
+          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dia_limite_envio?: number
+          email_hrm?: string | null
+          id?: string
+          meta_hectares_grupo?: number
+          modo_contabilidade?: Database["public"]["Enums"]["modo_contabilidade"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       categorias_financeiras: {
         Row: {
           ativo: boolean
@@ -257,49 +287,73 @@ export type Database = {
       }
       fazendas: {
         Row: {
+          area_abertura_ha: number | null
           area_hectares: number | null
+          area_produtiva_ha: number | null
           ativo: boolean
           car: string | null
           codigo: string | null
           created_at: string
+          custo_arrendamento: number | null
           deleted_at: string | null
           emissor_id: string
           id: string
+          inclui_quadro_produtivo: boolean
           inscricao_estadual: string | null
+          meta_hectares: number | null
           municipio: string | null
           nome: string
+          observacoes: string | null
+          regime: Database["public"]["Enums"]["fazenda_regime"]
           uf: string | null
           updated_at: string
+          venc_arrendamento: string | null
         }
         Insert: {
+          area_abertura_ha?: number | null
           area_hectares?: number | null
+          area_produtiva_ha?: number | null
           ativo?: boolean
           car?: string | null
           codigo?: string | null
           created_at?: string
+          custo_arrendamento?: number | null
           deleted_at?: string | null
           emissor_id: string
           id?: string
+          inclui_quadro_produtivo?: boolean
           inscricao_estadual?: string | null
+          meta_hectares?: number | null
           municipio?: string | null
           nome: string
+          observacoes?: string | null
+          regime?: Database["public"]["Enums"]["fazenda_regime"]
           uf?: string | null
           updated_at?: string
+          venc_arrendamento?: string | null
         }
         Update: {
+          area_abertura_ha?: number | null
           area_hectares?: number | null
+          area_produtiva_ha?: number | null
           ativo?: boolean
           car?: string | null
           codigo?: string | null
           created_at?: string
+          custo_arrendamento?: number | null
           deleted_at?: string | null
           emissor_id?: string
           id?: string
+          inclui_quadro_produtivo?: boolean
           inscricao_estadual?: string | null
+          meta_hectares?: number | null
           municipio?: string | null
           nome?: string
+          observacoes?: string | null
+          regime?: Database["public"]["Enums"]["fazenda_regime"]
           uf?: string | null
           updated_at?: string
+          venc_arrendamento?: string | null
         }
         Relationships: [
           {
@@ -388,6 +442,8 @@ export type Database = {
           chassi_serie: string | null
           cor: string | null
           created_at: string
+          custo_manutencao_acumulado: number
+          depreciacao_anual_pct: number | null
           deleted_at: string | null
           emissor_id: string
           fazenda_id: string | null
@@ -407,6 +463,8 @@ export type Database = {
           chassi_serie?: string | null
           cor?: string | null
           created_at?: string
+          custo_manutencao_acumulado?: number
+          depreciacao_anual_pct?: number | null
           deleted_at?: string | null
           emissor_id: string
           fazenda_id?: string | null
@@ -426,6 +484,8 @@ export type Database = {
           chassi_serie?: string | null
           cor?: string | null
           created_at?: string
+          custo_manutencao_acumulado?: number
+          depreciacao_anual_pct?: number | null
           deleted_at?: string | null
           emissor_id?: string
           fazenda_id?: string | null
@@ -473,6 +533,42 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      produtos_agricolas: {
+        Row: {
+          ativo: boolean
+          codigo: string
+          cor_token: string | null
+          created_at: string
+          id: string
+          nome: string
+          ordem: number
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          ativo?: boolean
+          codigo: string
+          cor_token?: string | null
+          created_at?: string
+          id?: string
+          nome: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
+        }
+        Update: {
+          ativo?: boolean
+          codigo?: string
+          cor_token?: string | null
+          created_at?: string
+          id?: string
+          nome?: string
+          ordem?: number
+          tipo?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -761,8 +857,10 @@ export type Database = {
     Enums: {
       app_role: "administrador" | "gestor" | "operador" | "visualizador"
       categoria_tipo: "despesa" | "receita" | "folha" | "outros"
+      fazenda_regime: "propria" | "arrendada" | "arrendada_a_terceiro"
       lancamento_origem: "manual" | "xml" | "extrato" | "romaneio"
       lancamento_tipo: "despesa" | "receita" | "transferencia"
+      modo_contabilidade: "acesso_direto" | "envio_automatico"
       movimento_tipo: "credito" | "debito"
       perfil_usuario: "admin" | "funcionario" | "contabilidade"
       tipo_certificado: "A1" | "A3"
@@ -896,8 +994,10 @@ export const Constants = {
     Enums: {
       app_role: ["administrador", "gestor", "operador", "visualizador"],
       categoria_tipo: ["despesa", "receita", "folha", "outros"],
+      fazenda_regime: ["propria", "arrendada", "arrendada_a_terceiro"],
       lancamento_origem: ["manual", "xml", "extrato", "romaneio"],
       lancamento_tipo: ["despesa", "receita", "transferencia"],
+      modo_contabilidade: ["acesso_direto", "envio_automatico"],
       movimento_tipo: ["credito", "debito"],
       perfil_usuario: ["admin", "funcionario", "contabilidade"],
       tipo_certificado: ["A1", "A3"],

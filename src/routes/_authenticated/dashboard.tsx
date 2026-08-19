@@ -22,6 +22,7 @@ import {
 } from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import { FluxoAcompanhamento } from "@/components/FluxoAcompanhamento";
 import { KpiCard, RingStat, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,6 +134,8 @@ function Dashboard() {
           emissores.length,
         )}
       />
+
+      <FluxoAcompanhamento />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
