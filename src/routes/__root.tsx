@@ -94,13 +94,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "theme-color", content: "#1B5E3A" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-title", content: "Mandotti" },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.png", type: "image/png" },
+      { rel: "icon", href: "/favicon.ico?v=2", sizes: "any" },
+      { rel: "icon", href: "/favicon-32.png?v=2", type: "image/png", sizes: "32x32" },
+      { rel: "icon", href: "/favicon.png?v=2", type: "image/png", sizes: "64x64" },
+      { rel: "icon", href: "/favicon-192.png?v=2", type: "image/png", sizes: "192x192" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=2", sizes: "180x180" },
+      { rel: "manifest", href: "/manifest.webmanifest?v=2" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
