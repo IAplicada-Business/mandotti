@@ -3,20 +3,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowRight, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import {
+  DonutDistribution,
+  RankedBarList,
+  TimelineBarChart,
+} from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
@@ -144,20 +137,30 @@ function FinanceiroPage() {
   const saldoPassivos = passivos.reduce((acc, p) => acc + (p.saldo_devedor ?? 0), 0);
   const jurosProjetados = passivos.reduce((acc, p) => acc + (p.total_projetado ?? 0), 0);
 
-  const cronograma = useMemo(
+  const instituicoesChart = useMemo(
+    () =>
+      instituicoes.map((row, i) => ({
+        label: row.instituicao,
+        value: row.saldo_devedor ?? 0,
+        color: `var(--chart-${(i % 5) + 1})`,
+      })),
+    [instituicoes],
+  );
+
+  const cronogramaChart = useMemo(
     () =>
       CRONOGRAMA.map((c) => ({
-        periodo: c.label,
-        valor: Number(resumo?.[c.key] ?? 0),
+        label: c.label,
+        value: Number(resumo?.[c.key] ?? 0),
       })),
     [resumo],
   );
 
-  const porTitular = useMemo(() => {
+  const porTitularChart = useMemo(() => {
     if (!resumo) return [];
     return [
-      { name: "Eder Mandotti", value: resumo.passivo_eder ?? 0, color: "var(--emissor-eder)" },
-      { name: "Nagyla Pollyanna", value: resumo.passivo_nagyla ?? 0, color: "var(--emissor-nagyla)" },
+      { label: "Eder Mandotti", value: resumo.passivo_eder ?? 0, color: "var(--emissor-eder)" },
+      { label: "Nagyla Pollyanna", value: resumo.passivo_nagyla ?? 0, color: "var(--emissor-nagyla)" },
     ].filter((d) => d.value > 0);
   }, [resumo]);
 
@@ -260,109 +263,48 @@ function FinanceiroPage() {
         </div>
       )}
 
-      <div className="grid gap-4 xl:grid-cols-5">
+      {/* Visão analítica — endividamento */}
+      <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          className="xl:col-span-3"
           title="Passivo por instituição"
-          description="Saldo devedor por banco — Resumo Executivo da planilha."
+          description="Ranking de saldo devedor por banco · Resumo Executivo"
         >
-          <div className="h-[260px]">
-            {isLoading ? (
-              <Skeleton className="h-full w-full rounded-xl" />
-            ) : instituicoes.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={instituicoes} barSize={32}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis
-                    dataKey="instituicao"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={{ fontSize: 11 }}
-                    interval={0}
-                    angle={-12}
-                    textAnchor="end"
-                    height={56}
-                  />
-                  <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1e6).toFixed(0)}M`} />
-                  <Tooltip formatter={(v: number) => formatBRL(v)} />
-                  <Bar dataKey="saldo_devedor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="grid h-full place-items-center text-sm text-muted-foreground">
-                Sem dados de passivo por instituição.
-              </div>
-            )}
-          </div>
+          {isLoading ? (
+            <Skeleton className="h-[280px] w-full rounded-xl" />
+          ) : (
+            <RankedBarList items={instituicoesChart} emptyLabel="Sem dados de passivo por instituição." />
+          )}
         </SectionCard>
 
         <SectionCard
-          className="xl:col-span-2"
           title="Passivo por titular"
-          description="Distribuição Eder × Nagyla (SCR)."
+          description="Distribuição Eder × Nagyla · SCR consolidado"
         >
           {isLoading ? (
-            <Skeleton className="h-[220px] w-full rounded-xl" />
-          ) : porTitular.length ? (
-            <>
-              <div className="h-[160px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={porTitular}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={48}
-                      outerRadius={68}
-                      paddingAngle={3}
-                    >
-                      {porTitular.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v: number) => formatBRL(v)} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="space-y-1 text-sm">
-                {porTitular.map((d) => (
-                  <p key={d.name}>
-                    {d.name}: <strong className="font-mono-nums">{formatBRL(d.value)}</strong>
-                  </p>
-                ))}
-              </div>
-            </>
+            <Skeleton className="h-[280px] w-full rounded-xl" />
           ) : (
-            <p className="py-10 text-center text-sm text-muted-foreground">
-              Dados de titular indisponíveis no resumo.
-            </p>
+            <DonutDistribution
+              items={porTitularChart}
+              centerLabel="Passivo"
+              emptyLabel="Dados de titular indisponíveis no resumo."
+            />
           )}
         </SectionCard>
       </div>
 
       <SectionCard
         title="Cronograma de amortização"
-        description="Vencimentos projetados do endividamento (Resumo Executivo)."
+        description="Vencimentos projetados do endividamento · visão temporal"
       >
-        <div className="h-[240px]">
-          {isLoading ? (
-            <Skeleton className="h-full w-full rounded-xl" />
-          ) : cronograma.some((c) => c.valor > 0) ? (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cronograma} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="periodo" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
-                <Tooltip formatter={(v: number) => formatBRL(v)} />
-                <Bar dataKey="valor" fill="var(--chart-2)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="grid h-full place-items-center text-sm text-muted-foreground">
-              Cronograma não disponível no resumo.
-            </div>
-          )}
-        </div>
+        {isLoading ? (
+          <Skeleton className="h-[260px] w-full rounded-xl" />
+        ) : (
+          <TimelineBarChart
+            items={cronogramaChart}
+            color="var(--chart-2)"
+            emptyLabel="Cronograma não disponível no resumo."
+          />
+        )}
       </SectionCard>
 
       <SectionCard

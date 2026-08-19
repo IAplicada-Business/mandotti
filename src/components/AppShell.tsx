@@ -420,21 +420,31 @@ export function AppShell({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          <div
-            className={cn(
-              "mx-3 mb-4 mt-3 flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-xs",
-              colapsada && "lg:mx-2 lg:justify-center lg:p-2",
-            )}
-          >
-            <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
-              {initials(user?.email)}
-            </div>
-            <div className={cn("min-w-0 flex-1", soRail)}>
-              <p className="truncate text-sm font-semibold">{user?.email ?? "Conta"}</p>
-              <p className="text-xs text-muted-foreground">
-                {perfil ? PERFIL_LABEL[perfil] : "sem perfil"}
-              </p>
-            </div>
+          <div className={cn("mx-3 mb-4 mt-3", colapsada && "lg:mx-2 lg:flex lg:justify-center")}>
+            {colapsada ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="hidden rounded-xl lg:flex"
+                    onClick={sair}
+                    aria-label="Sair"
+                  >
+                    <LogOut className="size-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Sair</TooltipContent>
+              </Tooltip>
+            ) : null}
+            <Button
+              variant="outline"
+              className={cn("w-full justify-start gap-2 rounded-xl", colapsada && "lg:hidden")}
+              onClick={sair}
+            >
+              <LogOut className="size-4" />
+              Sair
+            </Button>
           </div>
         </aside>
 

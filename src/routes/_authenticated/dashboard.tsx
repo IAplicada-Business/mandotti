@@ -18,6 +18,7 @@ import {
 } from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import { CompositionDonut } from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -94,11 +95,11 @@ function Dashboard() {
   const composicaoPatrimonio = useMemo(() => {
     if (!data) return [];
     return [
-      { name: "Imóveis", value: data.imoveis },
-      { name: "Maquinários", value: data.maquinarios_veiculos },
-      { name: "Participações", value: data.participacoes_societarias },
-      { name: "Animais", value: data.animais },
-      { name: "Outros", value: data.outros_bens },
+      { label: "Imóveis", value: data.imoveis },
+      { label: "Maquinários", value: data.maquinarios_veiculos },
+      { label: "Participações", value: data.participacoes_societarias },
+      { label: "Animais", value: data.animais },
+      { label: "Outros", value: data.outros_bens },
     ].filter((x) => x.value > 0);
   }, [data]);
 
@@ -167,63 +168,17 @@ function Dashboard() {
         title="Gestão visual · Composição patrimonial"
         description="Distribuição dos bens do grupo — ficha cadastral Mandotti"
       >
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-          <div className="h-[260px]">
-            {composicaoPatrimonio.length ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={composicaoPatrimonio}
-                    dataKey="value"
-                    nameKey="name"
-                    innerRadius={64}
-                    outerRadius={96}
-                    paddingAngle={2}
-                  >
-                    {composicaoPatrimonio.map((entry, i) => (
-                      <Cell key={entry.name} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v: number) => formatBRL(v)} />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                Sem dados patrimoniais
-              </p>
-            )}
-          </div>
-          <div className="space-y-2">
-            {composicaoPatrimonio.map((item, i) => {
-              const total = data?.patrimonio_total ?? 1;
-              const pct = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
-              return (
-                <div
-                  key={item.name}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-border/60 bg-surface-soft px-4 py-3"
-                >
-                  <span className="inline-flex items-center gap-2.5 text-sm font-medium">
-                    <i
-                      className="size-3 rounded-sm"
-                      style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
-                    />
-                    {item.name}
-                  </span>
-                  <span className="text-right">
-                    <span className="block font-mono-nums text-sm font-bold">{formatBRL(item.value)}</span>
-                    <span className="text-xs text-muted-foreground">{pct}%</span>
-                  </span>
-                </div>
-              );
-            })}
-            <Link
-              to="/patrimonio"
-              className="inline-block pt-3 text-sm font-semibold text-primary hover:underline"
-            >
-              Detalhar patrimônio →
-            </Link>
-          </div>
-        </div>
+        <CompositionDonut
+          items={composicaoPatrimonio}
+          total={data?.patrimonio_total ?? undefined}
+          emptyLabel="Sem dados patrimoniais"
+        />
+        <Link
+          to="/patrimonio"
+          className="mt-4 inline-block text-sm font-semibold text-primary hover:underline"
+        >
+          Detalhar patrimônio →
+        </Link>
       </SectionCard>
 
       <Tabs defaultValue="visao">

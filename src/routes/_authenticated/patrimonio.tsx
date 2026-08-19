@@ -12,15 +12,13 @@ import {
   Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import {
+  CompositionDonut,
+  RankedBarList,
+  TimelineBarChart,
+} from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Button } from "@/components/ui/button";
 import {
@@ -57,14 +55,6 @@ const CRONOGRAMA = [
   { key: "cronograma_apos_jun30", label: "Após jun/30" },
 ] as const;
 
-const PIE_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
-];
-
 const LIMITE_LINHAS = 5;
 
 function PatrimonioPage() {
@@ -97,18 +87,35 @@ function PatrimonioPage() {
   const r = data?.resumo;
   const imoveis = data?.bens.filter((b) => b.tipo === "imovel") ?? [];
 
-  const composicao = useMemo(() => {
+  const composicaoChart = useMemo(() => {
     if (!r) return [];
     return [
-      { name: "Imóveis", value: r.imoveis, color: PIE_COLORS[0] },
-      { name: "Maquinários", value: r.maquinarios_veiculos, color: PIE_COLORS[1] },
-      { name: "Participações", value: r.participacoes_societarias, color: PIE_COLORS[2] },
-      { name: "Animais", value: r.animais, color: PIE_COLORS[3] },
-      { name: "Outros", value: r.outros_bens, color: PIE_COLORS[4] },
+      { label: "Imóveis", value: r.imoveis },
+      { label: "Maquinários", value: r.maquinarios_veiculos },
+      { label: "Participações", value: r.participacoes_societarias },
+      { label: "Animais", value: r.animais },
+      { label: "Outros", value: r.outros_bens },
     ].filter((x) => x.value > 0);
   }, [r]);
 
-  const totalPatrimonio = r?.patrimonio_total ?? 0;
+  const cronogramaChart = useMemo(
+    () =>
+      CRONOGRAMA.map((p) => ({
+        label: p.label,
+        value: Number(r?.[p.key] ?? 0),
+      })),
+    [r],
+  );
+
+  const passivoInstChart = useMemo(
+    () =>
+      (data?.passivoInst ?? []).map((row, i) => ({
+        label: row.instituicao,
+        value: row.saldo_devedor ?? 0,
+        color: `var(--chart-${(i % 5) + 1})`,
+      })),
+    [data?.passivoInst],
+  );
 
   return (
     <div className="space-y-6">
@@ -164,106 +171,28 @@ function PatrimonioPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-5">
+      <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard
-          className="xl:col-span-2"
           title="Composição do patrimônio"
-          description="Resumo executivo · planilha Mandotti"
+          description="Distribuição dos bens · resumo executivo Mandotti"
         >
-          {composicao.length ? (
-            <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
-              <div className="h-[220px] min-h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={composicao}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={52}
-                      outerRadius={78}
-                      paddingAngle={2}
-                      cursor="pointer"
-                    >
-                      {composicao.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} stroke="var(--card)" strokeWidth={2} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      cursor={{ fill: "var(--surface-soft)" }}
-                      formatter={(value: number, name: string) => {
-                        const pct =
-                          totalPatrimonio > 0
-                            ? ((value / totalPatrimonio) * 100).toFixed(1)
-                            : "0";
-                        return [`${formatBRL(value)} (${pct}%)`, name];
-                      }}
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid var(--border)",
-                        background: "var(--card)",
-                        boxShadow: "var(--shadow-sm-token)",
-                        fontSize: 13,
-                      }}
-                      itemStyle={{ color: "var(--foreground)" }}
-                      labelStyle={{ fontWeight: 600, marginBottom: 4 }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-              <ul className="space-y-2" aria-label="Legenda da composição patrimonial">
-                {composicao.map((item) => {
-                  const pct =
-                    totalPatrimonio > 0 ? ((item.value / totalPatrimonio) * 100).toFixed(1) : "0";
-                  return (
-                    <li
-                      key={item.name}
-                      className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-surface-soft px-3 py-2.5"
-                    >
-                      <span className="inline-flex min-w-0 items-center gap-2 text-sm font-medium">
-                        <span
-                          className="size-3 shrink-0 rounded-sm"
-                          style={{ background: item.color }}
-                          aria-hidden
-                        />
-                        <span className="truncate">{item.name}</span>
-                      </span>
-                      <span className="shrink-0 text-right">
-                        <span className="block font-mono-nums text-sm font-bold">{formatBRL(item.value)}</span>
-                        <span className="text-xs text-muted-foreground">{pct}%</span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ) : (
-            <p className="py-16 text-center text-sm text-muted-foreground">Sem dados</p>
-          )}
+          <CompositionDonut
+            items={composicaoChart}
+            total={r?.patrimonio_total ?? undefined}
+            emptyLabel="Sem dados patrimoniais"
+          />
         </SectionCard>
 
         <SectionCard
-          className="xl:col-span-3"
           title="Cronograma de amortização (grupo)"
-          description="Totais consolidados — detalhe por contrato em Passivos · SCR"
+          description="Vencimentos projetados · detalhe por contrato em Passivos · SCR"
         >
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Período</TableHead>
-                <TableHead className="text-right">Valor</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {CRONOGRAMA.map((p) => (
-                <TableRow key={p.key}>
-                  <TableCell>{p.label}</TableCell>
-                  <TableCell className="text-right font-mono-nums">
-                    {formatBRL(r?.[p.key as keyof typeof r] as number | null | undefined)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <TimelineBarChart
+            items={cronogramaChart}
+            color="var(--chart-3)"
+            height={280}
+            emptyLabel="Cronograma não disponível no resumo."
+          />
         </SectionCard>
       </div>
 
@@ -292,9 +221,12 @@ function PatrimonioPage() {
         <TabsContent value="passivo-inst">
           <SectionCard
             title="Saldo por instituição"
-            description="Consolidado do resumo executivo — contratos individuais em Passivos · SCR"
+            description="Ranking consolidado · contratos individuais em Passivos · SCR"
           >
-            <TabelaPassivoInst rows={data?.passivoInst ?? []} loading={isLoading} />
+            <RankedBarList
+              items={passivoInstChart}
+              emptyLabel="Sem dados de passivo por instituição."
+            />
           </SectionCard>
         </TabsContent>
       </Tabs>
@@ -408,45 +340,6 @@ function TabelaAtivos({
               <TableCell className="font-medium">{row.nome}</TableCell>
               <TableCell className="text-muted-foreground">{row.categoria}</TableCell>
               <TableCell className="text-right font-mono-nums">{formatBRL(row.valor_aquisicao)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <VerMais total={rows.length} expandido={expandido} onToggle={() => setExpandido((v) => !v)} />
-    </>
-  );
-}
-
-function TabelaPassivoInst({
-  rows,
-  loading,
-}: {
-  rows: { id: string; instituicao: string; saldo_devedor: number }[];
-  loading: boolean;
-}) {
-  const [expandido, setExpandido] = useState(false);
-  const visiveis = expandido ? rows : rows.slice(0, LIMITE_LINHAS);
-
-  if (loading) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>;
-  }
-  if (!rows.length) {
-    return <p className="py-8 text-center text-sm text-muted-foreground">Nenhum registro</p>;
-  }
-  return (
-    <>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Instituição</TableHead>
-            <TableHead className="text-right">Saldo devedor</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {visiveis.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell className="font-medium">{row.instituicao}</TableCell>
-              <TableCell className="text-right font-mono-nums">{formatBRL(row.saldo_devedor)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
