@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -140,10 +141,7 @@ function FiltrosMaquinario({
   onOrdenacao: (v: Ordenacao) => void;
 }) {
   return (
-    <aside className="w-full shrink-0 space-y-4 rounded-2xl border border-border/80 bg-surface-soft p-4 lg:w-56">
-      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-        Filtros
-      </p>
+    <>
       <div className="space-y-2">
         <Label className="text-xs">Ano</Label>
         <Select value={ano} onValueChange={onAno}>
@@ -206,7 +204,7 @@ function FiltrosMaquinario({
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2 border-t border-border/60 pt-4">
+      <div className="space-y-2 border-t border-border/60 pt-3">
         <Label className="text-xs">Ordenar tabela</Label>
         <Select value={ordenacao} onValueChange={(v) => onOrdenacao(v as Ordenacao)}>
           <SelectTrigger>
@@ -218,7 +216,7 @@ function FiltrosMaquinario({
           </SelectContent>
         </Select>
       </div>
-    </aside>
+    </>
   );
 }
 
@@ -372,8 +370,26 @@ function MaquinarioPage() {
       ) : null}
 
       <SectionCard title="Frota" description="Dados importados da aba Maquinários.">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-          <div className="min-w-0 flex-1">
+        <LayoutAbasFiltros
+          filtros={
+            <FiltrosMaquinario
+              anos={anos}
+              proprietarios={proprietarios}
+              equipamentos={equipamentos}
+              ano={anoFiltro}
+              proprietario={proprietarioFiltro}
+              equipamento={equipamentoFiltro}
+              status={statusFiltro}
+              ordenacao={ordenacao}
+              onAno={setAnoFiltro}
+              onProprietario={setProprietarioFiltro}
+              onEquipamento={setEquipamentoFiltro}
+              onStatus={setStatusFiltro}
+              onOrdenacao={setOrdenacao}
+            />
+          }
+        >
+          <div className="p-4 sm:p-5">
             {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (
@@ -444,22 +460,7 @@ function MaquinarioPage() {
               </Table>
             )}
           </div>
-          <FiltrosMaquinario
-            anos={anos}
-            proprietarios={proprietarios}
-            equipamentos={equipamentos}
-            ano={anoFiltro}
-            proprietario={proprietarioFiltro}
-            equipamento={equipamentoFiltro}
-            status={statusFiltro}
-            ordenacao={ordenacao}
-            onAno={setAnoFiltro}
-            onProprietario={setProprietarioFiltro}
-            onEquipamento={setEquipamentoFiltro}
-            onStatus={setStatusFiltro}
-            onOrdenacao={setOrdenacao}
-          />
-        </div>
+        </LayoutAbasFiltros>
       </SectionCard>
 
       <Dialog open={aberto} onOpenChange={setAberto}>
