@@ -210,14 +210,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           ))}
         </nav>
 
-        <div className="mx-3 mb-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-surface-soft to-card p-4">
-          <p className="text-sm font-bold text-foreground">Fase 1 · Fundação</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Paleta provisória — será alinhada às logos oficiais do Grupo Mandotti.
-          </p>
-        </div>
-
-        <div className="mx-3 mb-4 flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-xs">
+        <div className="mx-3 mb-4 mt-3 flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-xs">
           <div className="grid size-10 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
             {initials(user?.email)}
           </div>
