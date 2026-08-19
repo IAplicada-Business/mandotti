@@ -107,8 +107,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon-32.png?v=2", type: "image/png", sizes: "32x32" },
       { rel: "icon", href: "/favicon.png?v=2", type: "image/png", sizes: "64x64" },
       { rel: "icon", href: "/favicon-192.png?v=2", type: "image/png", sizes: "192x192" },
-      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=2", sizes: "180x180" },
-      { rel: "manifest", href: "/manifest.webmanifest?v=2" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png?v=3", sizes: "180x180" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon-167.png?v=3", sizes: "167x167" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon-152.png?v=3", sizes: "152x152" },
+      { rel: "mask-icon", href: "/safari-pinned-tab.svg?v=3", color: "#1B5E3A" },
+      { rel: "manifest", href: "/manifest.webmanifest?v=3" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
