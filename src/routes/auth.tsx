@@ -74,26 +74,50 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-secondary px-4 py-10">
-      <div className="w-full max-w-md">
-        <div className="mb-6 flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Sprout className="size-6" />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(1200px 600px at 10% -10%, rgba(63,125,73,0.18), transparent 55%), radial-gradient(900px 500px at 100% 0%, rgba(127,168,50,0.14), transparent 50%), linear-gradient(180deg, #f1f7f1 0%, #f4f7f5 45%, #eef3ef 100%)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-[3px]"
+        style={{
+          background:
+            "linear-gradient(90deg, #2E6636 0%, #7FA832 30%, #C99012 60%, #B5541C 85%, #6E5537 100%)",
+        }}
+      />
+
+      <div className="relative w-full max-w-md">
+        <div className="mb-7 flex items-center gap-3">
+          <div className="relative grid size-12 place-items-center rounded-full bg-card shadow-sm">
+            <span
+              className="absolute -inset-0.5 rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 130deg, #2E6636, #7FA832, #C99012, #B5541C, #6E5537, #2E6636)",
+                WebkitMask: "radial-gradient(circle, transparent 19px, #000 20.5px)",
+                mask: "radial-gradient(circle, transparent 19px, #000 20.5px)",
+              }}
+            />
+            <Sprout className="relative z-10 size-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-xl font-semibold">Sistema Grupo Mandotti</h1>
+            <h1 className="text-xl font-extrabold tracking-tight">Sistema Grupo Mandotti</h1>
             <p className="text-sm text-muted-foreground">Gestão agrícola integrada</p>
           </div>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Acesso à plataforma</CardTitle>
+        <Card className="shadow-md">
+          <CardHeader className="border-b-0 pb-2">
+            <CardTitle className="text-lg">Acesso à plataforma</CardTitle>
             <CardDescription>Use suas credenciais corporativas.</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="entrar">
-              <TabsList className="mb-4 grid w-full grid-cols-2">
+              <TabsList className="mb-5 grid w-full grid-cols-2">
                 <TabsTrigger value="entrar">Entrar</TabsTrigger>
                 <TabsTrigger value="cadastrar">Criar conta</TabsTrigger>
               </TabsList>
@@ -130,7 +154,12 @@ function AuthPage() {
                 <form className="space-y-4" onSubmit={cadastrar}>
                   <div className="space-y-2">
                     <Label htmlFor="nome">Nome completo</Label>
-                    <Input id="nome" required value={nome} onChange={(e) => setNome(e.target.value)} />
+                    <Input
+                      id="nome"
+                      required
+                      value={nome}
+                      onChange={(e) => setNome(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email2">E-mail</Label>

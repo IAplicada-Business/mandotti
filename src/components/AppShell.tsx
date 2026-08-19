@@ -1,7 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   Building2,
-  ChevronDown,
   FileSpreadsheet,
   LayoutDashboard,
   LogOut,
@@ -9,12 +8,14 @@ import {
   Moon,
   Package,
   ScrollText,
+  Search,
   Settings,
   ShieldCheck,
   Sprout,
   Sun,
   Users,
   Warehouse,
+  X,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -71,8 +72,14 @@ const PERFIL_LABEL: Record<string, string> = {
   contabilidade: "Contabilidade",
 };
 
+function initials(email?: string | null) {
+  if (!email) return "GM";
+  return email.slice(0, 2).toUpperCase();
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [ctx, setCtx] = useState<"gestao" | "contabilidade">("gestao");
   const { user } = useSession();
   const { perfil, pode } = usePerfil(user);
   const { theme, toggleTheme } = useTheme();
@@ -80,7 +87,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const navVisivel = NAV.map((section) => ({
     ...section,
-    items: section.items.filter((item) => pode(item.to, "ver")),
+    items: section.items.filter((item) => {
+      if (ctx === "contabilidade") {
+        return (
+          item.to === "/dashboard" ||
+          item.to === "/notas-fiscais" ||
+          item.to === "/relatorios" ||
+          item.to === "/certificados"
+        );
+      }
+      return pode(item.to, "ver");
+    }),
   })).filter((section) => section.items.length > 0);
 
   const sair = async () => {
@@ -93,24 +110,78 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen bg-background">
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-sidebar text-sidebar-foreground transition-transform lg:static lg:translate-x-0",
+          "fixed inset-y-0 left-0 z-40 flex w-[272px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-transform lg:static lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
-          <Sprout className="size-5 text-sidebar-primary" />
-          <div className="leading-tight">
-            <p className="font-display text-sm font-semibold">Grupo Mandotti</p>
-            <p className="text-[11px] text-sidebar-foreground/60">Plataforma de gestão</p>
+        <div
+          className="h-[3px] w-full"
+          style={{
+            background:
+              "linear-gradient(90deg, #2E6636 0%, #7FA832 30%, #C99012 60%, #B5541C 85%, #6E5537 100%)",
+          }}
+        />
+
+        <div className="flex items-center gap-3 border-b border-sidebar-border px-4 py-4">
+          <div className="relative grid size-11 place-items-center rounded-full bg-card">
+            <span
+              className="absolute -inset-0.5 rounded-full"
+              style={{
+                background:
+                  "conic-gradient(from 130deg, #2E6636, #7FA832, #C99012, #B5541C, #6E5537, #2E6636)",
+                WebkitMask: "radial-gradient(circle, transparent 18px, #000 19.5px)",
+                mask: "radial-gradient(circle, transparent 18px, #000 19.5px)",
+              }}
+            />
+            <span className="relative z-10 text-sm font-extrabold text-primary">GM</span>
           </div>
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-sm font-extrabold tracking-wide">GRUPO MANDOTTI</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Gestão Agrícola
+            </p>
+          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="ml-auto lg:hidden"
+            onClick={() => setOpen(false)}
+            aria-label="Fechar menu"
+          >
+            <X className="size-4" />
+          </Button>
         </div>
-        <nav className="flex-1 space-y-6 overflow-y-auto px-3 py-5">
+
+        <div className="mx-3 mt-4 flex rounded-xl border border-primary/10 bg-surface-soft p-1">
+          {(
+            [
+              ["gestao", "Gestão"],
+              ["contabilidade", "Contabilidade"],
+            ] as const
+          ).map(([key, label]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setCtx(key)}
+              className={cn(
+                "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+                ctx === key
+                  ? "bg-card text-primary shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <nav className="mt-3 flex-1 space-y-5 overflow-y-auto px-3 pb-4">
           {navVisivel.map((section) => (
             <div key={section.group}>
-              <p className="px-2 pb-2 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+              <p className="px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
                 {section.group}
               </p>
-              <ul className="space-y-1">
+              <ul className="space-y-0.5">
                 {section.items.map((item) => {
                   const active = pathname.startsWith(item.to);
                   return (
@@ -119,13 +190,16 @@ export function AppShell({ children }: { children: ReactNode }) {
                         to={item.to}
                         onClick={() => setOpen(false)}
                         className={cn(
-                          "flex items-center gap-3 rounded-md px-2.5 py-2 text-sm transition-colors",
+                          "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
                           active
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60",
+                            ? "bg-surface-soft font-semibold text-primary"
+                            : "text-sidebar-foreground/75 hover:bg-surface-soft hover:text-foreground",
                         )}
                       >
-                        <item.icon className="size-4" />
+                        {active ? (
+                          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
+                        ) : null}
+                        <item.icon className={cn("size-4", active ? "opacity-100" : "opacity-60")} />
                         {item.label}
                       </Link>
                     </li>
@@ -135,18 +209,37 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
+
+        <div className="mx-3 mb-3 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/10 via-surface-soft to-card p-4">
+          <p className="text-sm font-bold text-foreground">Fase 1 · Fundação</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Paleta provisória — será alinhada às logos oficiais do Grupo Mandotti.
+          </p>
+        </div>
+
+        <div className="mx-3 mb-4 flex items-center gap-3 rounded-2xl border border-border/80 bg-card p-3 shadow-xs">
+          <div className="grid size-10 place-items-center rounded-full bg-primary/12 text-xs font-bold text-primary">
+            {initials(user?.email)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold">{user?.email ?? "Conta"}</p>
+            <p className="text-xs text-muted-foreground">
+              {perfil ? PERFIL_LABEL[perfil] : "sem perfil"}
+            </p>
+          </div>
+        </div>
       </aside>
 
       {open ? (
         <div
-          className="fixed inset-0 z-30 bg-foreground/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-foreground/30 backdrop-blur-[2px] lg:hidden"
           onClick={() => setOpen(false)}
           aria-hidden
         />
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b bg-card/90 px-4 backdrop-blur">
+        <header className="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-border/80 bg-card/85 px-4 backdrop-blur-md lg:px-6">
           <Button
             variant="ghost"
             size="icon"
@@ -156,47 +249,55 @@ export function AppShell({ children }: { children: ReactNode }) {
           >
             <Menu className="size-5" />
           </Button>
-          <EmissorSelector />
-          <div className="ml-auto">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="gap-2"
-                  aria-label={user?.email ? `Conta: ${user.email}` : "Conta"}
-                >
-                  <span className="hidden max-w-[12rem] truncate text-sm sm:inline">
-                    {user?.email ?? "Conta"}
-                  </span>
-                  <ChevronDown className="size-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel className="font-normal">
-                  <p className="text-sm font-medium">{user?.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {perfil ? PERFIL_LABEL[perfil] : "sem perfil definido"}
-                  </p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={toggleTheme}>
-                  {theme === "dark" ? (
-                    <Sun className="mr-2 size-4" />
-                  ) : (
-                    <Moon className="mr-2 size-4" />
-                  )}
-                  {theme === "dark" ? "Tema claro" : "Tema escuro"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={sair}>
-                  <LogOut className="mr-2 size-4" />
-                  Sair
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+          <div className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm text-muted-foreground md:flex">
+            <Search className="size-4 shrink-0 opacity-60" />
+            <span className="truncate">Buscar fazendas, emissores, notas…</span>
           </div>
+
+          <div className="min-w-0 flex-1">
+            <EmissorSelector />
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Tema claro" : "Tema escuro"}
+          >
+            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          </Button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="gap-2 rounded-full pl-1.5 pr-3">
+                <span className="grid size-7 place-items-center rounded-full bg-primary/12 text-[11px] font-bold text-primary">
+                  {initials(user?.email)}
+                </span>
+                <span className="hidden max-w-[10rem] truncate text-sm sm:inline">
+                  {user?.email?.split("@")[0] ?? "Conta"}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56 rounded-xl">
+              <DropdownMenuLabel className="font-normal">
+                <p className="text-sm font-medium">{user?.email}</p>
+                <p className="text-xs text-muted-foreground">
+                  {perfil ? PERFIL_LABEL[perfil] : "sem perfil definido"}
+                </p>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={sair}>
+                <LogOut className="mr-2 size-4" />
+                Sair
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </header>
-        <main className="flex-1 px-4 py-6 lg:px-8">{children}</main>
+
+        <main className="mx-auto w-full max-w-[1320px] flex-1 px-4 py-6 lg:px-8 lg:py-8">
+          {children}
+        </main>
       </div>
     </div>
   );
@@ -206,16 +307,23 @@ export function PageHeader({
   title,
   description,
   action,
+  breadcrumb,
 }: {
   title: string;
   description?: string;
   action?: ReactNode;
+  breadcrumb?: string;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold">{title}</h1>
-        {description ? <p className="mt-1 text-sm text-muted-foreground">{description}</p> : null}
+        {breadcrumb ? (
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">
+            {breadcrumb}
+          </p>
+        ) : null}
+        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{title}</h1>
+        {description ? <p className="mt-1.5 text-sm text-muted-foreground">{description}</p> : null}
       </div>
       {action}
     </div>

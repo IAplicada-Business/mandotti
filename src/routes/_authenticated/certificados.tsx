@@ -76,11 +76,11 @@ const vazio: Form = {
 };
 
 function statusValidade(validade: string | null) {
-  if (!validade) return { label: "Sem validade", variant: "secondary" as const };
+  if (!validade) return { label: "Sem validade", variant: "muted" as const };
   const dias = Math.ceil((new Date(validade).getTime() - Date.now()) / 86400000);
   if (dias < 0) return { label: "Vencido", variant: "destructive" as const };
-  if (dias <= 30) return { label: `Vence em ${dias}d`, variant: "outline" as const };
-  return { label: "Vigente", variant: "default" as const };
+  if (dias <= 30) return { label: `Vence em ${dias}d`, variant: "warning" as const };
+  return { label: "Vigente", variant: "success" as const };
 }
 
 function CertificadosPage() {
