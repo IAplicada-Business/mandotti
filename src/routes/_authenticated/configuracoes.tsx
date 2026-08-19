@@ -11,8 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
+import { formatDateBR } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/configuracoes")({
   head: () => ({ meta: [{ title: "Parâmetros | Sistema Grupo Mandotti" }] }),
@@ -31,6 +40,19 @@ function ConfiguracoesPage() {
       const { data, error } = await supabase.from("configuracoes_grupo").select("*").limit(1).maybeSingle();
       if (error) throw error;
       return data;
+    },
+  });
+
+  const { data: ficha, isLoading: loadingFicha } = useQuery({
+    queryKey: ["configuracoes_ficha"],
+    queryFn: async () => {
+      const [pessoas, bens] = await Promise.all([
+        supabase.from("cadastro_pessoas").select("*").order("ordem"),
+        supabase.from("patrimonio_bens").select("*").eq("tipo", "participacao").order("ordem"),
+      ]);
+      if (pessoas.error) throw pessoas.error;
+      if (bens.error) throw bens.error;
+      return { pessoas: pessoas.data ?? [], participacoes: bens.data ?? [] };
     },
   });
 
@@ -73,7 +95,7 @@ function ConfiguracoesPage() {
       <PageHeader
         breadcrumb="Configurações"
         title="Parâmetros"
-        description="Preferências do grupo acordadas na call de kickoff."
+        description="Preferências do sistema e dados cadastrais importados da ficha Mandotti."
       />
 
       <SectionCard
@@ -149,6 +171,100 @@ function ConfiguracoesPage() {
           </div>
         )}
       </SectionCard>
+
+      <SectionCard
+        title="Participações societárias"
+        description="Estrutura societária do grupo — importada da ficha cadastral (somente consulta)"
+      >
+        {loadingFicha ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : ficha?.participacoes.length ? (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12">#</TableHead>
+                <TableHead>Descrição</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ficha.participacoes.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell className="font-mono-nums text-muted-foreground">{row.ordem}</TableCell>
+                  <TableCell>{row.descricao}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nenhuma participação cadastrada</p>
+        )}
+      </SectionCard>
+
+      <SectionCard
+        title="Dados cadastrais"
+        description="Titular, cônjuge e correspondência — importados da ficha (somente consulta)"
+      >
+        {loadingFicha ? (
+          <p className="text-sm text-muted-foreground">Carregando…</p>
+        ) : ficha?.pessoas.length ? (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {ficha.pessoas.map((p) => (
+              <div key={p.id} className="rounded-xl border border-border/80 bg-surface-soft p-4">
+                <div className="mb-2 flex items-center gap-2">
+                  <Badge variant="secondary">{labelTipoPessoa(p.tipo)}</Badge>
+                </div>
+                <p className="font-semibold text-foreground">{p.nome}</p>
+                <dl className="mt-3 space-y-1.5 text-sm">
+                  {p.email && (
+                    <div>
+                      <dt className="text-muted-foreground">E-mail</dt>
+                      <dd>{p.email}</dd>
+                    </div>
+                  )}
+                  {p.telefone && (
+                    <div>
+                      <dt className="text-muted-foreground">Telefone</dt>
+                      <dd>{p.telefone}</dd>
+                    </div>
+                  )}
+                  {p.endereco && (
+                    <div>
+                      <dt className="text-muted-foreground">Endereço</dt>
+                      <dd>{p.endereco}</dd>
+                    </div>
+                  )}
+                  {(p.cidade || p.cep) && (
+                    <div>
+                      <dt className="text-muted-foreground">Cidade / CEP</dt>
+                      <dd>{[p.cidade, p.uf, p.cep].filter(Boolean).join(" · ")}</dd>
+                    </div>
+                  )}
+                  {p.profissao && (
+                    <div>
+                      <dt className="text-muted-foreground">Profissão</dt>
+                      <dd>{p.profissao}</dd>
+                    </div>
+                  )}
+                  {p.data_nascimento && (
+                    <div>
+                      <dt className="text-muted-foreground">Nascimento</dt>
+                      <dd>{formatDateBR(p.data_nascimento)}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">Nenhum cadastro importado</p>
+        )}
+      </SectionCard>
     </div>
   );
+}
+
+function labelTipoPessoa(tipo: string) {
+  if (tipo === "titular") return "Titular";
+  if (tipo === "conjuge") return "Cônjuge";
+  return "Correspondência";
 }
