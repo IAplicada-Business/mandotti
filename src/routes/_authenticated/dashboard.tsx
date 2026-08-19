@@ -23,7 +23,6 @@ import {
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, RingStat, SectionCard } from "@/components/design-system";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
@@ -133,7 +132,6 @@ function Dashboard() {
           emissores.filter((e) => emissorIds.includes(e.id)),
           emissores.length,
         )}
-        action={<Badge variant="warning">Paleta provisória</Badge>}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
