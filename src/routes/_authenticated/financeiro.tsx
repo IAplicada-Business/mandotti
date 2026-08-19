@@ -214,10 +214,10 @@ function FinanceiroPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/financeiro/xml">Importar XML</Link>
+              <Link to="/importacao-xml">Importar XML</Link>
             </Button>
             <Button variant="outline" asChild>
-              <Link to="/financeiro/conciliacao">Conciliação</Link>
+              <Link to="/conciliacao">Conciliação</Link>
             </Button>
             {podeEditar ? (
               <Button
