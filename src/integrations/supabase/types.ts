@@ -676,6 +676,162 @@ export type Database = {
           },
         ]
       }
+      negociacoes_comerciais: {
+        Row: {
+          comprador_id: string
+          created_at: string
+          cultura_codigo: string
+          deleted_at: string | null
+          emissor_id: string | null
+          id: string
+          observacoes: string | null
+          origem: string
+          preco_saca: number | null
+          safra: string
+          status: Database["public"]["Enums"]["negociacao_status"]
+          updated_at: string
+          volume_sc: number | null
+        }
+        Insert: {
+          comprador_id: string
+          created_at?: string
+          cultura_codigo: string
+          deleted_at?: string | null
+          emissor_id?: string | null
+          id?: string
+          observacoes?: string | null
+          origem?: string
+          preco_saca?: number | null
+          safra: string
+          status?: Database["public"]["Enums"]["negociacao_status"]
+          updated_at?: string
+          volume_sc?: number | null
+        }
+        Update: {
+          comprador_id?: string
+          created_at?: string
+          cultura_codigo?: string
+          deleted_at?: string | null
+          emissor_id?: string | null
+          id?: string
+          observacoes?: string | null
+          origem?: string
+          preco_saca?: number | null
+          safra?: string
+          status?: Database["public"]["Enums"]["negociacao_status"]
+          updated_at?: string
+          volume_sc?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "negociacoes_comerciais_comprador_id_fkey"
+            columns: ["comprador_id"]
+            isOneToOne: false
+            referencedRelation: "grupo_contatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "negociacoes_comerciais_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "negociacoes_comerciais_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notas_fiscais: {
+        Row: {
+          chave_acesso: string | null
+          comprador_id: string
+          created_at: string
+          cultura_codigo: string | null
+          data_emissao: string | null
+          deleted_at: string | null
+          emissor_id: string
+          id: string
+          negociacao_id: string | null
+          numero: string | null
+          observacoes: string | null
+          serie: string | null
+          status: Database["public"]["Enums"]["nota_fiscal_status"]
+          updated_at: string
+          valor: number | null
+          volume_sc: number | null
+        }
+        Insert: {
+          chave_acesso?: string | null
+          comprador_id: string
+          created_at?: string
+          cultura_codigo?: string | null
+          data_emissao?: string | null
+          deleted_at?: string | null
+          emissor_id: string
+          id?: string
+          negociacao_id?: string | null
+          numero?: string | null
+          observacoes?: string | null
+          serie?: string | null
+          status?: Database["public"]["Enums"]["nota_fiscal_status"]
+          updated_at?: string
+          valor?: number | null
+          volume_sc?: number | null
+        }
+        Update: {
+          chave_acesso?: string | null
+          comprador_id?: string
+          created_at?: string
+          cultura_codigo?: string | null
+          data_emissao?: string | null
+          deleted_at?: string | null
+          emissor_id?: string
+          id?: string
+          negociacao_id?: string | null
+          numero?: string | null
+          observacoes?: string | null
+          serie?: string | null
+          status?: Database["public"]["Enums"]["nota_fiscal_status"]
+          updated_at?: string
+          valor?: number | null
+          volume_sc?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notas_fiscais_comprador_id_fkey"
+            columns: ["comprador_id"]
+            isOneToOne: false
+            referencedRelation: "grupo_contatos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_cultura_codigo_fkey"
+            columns: ["cultura_codigo"]
+            isOneToOne: false
+            referencedRelation: "produtos_agricolas"
+            referencedColumns: ["codigo"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_emissor_id_fkey"
+            columns: ["emissor_id"]
+            isOneToOne: false
+            referencedRelation: "emissores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notas_fiscais_negociacao_id_fkey"
+            columns: ["negociacao_id"]
+            isOneToOne: false
+            referencedRelation: "negociacoes_comerciais"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       papeis_usuario: {
         Row: {
           created_at: string
@@ -1306,6 +1462,14 @@ export type Database = {
       lancamento_tipo: "despesa" | "receita" | "transferencia"
       modo_contabilidade: "acesso_direto" | "envio_automatico"
       movimento_tipo: "credito" | "debito"
+      negociacao_status:
+        | "cadastrado"
+        | "negociando"
+        | "firmado"
+        | "entregue"
+        | "pagamento_validado"
+        | "faturado"
+      nota_fiscal_status: "pendente" | "emitida" | "cancelada"
       perfil_usuario: "admin" | "funcionario" | "contabilidade"
       tipo_certificado: "A1" | "A3"
       xml_status: "pendente" | "processado" | "erro"
@@ -1443,6 +1607,15 @@ export const Constants = {
       lancamento_tipo: ["despesa", "receita", "transferencia"],
       modo_contabilidade: ["acesso_direto", "envio_automatico"],
       movimento_tipo: ["credito", "debito"],
+      negociacao_status: [
+        "cadastrado",
+        "negociando",
+        "firmado",
+        "entregue",
+        "pagamento_validado",
+        "faturado",
+      ],
+      nota_fiscal_status: ["pendente", "emitida", "cancelada"],
       perfil_usuario: ["admin", "funcionario", "contabilidade"],
       tipo_certificado: ["A1", "A3"],
       xml_status: ["pendente", "processado", "erro"],
