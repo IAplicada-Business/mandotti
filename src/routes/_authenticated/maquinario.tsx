@@ -36,6 +36,11 @@ import { usePerfil, useSession } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL } from "@/lib/format";
 import { useEmissor } from "@/lib/emissor-context";
+import {
+  STATUS_MANUTENCAO_LABEL,
+  statusManutencao,
+  type StatusManutencao,
+} from "@/lib/maquinario-alerts";
 
 export const Route = createFileRoute("/_authenticated/maquinario")({
   head: () => ({
@@ -53,8 +58,16 @@ const VAZIO = {
   modelo: "",
   ano: "",
   valor_aquisicao: "",
+  custo_manutencao_acumulado: "",
+  depreciacao_anual_pct: "10",
   cor: "",
   chassi_serie: "",
+};
+
+const STATUS_BADGE: Record<StatusManutencao, "default" | "secondary" | "destructive"> = {
+  saudavel: "default",
+  atencao: "secondary",
+  avaliar_troca: "destructive",
 };
 
 function MaquinarioPage() {
@@ -93,6 +106,10 @@ function MaquinarioPage() {
   );
 
   const valorTotal = filtrados.reduce((acc, m) => acc + (m.valor_aquisicao ?? 0), 0);
+  const manutTotal = filtrados.reduce((acc, m) => acc + (m.custo_manutencao_acumulado ?? 0), 0);
+  const alertas = filtrados.filter(
+    (m) => statusManutencao(m.valor_aquisicao, m.custo_manutencao_acumulado, m.depreciacao_anual_pct) === "avaliar_troca",
+  ).length;
 
   const criar = useMutation({
     mutationFn: async () => {
@@ -105,6 +122,10 @@ function MaquinarioPage() {
         modelo: form.modelo || null,
         ano: form.ano ? Number(form.ano) : null,
         valor_aquisicao: form.valor_aquisicao ? Number(form.valor_aquisicao) : null,
+        custo_manutencao_acumulado: form.custo_manutencao_acumulado
+          ? Number(form.custo_manutencao_acumulado)
+          : 0,
+        depreciacao_anual_pct: form.depreciacao_anual_pct ? Number(form.depreciacao_anual_pct) : 10,
         cor: form.cor || null,
         chassi_serie: form.chassi_serie || null,
         ordem: (data.length || 0) + 1,
@@ -139,7 +160,7 @@ function MaquinarioPage() {
       <PageHeader
         breadcrumb="Cadastros · Ativos"
         title="Maquinário"
-        description="Cadastro da frota (ficha cadastral). Depreciação e alertas entram na Fase 3."
+        description="Frota da planilha (78 itens). Alerta quando manutenção supera depreciação ou 12% do valor."
         action={
           <div className="flex flex-wrap gap-2">
             <Select value={categoria} onValueChange={setCategoria}>
@@ -169,11 +190,19 @@ function MaquinarioPage() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-4">
         <KpiCard label="Ativos" value={filtrados.length} />
         <KpiCard label="Valor total" value={formatBRL(valorTotal)} tone="success" />
-        <KpiCard label="Categorias" value={categorias.length} />
+        <KpiCard label="Manutenção acum." value={formatBRL(manutTotal)} tone="warning" />
+        <KpiCard label="Alertas de troca" value={alertas} tone={alertas > 0 ? "danger" : "default"} />
       </div>
+
+      {alertas > 0 ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+          <span className="font-semibold text-destructive">Ponto de atenção:</span>{" "}
+          {alertas} ativo(s) com custo de manutenção elevado — avaliar troca do equipamento.
+        </div>
+      ) : null}
 
       <SectionCard title="Frota" description="Dados importados da aba Maquinários.">
         {isLoading ? (
@@ -190,10 +219,18 @@ function MaquinarioPage() {
                 <TableHead>Marca / Modelo</TableHead>
                 <TableHead>Ano</TableHead>
                 <TableHead className="text-right">Valor</TableHead>
+                <TableHead className="text-right">Manut.</TableHead>
+                <TableHead>Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtrados.map((m) => (
+              {filtrados.map((m) => {
+                const st = statusManutencao(
+                  m.valor_aquisicao,
+                  m.custo_manutencao_acumulado,
+                  m.depreciacao_anual_pct,
+                );
+                return (
                 <TableRow key={m.id}>
                   <TableCell className="font-mono-nums text-muted-foreground">{m.ordem}</TableCell>
                   <TableCell>
@@ -219,8 +256,15 @@ function MaquinarioPage() {
                   <TableCell className="text-right font-mono-nums">
                     {formatBRL(m.valor_aquisicao)}
                   </TableCell>
+                  <TableCell className="text-right font-mono-nums">
+                    {formatBRL(m.custo_manutencao_acumulado)}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={STATUS_BADGE[st]}>{STATUS_MANUTENCAO_LABEL[st]}</Badge>
+                  </TableCell>
                 </TableRow>
-              ))}
+              );
+              })}
             </TableBody>
           </Table>
         )}
@@ -301,12 +345,34 @@ function MaquinarioPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Valor</Label>
+                <Label>Valor aquisição</Label>
                 <Input
                   type="number"
                   step="0.01"
                   value={form.valor_aquisicao}
                   onChange={(e) => setForm((f) => ({ ...f, valor_aquisicao: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Manutenção acumulada</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.custo_manutencao_acumulado}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, custo_manutencao_acumulado: e.target.value }))
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Depreciação anual (%)</Label>
+                <Input
+                  type="number"
+                  step="0.1"
+                  value={form.depreciacao_anual_pct}
+                  onChange={(e) => setForm((f) => ({ ...f, depreciacao_anual_pct: e.target.value }))}
                 />
               </div>
               <div className="space-y-2">

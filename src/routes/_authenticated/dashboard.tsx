@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Building2,
+  Landmark,
+  Scale,
   ShieldCheck,
   Sprout,
   TriangleAlert,
@@ -22,10 +24,12 @@ import {
 } from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
+import { FluxoAcompanhamento } from "@/components/FluxoAcompanhamento";
 import { KpiCard, RingStat, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
+import { formatBRL, formatPctDecimal } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -76,7 +80,7 @@ function Dashboard() {
     queryKey: ["dashboard", emissorIds],
     enabled: emissorIds.length > 0,
     queryFn: async () => {
-      const [fazendas, certificados] = await Promise.all([
+      const [fazendas, certificados, resumo, config, producao] = await Promise.all([
         supabase
           .from("fazendas")
           .select("id", { count: "exact", head: true })
@@ -87,6 +91,15 @@ function Dashboard() {
           .select("validade")
           .is("deleted_at", null)
           .in("emissor_id", emissorIds),
+        supabase.from("resumo_patrimonial").select("*").limit(1).maybeSingle(),
+        supabase.from("configuracoes_grupo").select("meta_hectares_grupo").limit(1).maybeSingle(),
+        supabase
+          .from("producao_grupo_safra")
+          .select("area_plantio_ha")
+          .eq("safra", "2026/27")
+          .eq("cultura_codigo", "soja")
+          .eq("ciclo", "safra")
+          .maybeSingle(),
       ]);
 
       const hoje = new Date();
@@ -99,6 +112,9 @@ function Dashboard() {
         fazendas: fazendas.count ?? 0,
         certificados: certificados.data?.length ?? 0,
         vencendo,
+        resumo: resumo.data,
+        metaHa: config.data?.meta_hectares_grupo ?? 6000,
+        areaSafra2627: producao.data?.area_plantio_ha ?? 0,
       };
     },
   });
@@ -134,12 +150,22 @@ function Dashboard() {
         )}
       />
 
+      <FluxoAcompanhamento />
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
-          label="Emissores"
-          value={emissorIds.length}
-          icon={Building2}
-          hint="Visão filtrada no seletor"
+          label="Patrimônio total"
+          value={formatBRL(data?.resumo?.patrimonio_total)}
+          icon={Landmark}
+          tone="info"
+          hint="Resumo executivo · planilha"
+        />
+        <KpiCard
+          label="Endividamento"
+          value={formatPctDecimal(data?.resumo?.endividamento_pct)}
+          icon={Scale}
+          tone="warning"
+          hint={`Passivo ${formatBRL(data?.resumo?.passivo_total)}`}
         />
         <KpiCard
           label="Fazendas"
@@ -149,6 +175,22 @@ function Dashboard() {
           hint="Cadastro ativo"
         />
         <KpiCard
+          label="Certificados · 30d"
+          value={data?.vencendo ?? 0}
+          icon={TriangleAlert}
+          tone={data?.vencendo ? "warning" : "default"}
+          hint={`${certTotal} no total`}
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          label="Emissores"
+          value={emissorIds.length}
+          icon={Building2}
+          hint="Visão filtrada no seletor"
+        />
+        <KpiCard
           label="Certificados"
           value={certTotal}
           icon={ShieldCheck}
@@ -156,20 +198,25 @@ function Dashboard() {
           hint="Vinculados aos emissores"
         />
         <KpiCard
-          label="Vencendo · 30d"
-          value={data?.vencendo ?? 0}
-          icon={TriangleAlert}
-          tone={data?.vencendo ? "warning" : "default"}
-          hint="Atenção de validade"
+          label="Patrimônio líquido"
+          value={formatBRL(data?.resumo?.patrimonio_liquido)}
+          icon={Landmark}
+          hint="Planilha Mandotti"
+        />
+        <KpiCard
+          label="Maquinários"
+          value={formatBRL(data?.resumo?.maquinarios_veiculos)}
+          icon={Building2}
+          hint="79 itens na planilha"
         />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <RingStat label="Certificados ok" value={certOk} total={Math.max(certTotal, 1)} />
         <RingStat
-          label="Fazendas / meta"
-          value={data?.fazendas ?? 0}
-          total={11}
+          label="Área soja 26/27"
+          value={data?.areaSafra2627 ?? 0}
+          total={data?.metaHa ?? 6000}
           color="var(--chart-2)"
         />
         <RingStat

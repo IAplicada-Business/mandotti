@@ -12,9 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAssinaturasRouteImport } from './routes/_authenticated/assinaturas'
 import { Route as AuthenticatedCertificadosRouteImport } from './routes/_authenticated/certificados'
+import { Route as AuthenticatedClientesRouteImport } from './routes/_authenticated/clientes'
 import { Route as AuthenticatedConfiguracoesRouteImport } from './routes/_authenticated/configuracoes'
+import { Route as AuthenticatedContratosRouteImport } from './routes/_authenticated/contratos'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedEmissoresRouteImport } from './routes/_authenticated/emissores'
 import { Route as AuthenticatedEstoqueRouteImport } from './routes/_authenticated/estoque'
 import { Route as AuthenticatedFazendasRouteImport } from './routes/_authenticated/fazendas'
@@ -22,9 +26,13 @@ import { Route as AuthenticatedFinanceiroRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMaquinarioRouteImport } from './routes/_authenticated/maquinario'
 import { Route as AuthenticatedNotasFiscaisRouteImport } from './routes/_authenticated/notas-fiscais'
 import { Route as AuthenticatedPassivosRouteImport } from './routes/_authenticated/passivos'
+import { Route as AuthenticatedProducaoRouteImport } from './routes/_authenticated/producao'
 import { Route as AuthenticatedProdutosRouteImport } from './routes/_authenticated/produtos'
 import { Route as AuthenticatedRelatoriosRouteImport } from './routes/_authenticated/relatorios'
 import { Route as AuthenticatedUsuariosRouteImport } from './routes/_authenticated/usuarios'
+import { Route as AuthenticatedContabilidadeDocumentosRouteImport } from './routes/_authenticated/contabilidade/documentos'
+import { Route as AuthenticatedContabilidadeExtratosRouteImport } from './routes/_authenticated/contabilidade/extratos'
+import { Route as AuthenticatedContabilidadeRelatoriosRouteImport } from './routes/_authenticated/contabilidade/relatorios'
 import { Route as AuthenticatedFinanceiroConciliacaoRouteImport } from './routes/_authenticated/financeiro.conciliacao'
 import { Route as AuthenticatedFinanceiroXmlRouteImport } from './routes/_authenticated/financeiro.xml'
 
@@ -42,21 +50,42 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAssinaturasRoute =
+  AuthenticatedAssinaturasRouteImport.update({
+    id: '/assinaturas',
+    path: '/assinaturas',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCertificadosRoute =
   AuthenticatedCertificadosRouteImport.update({
     id: '/certificados',
     path: '/certificados',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedClientesRoute = AuthenticatedClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedConfiguracoesRoute =
   AuthenticatedConfiguracoesRouteImport.update({
     id: '/configuracoes',
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContratosRoute = AuthenticatedContratosRouteImport.update({
+  id: '/contratos',
+  path: '/contratos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedEmissoresRoute = AuthenticatedEmissoresRouteImport.update({
@@ -95,6 +124,11 @@ const AuthenticatedPassivosRoute = AuthenticatedPassivosRouteImport.update({
   path: '/passivos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProducaoRoute = AuthenticatedProducaoRouteImport.update({
+  id: '/producao',
+  path: '/producao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProdutosRoute = AuthenticatedProdutosRouteImport.update({
   id: '/produtos',
   path: '/produtos',
@@ -110,6 +144,24 @@ const AuthenticatedUsuariosRoute = AuthenticatedUsuariosRouteImport.update({
   path: '/usuarios',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedContabilidadeDocumentosRoute =
+  AuthenticatedContabilidadeDocumentosRouteImport.update({
+    id: '/contabilidade/documentos',
+    path: '/contabilidade/documentos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeExtratosRoute =
+  AuthenticatedContabilidadeExtratosRouteImport.update({
+    id: '/contabilidade/extratos',
+    path: '/contabilidade/extratos',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedContabilidadeRelatoriosRoute =
+  AuthenticatedContabilidadeRelatoriosRouteImport.update({
+    id: '/contabilidade/relatorios',
+    path: '/contabilidade/relatorios',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedFinanceiroConciliacaoRoute =
   AuthenticatedFinanceiroConciliacaoRouteImport.update({
     id: '/conciliacao',
@@ -126,9 +178,13 @@ const AuthenticatedFinanceiroXmlRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/assinaturas': typeof AuthenticatedAssinaturasRoute
   '/certificados': typeof AuthenticatedCertificadosRoute
+  '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/contratos': typeof AuthenticatedContratosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documentos': typeof AuthenticatedDocumentosRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
@@ -136,18 +192,26 @@ export interface FileRoutesByFullPath {
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/passivos': typeof AuthenticatedPassivosRoute
+  '/producao': typeof AuthenticatedProducaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/assinaturas': typeof AuthenticatedAssinaturasRoute
   '/certificados': typeof AuthenticatedCertificadosRoute
+  '/clientes': typeof AuthenticatedClientesRoute
   '/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/contratos': typeof AuthenticatedContratosRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/documentos': typeof AuthenticatedDocumentosRoute
   '/emissores': typeof AuthenticatedEmissoresRoute
   '/estoque': typeof AuthenticatedEstoqueRoute
   '/fazendas': typeof AuthenticatedFazendasRoute
@@ -155,9 +219,13 @@ export interface FileRoutesByTo {
   '/maquinario': typeof AuthenticatedMaquinarioRoute
   '/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/passivos': typeof AuthenticatedPassivosRoute
+  '/producao': typeof AuthenticatedProducaoRoute
   '/produtos': typeof AuthenticatedProdutosRoute
   '/relatorios': typeof AuthenticatedRelatoriosRoute
   '/usuarios': typeof AuthenticatedUsuariosRoute
+  '/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
 }
@@ -166,9 +234,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/assinaturas': typeof AuthenticatedAssinaturasRoute
   '/_authenticated/certificados': typeof AuthenticatedCertificadosRoute
+  '/_authenticated/clientes': typeof AuthenticatedClientesRoute
   '/_authenticated/configuracoes': typeof AuthenticatedConfiguracoesRoute
+  '/_authenticated/contratos': typeof AuthenticatedContratosRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/emissores': typeof AuthenticatedEmissoresRoute
   '/_authenticated/estoque': typeof AuthenticatedEstoqueRoute
   '/_authenticated/fazendas': typeof AuthenticatedFazendasRoute
@@ -176,9 +248,13 @@ export interface FileRoutesById {
   '/_authenticated/maquinario': typeof AuthenticatedMaquinarioRoute
   '/_authenticated/notas-fiscais': typeof AuthenticatedNotasFiscaisRoute
   '/_authenticated/passivos': typeof AuthenticatedPassivosRoute
+  '/_authenticated/producao': typeof AuthenticatedProducaoRoute
   '/_authenticated/produtos': typeof AuthenticatedProdutosRoute
   '/_authenticated/relatorios': typeof AuthenticatedRelatoriosRoute
   '/_authenticated/usuarios': typeof AuthenticatedUsuariosRoute
+  '/_authenticated/contabilidade/documentos': typeof AuthenticatedContabilidadeDocumentosRoute
+  '/_authenticated/contabilidade/extratos': typeof AuthenticatedContabilidadeExtratosRoute
+  '/_authenticated/contabilidade/relatorios': typeof AuthenticatedContabilidadeRelatoriosRoute
   '/_authenticated/financeiro/conciliacao': typeof AuthenticatedFinanceiroConciliacaoRoute
   '/_authenticated/financeiro/xml': typeof AuthenticatedFinanceiroXmlRoute
 }
@@ -187,9 +263,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/assinaturas'
     | '/certificados'
+    | '/clientes'
     | '/configuracoes'
+    | '/contratos'
     | '/dashboard'
+    | '/documentos'
     | '/emissores'
     | '/estoque'
     | '/fazendas'
@@ -197,18 +277,26 @@ export interface FileRouteTypes {
     | '/maquinario'
     | '/notas-fiscais'
     | '/passivos'
+    | '/producao'
     | '/produtos'
     | '/relatorios'
     | '/usuarios'
+    | '/contabilidade/documentos'
+    | '/contabilidade/extratos'
+    | '/contabilidade/relatorios'
     | '/financeiro/conciliacao'
     | '/financeiro/xml'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/assinaturas'
     | '/certificados'
+    | '/clientes'
     | '/configuracoes'
+    | '/contratos'
     | '/dashboard'
+    | '/documentos'
     | '/emissores'
     | '/estoque'
     | '/fazendas'
@@ -216,9 +304,13 @@ export interface FileRouteTypes {
     | '/maquinario'
     | '/notas-fiscais'
     | '/passivos'
+    | '/producao'
     | '/produtos'
     | '/relatorios'
     | '/usuarios'
+    | '/contabilidade/documentos'
+    | '/contabilidade/extratos'
+    | '/contabilidade/relatorios'
     | '/financeiro/conciliacao'
     | '/financeiro/xml'
   id:
@@ -226,9 +318,13 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/assinaturas'
     | '/_authenticated/certificados'
+    | '/_authenticated/clientes'
     | '/_authenticated/configuracoes'
+    | '/_authenticated/contratos'
     | '/_authenticated/dashboard'
+    | '/_authenticated/documentos'
     | '/_authenticated/emissores'
     | '/_authenticated/estoque'
     | '/_authenticated/fazendas'
@@ -236,9 +332,13 @@ export interface FileRouteTypes {
     | '/_authenticated/maquinario'
     | '/_authenticated/notas-fiscais'
     | '/_authenticated/passivos'
+    | '/_authenticated/producao'
     | '/_authenticated/produtos'
     | '/_authenticated/relatorios'
     | '/_authenticated/usuarios'
+    | '/_authenticated/contabilidade/documentos'
+    | '/_authenticated/contabilidade/extratos'
+    | '/_authenticated/contabilidade/relatorios'
     | '/_authenticated/financeiro/conciliacao'
     | '/_authenticated/financeiro/xml'
   fileRoutesById: FileRoutesById
@@ -272,11 +372,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/assinaturas': {
+      id: '/_authenticated/assinaturas'
+      path: '/assinaturas'
+      fullPath: '/assinaturas'
+      preLoaderRoute: typeof AuthenticatedAssinaturasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/certificados': {
       id: '/_authenticated/certificados'
       path: '/certificados'
       fullPath: '/certificados'
       preLoaderRoute: typeof AuthenticatedCertificadosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/clientes': {
+      id: '/_authenticated/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof AuthenticatedClientesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/configuracoes': {
@@ -286,11 +400,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/contratos': {
+      id: '/_authenticated/contratos'
+      path: '/contratos'
+      fullPath: '/contratos'
+      preLoaderRoute: typeof AuthenticatedContratosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/documentos': {
+      id: '/_authenticated/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof AuthenticatedDocumentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/emissores': {
@@ -342,6 +470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPassivosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/producao': {
+      id: '/_authenticated/producao'
+      path: '/producao'
+      fullPath: '/producao'
+      preLoaderRoute: typeof AuthenticatedProducaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/produtos': {
       id: '/_authenticated/produtos'
       path: '/produtos'
@@ -361,6 +496,27 @@ declare module '@tanstack/react-router' {
       path: '/usuarios'
       fullPath: '/usuarios'
       preLoaderRoute: typeof AuthenticatedUsuariosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/documentos': {
+      id: '/_authenticated/contabilidade/documentos'
+      path: '/contabilidade/documentos'
+      fullPath: '/contabilidade/documentos'
+      preLoaderRoute: typeof AuthenticatedContabilidadeDocumentosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/extratos': {
+      id: '/_authenticated/contabilidade/extratos'
+      path: '/contabilidade/extratos'
+      fullPath: '/contabilidade/extratos'
+      preLoaderRoute: typeof AuthenticatedContabilidadeExtratosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contabilidade/relatorios': {
+      id: '/_authenticated/contabilidade/relatorios'
+      path: '/contabilidade/relatorios'
+      fullPath: '/contabilidade/relatorios'
+      preLoaderRoute: typeof AuthenticatedContabilidadeRelatoriosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/financeiro/conciliacao': {
@@ -398,9 +554,13 @@ const AuthenticatedFinanceiroRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAssinaturasRoute: typeof AuthenticatedAssinaturasRoute
   AuthenticatedCertificadosRoute: typeof AuthenticatedCertificadosRoute
+  AuthenticatedClientesRoute: typeof AuthenticatedClientesRoute
   AuthenticatedConfiguracoesRoute: typeof AuthenticatedConfiguracoesRoute
+  AuthenticatedContratosRoute: typeof AuthenticatedContratosRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEmissoresRoute: typeof AuthenticatedEmissoresRoute
   AuthenticatedEstoqueRoute: typeof AuthenticatedEstoqueRoute
   AuthenticatedFazendasRoute: typeof AuthenticatedFazendasRoute
@@ -408,15 +568,23 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMaquinarioRoute: typeof AuthenticatedMaquinarioRoute
   AuthenticatedNotasFiscaisRoute: typeof AuthenticatedNotasFiscaisRoute
   AuthenticatedPassivosRoute: typeof AuthenticatedPassivosRoute
+  AuthenticatedProducaoRoute: typeof AuthenticatedProducaoRoute
   AuthenticatedProdutosRoute: typeof AuthenticatedProdutosRoute
   AuthenticatedRelatoriosRoute: typeof AuthenticatedRelatoriosRoute
   AuthenticatedUsuariosRoute: typeof AuthenticatedUsuariosRoute
+  AuthenticatedContabilidadeDocumentosRoute: typeof AuthenticatedContabilidadeDocumentosRoute
+  AuthenticatedContabilidadeExtratosRoute: typeof AuthenticatedContabilidadeExtratosRoute
+  AuthenticatedContabilidadeRelatoriosRoute: typeof AuthenticatedContabilidadeRelatoriosRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAssinaturasRoute: AuthenticatedAssinaturasRoute,
   AuthenticatedCertificadosRoute: AuthenticatedCertificadosRoute,
+  AuthenticatedClientesRoute: AuthenticatedClientesRoute,
   AuthenticatedConfiguracoesRoute: AuthenticatedConfiguracoesRoute,
+  AuthenticatedContratosRoute: AuthenticatedContratosRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEmissoresRoute: AuthenticatedEmissoresRoute,
   AuthenticatedEstoqueRoute: AuthenticatedEstoqueRoute,
   AuthenticatedFazendasRoute: AuthenticatedFazendasRoute,
@@ -424,9 +592,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMaquinarioRoute: AuthenticatedMaquinarioRoute,
   AuthenticatedNotasFiscaisRoute: AuthenticatedNotasFiscaisRoute,
   AuthenticatedPassivosRoute: AuthenticatedPassivosRoute,
+  AuthenticatedProducaoRoute: AuthenticatedProducaoRoute,
   AuthenticatedProdutosRoute: AuthenticatedProdutosRoute,
   AuthenticatedRelatoriosRoute: AuthenticatedRelatoriosRoute,
   AuthenticatedUsuariosRoute: AuthenticatedUsuariosRoute,
+  AuthenticatedContabilidadeDocumentosRoute:
+    AuthenticatedContabilidadeDocumentosRoute,
+  AuthenticatedContabilidadeExtratosRoute:
+    AuthenticatedContabilidadeExtratosRoute,
+  AuthenticatedContabilidadeRelatoriosRoute:
+    AuthenticatedContabilidadeRelatoriosRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

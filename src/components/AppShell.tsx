@@ -4,14 +4,17 @@ import {
   Building2,
   Calculator,
   FileSpreadsheet,
+  FileText,
+  FolderOpen,
+  Handshake,
   Landmark,
   LayoutDashboard,
   LogOut,
   Menu,
   Moon,
-  Package,
   PanelLeftClose,
   PanelLeftOpen,
+  PenLine,
   Scale,
   ScrollText,
   Search,
@@ -20,9 +23,10 @@ import {
   Sprout,
   Sun,
   Tractor,
+  UserCircle,
   Users,
   Wallet,
-  Warehouse,
+  Wheat,
   X,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
@@ -51,6 +55,14 @@ export const NAV = [
     items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
+    group: "Operação",
+    items: [
+      { to: "/fazendas", label: "Fazendas & Áreas", icon: Sprout },
+      { to: "/producao", label: "Produção & Safras", icon: Wheat },
+      { to: "/maquinario", label: "Maquinário", icon: Tractor },
+    ],
+  },
+  {
     group: "Financeiro",
     items: [
       { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
@@ -60,30 +72,42 @@ export const NAV = [
     ],
   },
   {
-    group: "Cadastros",
-    items: [
-      { to: "/emissores", label: "Emissores", icon: Building2 },
-      { to: "/fazendas", label: "Fazendas", icon: Sprout },
-      { to: "/maquinario", label: "Maquinário", icon: Tractor },
-      { to: "/certificados", label: "Certificados", icon: ShieldCheck },
-      { to: "/produtos", label: "Produtos", icon: Package },
-    ],
-  },
-  {
-    group: "Operação",
+    group: "Fiscal",
     items: [
       { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
-      { to: "/estoque", label: "Estoque", icon: Warehouse },
-      { to: "/relatorios", label: "Relatórios", icon: FileSpreadsheet },
+      { to: "/clientes", label: "Clientes & Compradores", icon: UserCircle },
+      { to: "/contratos", label: "Contratos · Tradings", icon: Handshake },
     ],
   },
   {
-    group: "Administração",
+    group: "Documentos",
     items: [
-      { to: "/usuarios", label: "Usuários", icon: Users },
-      { to: "/configuracoes", label: "Configurações", icon: Settings },
+      { to: "/documentos", label: "Biblioteca", icon: FolderOpen },
+      { to: "/assinaturas", label: "Assinatura digital", icon: PenLine },
     ],
   },
+  {
+    group: "Configurações",
+    items: [
+      { to: "/emissores", label: "Emissores", icon: Building2 },
+      { to: "/certificados", label: "Certificados", icon: ShieldCheck },
+      { to: "/usuarios", label: "Usuários & Acessos", icon: Users },
+      { to: "/configuracoes", label: "Parâmetros", icon: Settings },
+    ],
+  },
+] as const;
+
+/** Rotas visíveis no contexto Contabilidade (HRM) */
+export const NAV_CONTABILIDADE = [
+  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
+  { to: "/financeiro/xml", label: "Importação XML", icon: FileSpreadsheet },
+  { to: "/financeiro/conciliacao", label: "Conciliação", icon: Landmark },
+  { to: "/passivos", label: "Passivos · SCR", icon: Scale },
+  { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
+  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
+  { to: "/contabilidade/relatorios", label: "Relatórios mensais", icon: FileSpreadsheet },
+  { to: "/contabilidade/documentos", label: "Documentos fiscais", icon: FileText },
 ] as const;
 
 const PERFIL_LABEL: Record<string, string> = {
@@ -119,23 +143,18 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  const navVisivel = NAV.map((section) => ({
-    ...section,
-    items: section.items.filter((item) => {
-      if (ctx === "contabilidade") {
-        return (
-          item.to === "/dashboard" ||
-          item.to === "/financeiro" ||
-          item.to.startsWith("/financeiro/") ||
-          item.to === "/passivos" ||
-          item.to === "/notas-fiscais" ||
-          item.to === "/relatorios" ||
-          item.to === "/certificados"
-        );
-      }
-      return pode(item.to, "ver");
-    }),
-  })).filter((section) => section.items.length > 0);
+  const navVisivel =
+    ctx === "contabilidade"
+      ? [
+          {
+            group: "Contabilidade",
+            items: NAV_CONTABILIDADE.filter((item) => pode(item.to, "ver")),
+          },
+        ].filter((section) => section.items.length > 0)
+      : NAV.map((section) => ({
+          ...section,
+          items: section.items.filter((item) => pode(item.to, "ver")),
+        })).filter((section) => section.items.length > 0);
 
   const sair = async () => {
     await supabase.auth.signOut();
