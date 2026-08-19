@@ -18,6 +18,8 @@ type LayoutAbasFiltrosProps = {
   /** Cards de filtro sempre visíveis */
   filtros: ReactNode;
   children: ReactNode;
+  /** false = conteúdo livre abaixo da barra (gráficos + tabela) */
+  encapsular?: boolean;
 };
 
 /** Card compacto com um dropdown */
@@ -34,7 +36,7 @@ export function FiltroCard({ label, children }: { label: string; children: React
 
 /**
  * Sub-abas à esquerda e filtros compactos sempre visíveis à direita,
- * acima da tabela — sem botão para abrir.
+ * acima do conteúdo — sem botão para abrir.
  */
 export function LayoutAbasFiltros({
   title,
@@ -43,6 +45,7 @@ export function LayoutAbasFiltros({
   onAbaChange,
   filtros,
   children,
+  encapsular = true,
 }: LayoutAbasFiltrosProps) {
   return (
     <div className="space-y-4">
@@ -80,12 +83,18 @@ export function LayoutAbasFiltros({
         <div className="flex flex-wrap items-center justify-end gap-2">{filtros}</div>
       </div>
 
-      <div
-        key={abaAtiva ?? "conteudo"}
-        className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm duration-300 animate-in fade-in-0 slide-in-from-left-2"
-      >
-        <div className="p-4 sm:p-5">{children}</div>
-      </div>
+      {encapsular ? (
+        <div
+          key={abaAtiva ?? "conteudo"}
+          className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm duration-300 animate-in fade-in-0 slide-in-from-left-2"
+        >
+          <div className="p-4 sm:p-5">{children}</div>
+        </div>
+      ) : (
+        <div key={abaAtiva ?? "conteudo"} className="space-y-6 duration-300 animate-in fade-in-0">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
