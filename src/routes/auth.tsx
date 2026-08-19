@@ -55,7 +55,9 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/dashboard" });
+      if (!data.session) return;
+      const mustChange = data.session.user.user_metadata?.must_change_password;
+      navigate({ to: mustChange ? "/trocar-senha" : "/dashboard" });
     });
   }, [navigate]);
 
@@ -86,13 +88,14 @@ function AuthPage() {
   const entrar = async (e: React.FormEvent) => {
     e.preventDefault();
     setCarregando(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password: senha });
     setCarregando(false);
     if (error) {
       toast.error(error.message);
       return;
     }
-    navigate({ to: "/dashboard" });
+    const mustChange = data.user?.user_metadata?.must_change_password;
+    navigate({ to: mustChange ? "/trocar-senha" : "/dashboard" });
   };
 
   const recuperarSenha = async () => {
