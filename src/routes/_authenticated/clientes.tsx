@@ -140,9 +140,8 @@ function ClientesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Fiscal · Comercial"
         title="Clientes & Compradores"
-        description="Tradings e esmagadoras da ficha cadastral — destino da produção. Base para negociações, validação de pagamento e emissão de NF."
+        description="Tradings e esmagadoras — destino da produção. Base para negociações, validação de pagamento e emissão de NF."
         action={
           <div className="flex flex-wrap gap-2">
             <Select value={safraFiltro} onValueChange={setSafraFiltro}>

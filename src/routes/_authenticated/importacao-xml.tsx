@@ -144,9 +144,8 @@ function ImportacaoXmlPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Fiscal · Importação"
         title="Importação XML"
-        description="Upload manual de NF-e. Categorização automática revisável (SEFAZ/n8n depois)."
+        description="Upload manual de NF-e. Categorização automática revisável."
       />
 
       <SectionCard

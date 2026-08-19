@@ -6,7 +6,7 @@ import { SectionCard } from "@/components/design-system";
 export function EmBreve({ titulo, descricao }: { titulo: string; descricao: string }) {
   return (
     <div>
-      <PageHeader breadcrumb="Módulo reservado" title={titulo} description={descricao} />
+      <PageHeader title={titulo} description={descricao} />
       <SectionCard title="Em construção">
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <span className="rounded-2xl bg-surface-soft p-4 text-primary">

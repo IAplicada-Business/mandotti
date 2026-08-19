@@ -93,9 +93,8 @@ function NotasFiscaisPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Fiscal"
         title="Notas fiscais"
-        description="Estrutura para emissão após validação de pagamento (Pix/transferência). Compradores e negociações vêm da planilha."
+        description="Emissão após validação de pagamento (Pix/transferência). Compradores e negociações vêm da planilha."
         action={
           <Link
             to="/clientes"

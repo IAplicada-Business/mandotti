@@ -55,7 +55,6 @@ function ExtratosContabilidadePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Contabilidade · Bancário"
         title="Extratos bancários"
         description="Somente leitura. Extratos são importados pelo time Mandotti em Gestão → Conciliação."
         action={

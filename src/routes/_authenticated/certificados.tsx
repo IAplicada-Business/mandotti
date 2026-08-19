@@ -34,7 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
-import { resumoEmissores, useEmissor } from "@/lib/emissor-context";
+import { useEmissor } from "@/lib/emissor-context";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/certificados")({
@@ -164,7 +164,7 @@ function CertificadosPage() {
       <div>
         <PageHeader
           title="Certificados"
-          description="Selecione ao menos um emissor no topo da tela."
+          description="Certificados digitais A1 dos emissores selecionados."
         />
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
@@ -178,11 +178,8 @@ function CertificadosPage() {
   return (
     <div>
       <PageHeader
-        title="Certificados digitais"
-        description={`Certificados de ${resumoEmissores(
-          emissores.filter((e) => emissorIds.includes(e.id)),
-          emissores.length,
-        )}.`}
+        title="Certificados"
+        description="Certificados digitais A1 dos emissores selecionados."
         action={
           podeEditar ? (
             <Button

@@ -247,7 +247,10 @@ function UsuariosPage() {
   if (!loading && !isAdmin) {
     return (
       <div>
-        <PageHeader title="Usuários" description="Área restrita a administradores." />
+        <PageHeader
+          title="Usuários & Acessos"
+          description="Perfis cadastrados e seus acessos por tela."
+        />
         <Card>
           <CardContent className="py-16 text-center text-muted-foreground">
             Você não tem permissão para gerenciar usuários.
@@ -260,7 +263,7 @@ function UsuariosPage() {
   return (
     <div>
       <PageHeader
-        title="Usuários"
+        title="Usuários & Acessos"
         description="Perfis cadastrados e seus acessos por tela."
         action={
           <Button onClick={() => setConvidarAberto(true)}>

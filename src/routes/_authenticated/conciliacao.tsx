@@ -190,9 +190,8 @@ function ConciliacaoPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Financeiro · Extratos"
-        title="Conciliação bancária"
-        description="Importação manual de extrato (CSV). Sem Open Finance — cruzamento nota × Pix/transferência."
+        title="Conciliação"
+        description="Importação manual de extrato (CSV). Cruzamento nota × Pix/transferência."
       />
 
       <div className="grid gap-4 sm:grid-cols-3">

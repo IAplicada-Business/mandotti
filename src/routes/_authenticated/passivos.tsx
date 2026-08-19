@@ -219,7 +219,10 @@ function PassivosPage() {
   if (!emissorIds.length) {
     return (
       <div>
-        <PageHeader breadcrumb="Financeiro" title="Passivos · SCR" />
+        <PageHeader
+          title="Passivos · SCR"
+          description="Contratos da ficha cadastral — visão por titular, banco e ano."
+        />
         <SectionCard title="Selecione emissores">
           <p className="py-8 text-center text-sm text-muted-foreground">
             Selecione ao menos um emissor no topo para ver os contratos.
@@ -232,7 +235,6 @@ function PassivosPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Financeiro · SCR"
         title="Passivos · SCR"
         description="Contratos da ficha cadastral — visão por titular, banco e ano."
       />

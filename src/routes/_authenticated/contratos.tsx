@@ -66,9 +66,8 @@ function ContratosPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Fiscal · Contratos"
         title="Contratos · Tradings"
-        description="Parceiros comerciais e destinos da produção (ficha cadastral). Negociações forward entram aqui; dívidas bancárias ficam em Passivos · SCR."
+        description="Parceiros comerciais e destinos da produção. Negociações forward entram aqui; dívidas bancárias ficam em Passivos · SCR."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

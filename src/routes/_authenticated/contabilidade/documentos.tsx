@@ -140,7 +140,6 @@ function DocumentosContabilidadePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Contabilidade · Fiscal"
         title="Documentos fiscais"
         description="Importação de XML pela contabilidade. Lançamentos gerados alimentam gestão e exportações — sem duplicar cadastro manual."
       />

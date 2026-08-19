@@ -120,8 +120,7 @@ function PatrimonioPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        breadcrumb="Visão geral · Patrimônio"
-        title="Patrimônio · Grupo"
+        title="Patrimônio"
         description="Composição patrimonial da ficha cadastral. Detalhes operacionais ficam em Maquinário, Fazendas e Passivos · SCR."
       />
 
