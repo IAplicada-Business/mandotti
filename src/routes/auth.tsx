@@ -25,14 +25,23 @@ export const Route = createFileRoute("/auth")({
 });
 
 /**
- * Bolhas de fundo: posições fixas (sem Math.random) para não divergir entre
- * renders e para manter a composição alinhada à marca.
+ * Fundo em duas camadas, com posições fixas (sem Math.random) para não divergir
+ * entre renders: brilhos difusos de atmosfera e, sobre eles, um aglomerado de
+ * gotas que se sobrepõem para o filtro gooey fundi-las numa massa líquida.
  */
-const AMBIENT = [
-  { size: 520, left: 4, top: 6, delay: -4, duration: 26, from: "#3f7d49", to: "#16301a" },
-  { size: 420, left: 76, top: 12, delay: -12, duration: 32, from: "#7fa832", to: "#2e6636" },
-  { size: 460, left: 64, top: 72, delay: -18, duration: 29, from: "#2e6636", to: "#0d2412" },
-  { size: 280, left: 12, top: 76, delay: -8, duration: 24, from: "#c99012", to: "#6e5537" },
+const GLOWS = [
+  { size: 46, left: -6, top: -4, delay: -4, duration: 30, tint: "rgba(63,125,73,0.55)" },
+  { size: 38, left: 72, top: 4, delay: -13, duration: 34, tint: "rgba(127,168,50,0.34)" },
+  { size: 42, left: 60, top: 66, delay: -19, duration: 31, tint: "rgba(46,102,54,0.5)" },
+  { size: 26, left: 4, top: 72, delay: -8, duration: 26, tint: "rgba(201,144,18,0.24)" },
+];
+
+const DROPS = [
+  { size: 250, left: 22, top: 34, delay: -3, duration: 19, from: "#4d8f4f", to: "#1d4423" },
+  { size: 190, left: 34, top: 62, delay: -9, duration: 23, from: "#7fa832", to: "#2e6636" },
+  { size: 210, left: 70, top: 40, delay: -14, duration: 21, from: "#3f7d49", to: "#16301a" },
+  { size: 160, left: 60, top: 68, delay: -6, duration: 17, from: "#6b9c3a", to: "#26512b" },
+  { size: 130, left: 82, top: 22, delay: -11, duration: 25, from: "#c99012", to: "#6e5537" },
 ];
 
 type Modo = "entrar" | "cadastrar";
@@ -45,7 +54,7 @@ function AuthPage() {
   const [nome, setNome] = useState("");
   const [carregando, setCarregando] = useState(false);
 
-  const ambientRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const parallaxRefs = useRef<(HTMLDivElement | null)[]>([]);
   const markRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -62,9 +71,9 @@ function AuthPage() {
       const x = e.clientX / window.innerWidth;
       const y = e.clientY / window.innerHeight;
 
-      ambientRefs.current.forEach((blob, index) => {
+      parallaxRefs.current.forEach((blob, index) => {
         if (!blob) return;
-        const speed = (index + 1) * 18;
+        const speed = (index + 1) * 14;
         blob.style.marginLeft = `${(x - 0.5) * speed}px`;
         blob.style.marginTop = `${(y - 0.5) * speed}px`;
       });
@@ -143,22 +152,40 @@ function AuthPage() {
         </defs>
       </svg>
 
-      <div className="ambient" aria-hidden="true">
-        {AMBIENT.map((blob, index) => (
+      <div className="glows" aria-hidden="true">
+        {GLOWS.map((glow, index) => (
           <div
             key={index}
             ref={(el) => {
-              ambientRefs.current[index] = el;
+              parallaxRefs.current[index] = el;
             }}
-            className="ambient-blob"
+            className="glow"
             style={{
-              width: `${blob.size}px`,
-              height: `${blob.size}px`,
-              left: `${blob.left}%`,
-              top: `${blob.top}%`,
-              animationDelay: `${blob.delay}s`,
-              animationDuration: `${blob.duration}s`,
-              background: `linear-gradient(135deg, ${blob.from}, ${blob.to})`,
+              width: `${glow.size}vmax`,
+              height: `${glow.size}vmax`,
+              left: `${glow.left}%`,
+              top: `${glow.top}%`,
+              animationDelay: `${glow.delay}s`,
+              animationDuration: `${glow.duration}s`,
+              background: `radial-gradient(circle at 38% 32%, ${glow.tint}, transparent 70%)`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="ambient" aria-hidden="true">
+        {DROPS.map((drop, index) => (
+          <div
+            key={index}
+            className="ambient-drop"
+            style={{
+              width: `${drop.size}px`,
+              height: `${drop.size}px`,
+              left: `${drop.left}%`,
+              top: `${drop.top}%`,
+              animationDelay: `${drop.delay}s`,
+              animationDuration: `${drop.duration}s`,
+              background: `linear-gradient(135deg, ${drop.from}, ${drop.to})`,
             }}
           />
         ))}
@@ -320,94 +347,123 @@ const AUTH_CSS = `
 
 .mandotti-auth .svg-filter-hidden { position: absolute; width: 0; height: 0; }
 
-/* ---------- Fundo ---------- */
-.mandotti-auth .ambient {
+/* ---------- Fundo: brilhos difusos ---------- */
+.mandotti-auth .glows {
   position: absolute;
   inset: 0;
   z-index: 0;
-  filter: var(--m-goo);
-  opacity: 0.5;
   pointer-events: none;
 }
 
-.mandotti-auth .ambient-blob {
+.mandotti-auth .glow {
   position: absolute;
   border-radius: 50%;
-  filter: blur(26px);
+  filter: blur(40px);
+  animation: mandotti-float 30s infinite alternate ease-in-out;
+  transition: margin 0.3s ease-out;
+}
+
+/* ---------- Fundo: massa líquida ---------- */
+.mandotti-auth .ambient {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  /* As gotas se sobrepõem: o gooey funde os contornos em vez de recortá-los */
+  filter: var(--m-goo) blur(2px);
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.mandotti-auth .ambient-drop {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(18px);
   box-shadow:
-    inset -14px -14px 30px rgba(4, 16, 8, 0.6),
-    12px 12px 40px rgba(127, 168, 50, 0.12);
-  animation: mandotti-float 26s infinite alternate ease-in-out;
-  transition: margin 0.25s ease-out;
+    inset -18px -18px 40px rgba(4, 16, 8, 0.55),
+    14px 14px 50px rgba(127, 168, 50, 0.14);
+  animation: mandotti-float 22s infinite alternate ease-in-out;
 }
 
 @keyframes mandotti-float {
   0%   { transform: translate(0, 0) scale(1); }
-  33%  { transform: translate(6vw, 8vh) scale(1.15); }
-  66%  { transform: translate(-4vw, 5vh) scale(0.9); }
-  100% { transform: translate(3vw, -6vh) scale(1.08); }
+  33%  { transform: translate(5vw, 7vh) scale(1.14); }
+  66%  { transform: translate(-4vw, 4vh) scale(0.9); }
+  100% { transform: translate(3vw, -5vh) scale(1.07); }
 }
 
 /* ---------- Marca 3D + massa líquida alinhada ao ícone ---------- */
 .mandotti-auth .brand-stage {
   position: relative;
-  width: 168px;
-  height: 168px;
-  margin-bottom: 28px;
+  width: 176px;
+  height: 176px;
+  margin-bottom: 30px;
+}
+
+/* Contraste sob a marca, para as nervuras claras não sumirem na massa verde */
+.mandotti-auth .brand-stage::after {
+  content: "";
+  position: absolute;
+  inset: -14%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 46%, rgba(6, 18, 10, 0.72), transparent 66%);
+  z-index: 1;
 }
 
 .mandotti-auth .liquid {
   position: absolute;
-  inset: -18%;
+  inset: -12%;
   filter: var(--m-goo);
-  opacity: 0.85;
+  opacity: 0.58;
 }
 
 .mandotti-auth .drop {
   position: absolute;
   border-radius: 50%;
-  filter: blur(6px);
+  filter: blur(5px);
   animation: mandotti-pulse 9s infinite alternate ease-in-out;
 }
 
-/* Folha */
+/*
+ * Cada gota espelha a geometria do SVG da marca (viewBox 0 0 120 120), então a
+ * massa líquida funciona como aura do ícone em vez de uma silhueta paralela.
+ * Folha: centro 60/48, 56x88. Curvas: centros 27/91 e 93/91, 40x38.
+ * Semente: centro 60/95, 19x27.
+ */
 .mandotti-auth .drop-leaf {
   left: 50%;
-  top: 30%;
-  width: 44%;
-  height: 62%;
+  top: 40%;
+  width: 52%;
+  height: 80%;
   transform: translate(-50%, -50%);
-  border-radius: 50% 50% 46% 46% / 64% 64% 36% 36%;
+  border-radius: 50% 50% 46% 46% / 62% 62% 38% 38%;
   background: linear-gradient(150deg, var(--m-leaf), var(--m-green) 58%, var(--m-green-deep));
 }
 
-/* Curvas de plantio */
 .mandotti-auth .drop-arc {
-  top: 74%;
-  width: 46%;
-  height: 34%;
+  top: 76%;
+  width: 40%;
+  height: 33%;
   background: linear-gradient(120deg, var(--m-green), var(--m-green-deep));
   animation-duration: 11s;
 }
 
 .mandotti-auth .drop-arc-left {
-  left: 16%;
+  left: 22%;
   transform: translate(-50%, -50%);
   border-radius: 60% 40% 46% 54% / 58% 52% 48% 42%;
 }
 
 .mandotti-auth .drop-arc-right {
-  left: 84%;
+  left: 78%;
   transform: translate(-50%, -50%);
   border-radius: 40% 60% 54% 46% / 52% 58% 42% 48%;
 }
 
-/* Semente */
 .mandotti-auth .drop-seed {
   left: 50%;
-  top: 84%;
+  top: 79%;
   width: 20%;
-  height: 26%;
+  height: 27%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: radial-gradient(circle at 34% 28%, #f2cd7a, var(--m-amber) 60%, #8f6207);
@@ -662,11 +718,12 @@ const AUTH_CSS = `
 }
 
 @media (min-width: 900px) {
-  .mandotti-auth .brand-stage { width: 196px; height: 196px; }
+  .mandotti-auth .brand-stage { width: 206px; height: 206px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mandotti-auth .ambient-blob,
+  .mandotti-auth .glow,
+  .mandotti-auth .ambient-drop,
   .mandotti-auth .drop,
   .mandotti-auth .mark-tilt { animation: none; }
   .mandotti-auth .form-group,
