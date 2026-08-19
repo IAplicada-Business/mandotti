@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -262,6 +263,8 @@ function ConciliacaoPage() {
             Nenhum extrato importado.
           </p>
         ) : (
+          <TabelaPreview rows={movimentos}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -274,7 +277,7 @@ function ConciliacaoPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {movimentos.map((m) => (
+              {visiveis.map((m) => (
                 <TableRow key={m.id}>
                   <TableCell>{formatDateBR(m.data_movimento)}</TableCell>
                   <TableCell className="max-w-[260px] truncate">{m.descricao}</TableCell>
@@ -324,6 +327,8 @@ function ConciliacaoPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
     </div>

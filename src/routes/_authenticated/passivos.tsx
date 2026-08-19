@@ -13,7 +13,13 @@ import {
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import {
+  CabecalhoOrdenavel,
+  TabelaPreview,
+  type DirecaoOrdem,
+} from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -56,9 +62,32 @@ const PERIODOS = [
   { key: "sem_cronograma", label: "Sem cronograma" },
 ] as const;
 
+type PassivoRow = {
+  id: string;
+  emissor_id: string;
+  instituicao: string;
+  contrato_finalidade: string;
+  taxa_juros: number | null;
+  vencimento_final: string | null;
+  saldo_devedor: number | null;
+  total_projetado: number | null;
+  ate_jun_2026: number;
+  jul26_jun27: number;
+  jul27_jun28: number;
+  jul28_jun29: number;
+  jul29_jun30: number;
+  apos_jun_2030: number;
+  sem_cronograma: number;
+};
+
+type Ordenacao = "saldo" | "projetado" | "vencimento" | "instituicao" | "titular" | "taxa";
+
 function PassivosPage() {
   const { emissores, emissorIds } = useEmissor();
-  const [banco, setBanco] = useState<string>("todos");
+  const [banco, setBanco] = useState("todos");
+  const [titular, setTitular] = useState("todos");
+  const [ordenacao, setOrdenacao] = useState<Ordenacao>("saldo");
+  const [direcao, setDirecao] = useState<DirecaoOrdem>("desc");
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["passivos", emissorIds],
@@ -71,19 +100,71 @@ function PassivosPage() {
         .in("emissor_id", emissorIds)
         .order("saldo_devedor", { ascending: false });
       if (error) throw error;
-      return data;
+      return data as PassivoRow[];
     },
   });
+
+  const nomeTitular = (emissorId: string) =>
+    emissores.find((e) => e.id === emissorId)?.nome_fantasia ||
+    emissores.find((e) => e.id === emissorId)?.razao_social ||
+    "—";
 
   const bancos = useMemo(
     () => [...new Set(data.map((p) => p.instituicao).filter(Boolean))].sort(),
     [data],
   );
 
-  const filtrados = useMemo(
-    () => (banco === "todos" ? data : data.filter((p) => p.instituicao === banco)),
-    [data, banco],
+  const titulares = useMemo(
+    () =>
+      emissores
+        .filter((e) => emissorIds.includes(e.id) && data.some((p) => p.emissor_id === e.id))
+        .map((e) => ({
+          id: e.id,
+          nome: e.nome_fantasia || e.razao_social || e.id,
+        }))
+        .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR")),
+    [data, emissores, emissorIds],
   );
+
+  const filtrados = useMemo(() => {
+    let rows = data;
+    if (banco !== "todos") rows = rows.filter((p) => p.instituicao === banco);
+    if (titular !== "todos") rows = rows.filter((p) => p.emissor_id === titular);
+
+    const copia = [...rows];
+    const fator = direcao === "asc" ? 1 : -1;
+    copia.sort((a, b) => {
+      switch (ordenacao) {
+        case "saldo":
+          return fator * ((a.saldo_devedor ?? 0) - (b.saldo_devedor ?? 0));
+        case "projetado":
+          return fator * ((a.total_projetado ?? 0) - (b.total_projetado ?? 0));
+        case "taxa":
+          return fator * ((a.taxa_juros ?? 0) - (b.taxa_juros ?? 0));
+        case "vencimento": {
+          const da = a.vencimento_final ?? "";
+          const db = b.vencimento_final ?? "";
+          return fator * da.localeCompare(db);
+        }
+        case "instituicao":
+          return fator * a.instituicao.localeCompare(b.instituicao, "pt-BR");
+        case "titular":
+          return fator * nomeTitular(a.emissor_id).localeCompare(nomeTitular(b.emissor_id), "pt-BR");
+        default:
+          return 0;
+      }
+    });
+    return copia;
+  }, [data, banco, titular, ordenacao, direcao, emissores]);
+
+  const ordenarPor = (campo: Ordenacao) => {
+    if (ordenacao === campo) {
+      setDirecao((d) => (d === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setOrdenacao(campo);
+    setDirecao(campo === "instituicao" || campo === "titular" ? "asc" : "desc");
+  };
 
   const saldoTotal = filtrados.reduce((acc, p) => acc + (p.saldo_devedor ?? 0), 0);
   const projetado = filtrados.reduce((acc, p) => acc + (p.total_projetado ?? 0), 0);
@@ -91,13 +172,12 @@ function PassivosPage() {
   const porTitular = useMemo(() => {
     const map = new Map<string, number>();
     for (const p of filtrados) {
-      const nome =
-        emissores.find((e) => e.id === p.emissor_id)?.nome_fantasia ||
-        emissores.find((e) => e.id === p.emissor_id)?.razao_social ||
-        "—";
+      const nome = nomeTitular(p.emissor_id);
       map.set(nome, (map.get(nome) ?? 0) + (p.saldo_devedor ?? 0));
     }
-    return [...map.entries()].map(([nome, valor]) => ({ nome, valor }));
+    return [...map.entries()]
+      .map(([nome, valor]) => ({ nome, valor }))
+      .sort((a, b) => b.valor - a.valor);
   }, [filtrados, emissores]);
 
   const porBanco = useMemo(() => {
@@ -138,21 +218,6 @@ function PassivosPage() {
         breadcrumb="Financeiro · SCR"
         title="Passivos · SCR"
         description="Contratos da ficha cadastral — visão por titular, banco e ano."
-        action={
-          <Select value={banco} onValueChange={setBanco}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Banco" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todos">Todos os bancos</SelectItem>
-              {bancos.map((b) => (
-                <SelectItem key={b} value={b}>
-                  {b}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -167,92 +232,216 @@ function PassivosPage() {
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <SectionCard title="Saldo por titular" description="Soma do saldo devedor atual.">
-          <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={porTitular} barSize={36}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="nome" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${Math.round(v / 1e6)}M`} />
-                <Tooltip formatter={(v: number) => formatBRL(v)} />
-                <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        <aside className="w-full shrink-0 space-y-4 rounded-2xl border border-border/80 bg-surface-soft p-4 lg:w-56">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            Filtros
+          </p>
+          <div className="space-y-2">
+            <Label className="text-xs">Titular</Label>
+            <Select value={titular} onValueChange={setTitular}>
+              <SelectTrigger>
+                <SelectValue placeholder="Titular" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos</SelectItem>
+                {titulares.map((t) => (
+                  <SelectItem key={t.id} value={t.id}>
+                    {t.nome}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </SectionCard>
-
-        <SectionCard title="Cronograma de vencimentos" description="Alocação por período (planilha).">
-          <div className="h-[240px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={cronograma} barSize={28}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="periodo" tickLine={false} axisLine={false} tick={{ fontSize: 11 }} />
-                <YAxis tickLine={false} axisLine={false} tickFormatter={(v) => `${Math.round(v / 1e6)}M`} />
-                <Tooltip formatter={(v: number) => formatBRL(v)} />
-                <Bar dataKey="valor" fill="var(--chart-3)" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="space-y-2">
+            <Label className="text-xs">Instituição</Label>
+            <Select value={banco} onValueChange={setBanco}>
+              <SelectTrigger>
+                <SelectValue placeholder="Banco" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas</SelectItem>
+                {bancos.map((b) => (
+                  <SelectItem key={b} value={b}>
+                    {b}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        </SectionCard>
-      </div>
-
-      <SectionCard title="Contratos" description={`${filtrados.length} registros`}>
-        {isLoading ? (
-          <p className="text-sm text-muted-foreground">Carregando…</p>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Titular</TableHead>
-                <TableHead>Instituição</TableHead>
-                <TableHead>Contrato</TableHead>
-                <TableHead>Taxa</TableHead>
-                <TableHead>Vencimento</TableHead>
-                <TableHead className="text-right">Saldo</TableHead>
-                <TableHead className="text-right">Projetado</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtrados.map((p) => {
-                const titular =
-                  emissores.find((e) => e.id === p.emissor_id)?.nome_fantasia ||
-                  emissores.find((e) => e.id === p.emissor_id)?.razao_social ||
-                  "—";
-                return (
-                  <TableRow key={p.id}>
-                    <TableCell>
-                      <Badge variant="default">{titular}</Badge>
-                    </TableCell>
-                    <TableCell className="font-medium">{p.instituicao}</TableCell>
-                    <TableCell className="max-w-[280px] truncate">{p.contrato_finalidade}</TableCell>
-                    <TableCell className="font-mono-nums">{formatPctDecimal(p.taxa_juros)}</TableCell>
-                    <TableCell>{formatDateBR(p.vencimento_final)}</TableCell>
-                    <TableCell className="text-right font-mono-nums">
-                      {formatBRL(p.saldo_devedor)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono-nums">
-                      {formatBRL(p.total_projetado)}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
-
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {porBanco.map((b) => (
-            <div
-              key={b.nome}
-              className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-3 py-2 text-sm"
+          <div className="space-y-2 border-t border-border/60 pt-4">
+            <Label className="text-xs">Ordenar tabela</Label>
+            <Select
+              value={ordenacao}
+              onValueChange={(v) => {
+                setOrdenacao(v as Ordenacao);
+                setDirecao(v === "instituicao" || v === "titular" ? "asc" : "desc");
+              }}
             >
-              <span className="truncate font-medium">{b.nome}</span>
-              <span className="font-mono-nums text-muted-foreground">{formatBRL(b.valor)}</span>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="saldo">Saldo devedor</SelectItem>
+                <SelectItem value="projetado">Projetado</SelectItem>
+                <SelectItem value="vencimento">Vencimento</SelectItem>
+                <SelectItem value="instituicao">Instituição</SelectItem>
+                <SelectItem value="titular">Titular</SelectItem>
+                <SelectItem value="taxa">Taxa</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={direcao} onValueChange={(v) => setDirecao(v as DirecaoOrdem)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Maior → menor</SelectItem>
+                <SelectItem value="asc">Menor → maior</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1 space-y-6">
+          <div className="grid gap-4 xl:grid-cols-2">
+            <SectionCard title="Saldo por titular" description="Soma do saldo devedor atual.">
+              <div className="h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={porTitular} barSize={36}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis dataKey="nome" tickLine={false} axisLine={false} />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => `${Math.round(v / 1e6)}M`}
+                    />
+                    <Tooltip formatter={(v: number) => formatBRL(v)} />
+                    <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionCard>
+
+            <SectionCard title="Cronograma de vencimentos" description="Alocação por período (planilha).">
+              <div className="h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={cronograma} barSize={28}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+                    <XAxis
+                      dataKey="periodo"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={{ fontSize: 11 }}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tickFormatter={(v) => `${Math.round(v / 1e6)}M`}
+                    />
+                    <Tooltip formatter={(v: number) => formatBRL(v)} />
+                    <Bar dataKey="valor" fill="var(--chart-3)" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </SectionCard>
+          </div>
+
+          <SectionCard title="Contratos" description={`${filtrados.length} registros`}>
+            {isLoading ? (
+              <p className="text-sm text-muted-foreground">Carregando…</p>
+            ) : filtrados.length === 0 ? (
+              <p className="py-10 text-center text-sm text-muted-foreground">
+                Nenhum contrato com os filtros atuais.
+              </p>
+            ) : (
+              <TabelaPreview rows={filtrados}>
+                {(visiveis) => (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <CabecalhoOrdenavel
+                          label="Titular"
+                          ativo={ordenacao === "titular"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("titular")}
+                        />
+                        <CabecalhoOrdenavel
+                          label="Instituição"
+                          ativo={ordenacao === "instituicao"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("instituicao")}
+                        />
+                        <TableHead>Contrato</TableHead>
+                        <CabecalhoOrdenavel
+                          label="Taxa"
+                          ativo={ordenacao === "taxa"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("taxa")}
+                        />
+                        <CabecalhoOrdenavel
+                          label="Vencimento"
+                          ativo={ordenacao === "vencimento"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("vencimento")}
+                        />
+                        <CabecalhoOrdenavel
+                          label="Saldo"
+                          ativo={ordenacao === "saldo"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("saldo")}
+                          align="right"
+                        />
+                        <CabecalhoOrdenavel
+                          label="Projetado"
+                          ativo={ordenacao === "projetado"}
+                          direcao={direcao}
+                          onClick={() => ordenarPor("projetado")}
+                          align="right"
+                        />
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visiveis.map((p) => (
+                        <TableRow key={p.id}>
+                          <TableCell>
+                            <Badge variant="default">{nomeTitular(p.emissor_id)}</Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">{p.instituicao}</TableCell>
+                          <TableCell className="max-w-[280px] truncate">
+                            {p.contrato_finalidade}
+                          </TableCell>
+                          <TableCell className="font-mono-nums">
+                            {formatPctDecimal(p.taxa_juros)}
+                          </TableCell>
+                          <TableCell>{formatDateBR(p.vencimento_final)}</TableCell>
+                          <TableCell className="text-right font-mono-nums">
+                            {formatBRL(p.saldo_devedor)}
+                          </TableCell>
+                          <TableCell className="text-right font-mono-nums">
+                            {formatBRL(p.total_projetado)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </TabelaPreview>
+            )}
+
+            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {porBanco.map((b) => (
+                <div
+                  key={b.nome}
+                  className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-3 py-2 text-sm"
+                >
+                  <span className="truncate font-medium">{b.nome}</span>
+                  <span className="font-mono-nums text-muted-foreground">{formatBRL(b.valor)}</span>
+                </div>
+              ))}
             </div>
-          ))}
+          </SectionCard>
         </div>
-      </SectionCard>
+      </div>
     </div>
   );
 }

@@ -18,6 +18,7 @@ import {
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -380,6 +381,8 @@ function FinanceiroPage() {
             Nenhum contrato para os emissores selecionados.
           </p>
         ) : (
+          <TabelaPreview rows={passivos}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -392,7 +395,7 @@ function FinanceiroPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {passivos.slice(0, 12).map((p) => (
+              {visiveis.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>
                     {emissores.find((e) => e.id === p.emissor_id)?.nome_fantasia ||
@@ -411,6 +414,8 @@ function FinanceiroPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
 
@@ -430,6 +435,8 @@ function FinanceiroPage() {
             Nenhum lançamento operacional ainda. Use importação XML ou cadastro manual acima.
           </p>
         ) : (
+          <TabelaPreview rows={lancamentos}>
+            {(visiveis) => (
           <Table>
             <TableHeader>
               <TableRow>
@@ -442,7 +449,7 @@ function FinanceiroPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {lancamentos.map((l) => (
+              {visiveis.map((l) => (
                 <TableRow key={l.id}>
                   <TableCell>{formatDateBR(l.data_competencia)}</TableCell>
                   <TableCell>
@@ -464,6 +471,8 @@ function FinanceiroPage() {
               ))}
             </TableBody>
           </Table>
+            )}
+          </TabelaPreview>
         )}
       </SectionCard>
 
