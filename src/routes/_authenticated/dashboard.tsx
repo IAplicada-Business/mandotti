@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Building2,
@@ -158,7 +158,11 @@ function Dashboard() {
           value={formatBRL(data?.resumo?.patrimonio_total)}
           icon={Landmark}
           tone="info"
-          hint="Resumo executivo · planilha"
+          hint={
+            <Link to="/patrimonio" className="text-primary hover:underline">
+              Ver composição →
+            </Link>
+          }
         />
         <KpiCard
           label="Endividamento"

@@ -11,6 +11,7 @@ Saídas:
   supabase/seed_resumo_patrimonial.sql
   supabase/seed_patrimonio_bens.sql
   supabase/seed_grupo_contatos.sql
+  supabase/seed_cadastro_pessoas.sql
   supabase/seed_produtividade_institucional.sql
   supabase/seed_config_grupo.sql
 """
@@ -364,13 +365,80 @@ def parse_patrimonio_bens(wb: openpyxl.Workbook) -> list[dict]:
     return rows
 
 
+def _parse_date(value) -> date | None:
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return None
+
+
+def parse_cadastro_pessoas(wb: openpyxl.Workbook) -> list[dict]:
+    ws = wb["Dados Cadastrais"]
+    rows: list[dict] = []
+
+    def add(tipo: str, **fields):
+        rows.append({"tipo": tipo, "ordem": len(rows) + 1, **fields})
+
+    titular_nome = ws.cell(8, 2).value
+    if titular_nome:
+        add(
+            "titular",
+            nome=str(titular_nome).strip(),
+            email=str(ws.cell(14, 2).value).strip() if ws.cell(14, 2).value else None,
+            telefone=str(ws.cell(14, 8).value).strip() if ws.cell(14, 8).value else None,
+            endereco=str(ws.cell(18, 2).value).strip() if ws.cell(18, 2).value else None,
+            cep=str(ws.cell(20, 2).value).strip() if ws.cell(20, 2).value else None,
+            cidade=str(ws.cell(20, 7).value).strip() if ws.cell(20, 7).value else None,
+            uf="TO",
+            profissao=str(ws.cell(12, 8).value).strip() if ws.cell(12, 8).value else None,
+            data_nascimento=_parse_date(ws.cell(10, 8).value),
+            sexo="M",
+            tempo_residencia=str(ws.cell(22, 2).value).strip() if ws.cell(22, 2).value else None,
+            tipo_residencia=str(ws.cell(22, 10).value).strip() if ws.cell(22, 10).value else None,
+        )
+
+    conjuge_nome = ws.cell(32, 2).value
+    if conjuge_nome:
+        add(
+            "conjuge",
+            nome=str(conjuge_nome).strip(),
+            profissao=str(ws.cell(34, 9).value).strip() if ws.cell(34, 9).value else None,
+            data_nascimento=_parse_date(ws.cell(34, 2).value),
+        )
+
+    if ws.cell(26, 2).value or ws.cell(28, 12).value:
+        add(
+            "correspondencia",
+            nome="Correspondência / cobranças",
+            email=str(ws.cell(28, 12).value).strip() if ws.cell(28, 12).value else None,
+            endereco=str(ws.cell(26, 2).value).strip() if ws.cell(26, 2).value else None,
+            cep=str(ws.cell(28, 2).value).strip() if ws.cell(28, 2).value else None,
+            cidade=str(ws.cell(28, 7).value).strip() if ws.cell(28, 7).value else None,
+            uf="TO",
+        )
+
+    return rows
+
+
 def parse_grupo_contatos(wb: openpyxl.Workbook) -> list[dict]:
     ws = wb["Dados Cadastrais"]
     rows: list[dict] = []
     mode = None
     ordem = 0
 
-    def add(cat: str, nome: str, cidade=None, contato=None, agencia=None):
+    def add(
+        cat: str,
+        nome: str,
+        cidade=None,
+        contato=None,
+        agencia=None,
+        email=None,
+        telefone=None,
+        endereco=None,
+    ):
         nonlocal ordem
         ordem += 1
         ag = str(int(agencia)) if isinstance(agencia, (int, float)) else agencia
@@ -381,6 +449,9 @@ def parse_grupo_contatos(wb: openpyxl.Workbook) -> list[dict]:
                 "cidade": str(cidade).strip() if cidade else None,
                 "contato_nome": str(contato).strip() if contato else None,
                 "agencia": str(ag).strip() if ag else None,
+                "email": str(email).strip() if email else None,
+                "telefone": str(telefone).strip() if telefone else None,
+                "endereco": str(endereco).strip() if endereco else None,
                 "ordem": ordem,
             }
         )
@@ -402,7 +473,12 @@ def parse_grupo_contatos(wb: openpyxl.Workbook) -> list[dict]:
             continue
         if "CONDOM" in upper:
             break
-        if text.startswith("  ") or text in ("NOME DA EMPRESA", "BANCÁRIA : NOME DO BANCO", "RUA, AVENIDA, TRAVESSA, ETC"):
+        if text.startswith("  ") or text in (
+            "NOME DA EMPRESA",
+            "BANCÁRIA : NOME DO BANCO",
+            "BANCÁRIA : NOME DO BANCO ",
+            "RUA, AVENIDA, TRAVESSA, ETC",
+        ):
             continue
         if mode == "ref":
             if upper == "COMERCIAL":
@@ -416,16 +492,17 @@ def parse_grupo_contatos(wb: openpyxl.Workbook) -> list[dict]:
                     add("referencia_pessoal", str(nxt))
                 continue
             if "BANC" in upper:
-                banco = text.split(":")[-1].strip() if ":" in text else text
-                contato = ws.cell(r, 8).value
-                agencia = ws.cell(r, 12).value
-                add("referencia_bancaria", banco or "Banco", contato=contato, agencia=agencia)
+                continue
+            contato = ws.cell(r, 8).value
+            agencia = ws.cell(r, 13).value
+            if contato or agencia:
+                add("referencia_bancaria", text, contato=contato, agencia=agencia)
         elif mode == "fornecedor":
-            cidade = ws.cell(r, 11).value
+            cidade = ws.cell(r, 12).value
             if "NOME" not in upper:
                 add("fornecedor", text, cidade=cidade)
         elif mode == "destino":
-            cidade = ws.cell(r, 11).value
+            cidade = ws.cell(r, 12).value
             if "NOME" not in upper:
                 add("destino_producao", text, cidade=cidade)
     return rows
@@ -758,6 +835,37 @@ def _generic_upsert_seed(
     (out_dir / filename).write_text(content + "\n", encoding="utf-8")
 
 
+def write_cadastro_pessoas_seed(out_dir: Path, pessoas: list[dict]) -> None:
+    if not pessoas:
+        return
+    vals = []
+    for r in pessoas:
+        dn = r.get("data_nascimento")
+        dn_sql = f"'{dn.isoformat()}'::date" if dn else "null"
+        vals.append(
+            "  ("
+            + f"{sql_str(r['tipo'])}, {sql_str(r['nome'])}, {sql_str(r.get('email'))}, "
+            + f"{sql_str(r.get('telefone'))}, {sql_str(r.get('endereco'))}, {sql_str(r.get('cep'))}, "
+            + f"{sql_str(r.get('cidade'))}, {sql_str(r.get('uf'))}, {sql_str(r.get('profissao'))}, "
+            + f"{dn_sql}, {sql_str(r.get('sexo'))}, "
+            + f"{sql_str(r.get('tempo_residencia'))}, {sql_str(r.get('tipo_residencia'))}, {r['ordem']}"
+            + ")"
+        )
+    (out_dir / "seed_cadastro_pessoas.sql").write_text(
+        "\n".join(
+            [
+                "-- aba Dados Cadastrais (dados pessoais)",
+                "delete from public.cadastro_pessoas where origem = 'planilha';",
+                "insert into public.cadastro_pessoas (tipo, nome, email, telefone, endereco, cep, cidade, uf, profissao, data_nascimento, sexo, tempo_residencia, tipo_residencia, ordem) values",
+                ",\n".join(vals),
+                ";",
+            ]
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+
 def write_complement_seeds(
     out_dir: Path,
     patrimonio: list[dict],
@@ -765,6 +873,7 @@ def write_complement_seeds(
     benchmarks: list[dict],
     passivo_inst: list[dict],
     config: dict,
+    pessoas: list[dict],
 ) -> None:
     if patrimonio:
         vals = []
@@ -792,7 +901,8 @@ def write_complement_seeds(
             vals.append(
                 "  ("
                 + f"{sql_str(r['categoria'])}, {sql_str(r['nome'])}, {sql_str(r['cidade'])}, "
-                + f"{sql_str(r['contato_nome'])}, {sql_str(r['agencia'])}, {r['ordem']}"
+                + f"{sql_str(r['contato_nome'])}, {sql_str(r['agencia'])}, {sql_str(r.get('email'))}, "
+                + f"{sql_str(r.get('telefone'))}, {sql_str(r.get('endereco'))}, {r['ordem']}"
                 + ")"
             )
         (out_dir / "seed_grupo_contatos.sql").write_text(
@@ -800,7 +910,7 @@ def write_complement_seeds(
                 [
                     "-- aba Dados Cadastrais (referências, fornecedores, destinos)",
                     "delete from public.grupo_contatos where origem = 'planilha';",
-                    "insert into public.grupo_contatos (categoria, nome, cidade, contato_nome, agencia, ordem) values",
+                    "insert into public.grupo_contatos (categoria, nome, cidade, contato_nome, agencia, email, telefone, endereco, ordem) values",
                     ",\n".join(vals),
                     ";",
                 ]
@@ -864,6 +974,8 @@ def write_complement_seeds(
         encoding="utf-8",
     )
 
+    write_cadastro_pessoas_seed(out_dir, pessoas)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Importa ficha cadastral Mandotti para SQL seeds")
@@ -883,17 +995,18 @@ def main() -> None:
     patrimonio = parse_patrimonio_bens(wb)
     contatos = parse_grupo_contatos(wb)
     passivo_inst = parse_passivo_instituicao(wb)
+    pessoas = parse_cadastro_pessoas(wb)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     write_fazendas_seed(args.out_dir)
     write_maquinarios_seed(args.out_dir, maquinarios)
     write_producao_seed(args.out_dir, grupo, fazenda)
     write_resumo_seed(args.out_dir, resumo)
-    write_complement_seeds(args.out_dir, patrimonio, contatos, benchmarks, passivo_inst, config)
+    write_complement_seeds(args.out_dir, patrimonio, contatos, benchmarks, passivo_inst, config, pessoas)
 
     print(
         f"OK — {len(maquinarios)} maquinários, {len(grupo)} safras, {len(fazenda)} fazendas, "
-        f"{len(patrimonio)} bens, {len(contatos)} contatos, {len(benchmarks)} benchmarks"
+        f"{len(patrimonio)} bens, {len(contatos)} contatos, {len(pessoas)} cadastros, {len(benchmarks)} benchmarks"
     )
     print(f"Seeds em {args.out_dir.resolve()}")
 

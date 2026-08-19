@@ -7,6 +7,7 @@ import {
   FileText,
   FolderOpen,
   Handshake,
+  Home,
   Landmark,
   LayoutDashboard,
   LogOut,
@@ -52,7 +53,10 @@ import { useTheme } from "@/lib/theme-context";
 export const NAV = [
   {
     group: "Visão geral",
-    items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
+    items: [
+      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { to: "/patrimonio", label: "Patrimônio", icon: Home },
+    ],
   },
   {
     group: "Operação",
