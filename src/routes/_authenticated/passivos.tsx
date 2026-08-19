@@ -10,13 +10,13 @@ import {
   TimelineBarChart,
 } from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import {
   CabecalhoOrdenavel,
   TabelaPreview,
   type DirecaoOrdem,
 } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -251,182 +251,179 @@ function PassivosPage() {
         />
       </div>
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        <aside className="w-full shrink-0 space-y-4 rounded-2xl border border-border/80 bg-surface-soft p-4 lg:w-56">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            Filtros
-          </p>
-          <div className="space-y-2">
-            <Label className="text-xs">Titular</Label>
-            <Select value={titular} onValueChange={setTitular}>
-              <SelectTrigger>
-                <SelectValue placeholder="Titular" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                {titulares.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label className="text-xs">Instituição</Label>
-            <Select value={banco} onValueChange={setBanco}>
-              <SelectTrigger>
-                <SelectValue placeholder="Banco" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas</SelectItem>
-                {bancos.map((b) => (
-                  <SelectItem key={b} value={b}>
-                    {b}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2 border-t border-border/60 pt-4">
-            <Label className="text-xs">Ordenar tabela</Label>
-            <Select
-              value={ordenacao}
-              onValueChange={(v) => {
-                setOrdenacao(v as Ordenacao);
-                setDirecao(v === "instituicao" || v === "titular" ? "asc" : "desc");
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="saldo">Saldo devedor</SelectItem>
-                <SelectItem value="projetado">Projetado</SelectItem>
-                <SelectItem value="vencimento">Vencimento</SelectItem>
-                <SelectItem value="instituicao">Instituição</SelectItem>
-                <SelectItem value="titular">Titular</SelectItem>
-                <SelectItem value="taxa">Taxa</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={direcao} onValueChange={(v) => setDirecao(v as DirecaoOrdem)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desc">Maior → menor</SelectItem>
-                <SelectItem value="asc">Menor → maior</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </aside>
-
-        <div className="min-w-0 flex-1 space-y-6">
-          <div className="grid gap-4 xl:grid-cols-2">
-            <SectionCard title="Saldo por titular" description="Participação de cada emissor no passivo filtrado.">
-              <DonutDistribution items={porTitularChart} centerLabel="Saldo" emptyLabel="Sem dados por titular." />
-            </SectionCard>
-
-            <SectionCard title="Saldo por banco" description="Ranking das instituições no filtro atual.">
-              <RankedBarList items={porBancoChart} emptyLabel="Sem dados por banco." />
-            </SectionCard>
-          </div>
-
-          <SectionCard title="Cronograma de vencimentos" description="Alocação por período · planilha SCR">
-            <TimelineBarChart items={cronogramaChart} color="var(--chart-3)" emptyLabel="Sem vencimentos no filtro." />
+      <LayoutAbasFiltros
+        encapsular={false}
+        filtros={
+          <>
+            <FiltroCard label="Titular">
+              <Select value={titular} onValueChange={setTitular}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Titular" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos</SelectItem>
+                  {titulares.map((t) => (
+                    <SelectItem key={t.id} value={t.id}>
+                      {t.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FiltroCard>
+            <FiltroCard label="Instituição">
+              <Select value={banco} onValueChange={setBanco}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Banco" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todas</SelectItem>
+                  {bancos.map((b) => (
+                    <SelectItem key={b} value={b}>
+                      {b}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FiltroCard>
+            <FiltroCard label="Ordenar">
+              <Select
+                value={ordenacao}
+                onValueChange={(v) => {
+                  setOrdenacao(v as Ordenacao);
+                  setDirecao(v === "instituicao" || v === "titular" ? "asc" : "desc");
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="saldo">Saldo devedor</SelectItem>
+                  <SelectItem value="projetado">Projetado</SelectItem>
+                  <SelectItem value="vencimento">Vencimento</SelectItem>
+                  <SelectItem value="instituicao">Instituição</SelectItem>
+                  <SelectItem value="titular">Titular</SelectItem>
+                  <SelectItem value="taxa">Taxa</SelectItem>
+                </SelectContent>
+              </Select>
+            </FiltroCard>
+            <FiltroCard label="Direção">
+              <Select value={direcao} onValueChange={(v) => setDirecao(v as DirecaoOrdem)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="desc">Maior → menor</SelectItem>
+                  <SelectItem value="asc">Menor → maior</SelectItem>
+                </SelectContent>
+              </Select>
+            </FiltroCard>
+          </>
+        }
+      >
+        <div className="grid gap-4 xl:grid-cols-2">
+          <SectionCard title="Saldo por titular" description="Participação de cada emissor no passivo filtrado.">
+            <DonutDistribution items={porTitularChart} centerLabel="Saldo" emptyLabel="Sem dados por titular." />
           </SectionCard>
 
-          <SectionCard title="Contratos" description={`${filtrados.length} registros`}>
-            {isLoading ? (
-              <p className="text-sm text-muted-foreground">Carregando…</p>
-            ) : filtrados.length === 0 ? (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                Nenhum contrato com os filtros atuais.
-              </p>
-            ) : (
-              <TabelaPreview rows={filtrados}>
-                {(visiveis) => (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <CabecalhoOrdenavel
-                          label="Titular"
-                          ativo={ordenacao === "titular"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("titular")}
-                        />
-                        <CabecalhoOrdenavel
-                          label="Instituição"
-                          ativo={ordenacao === "instituicao"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("instituicao")}
-                        />
-                        <TableHead>Contrato</TableHead>
-                        <CabecalhoOrdenavel
-                          label="Taxa"
-                          ativo={ordenacao === "taxa"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("taxa")}
-                        />
-                        <CabecalhoOrdenavel
-                          label="Vencimento"
-                          ativo={ordenacao === "vencimento"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("vencimento")}
-                        />
-                        <CabecalhoOrdenavel
-                          label="Saldo"
-                          ativo={ordenacao === "saldo"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("saldo")}
-                          align="right"
-                        />
-                        <CabecalhoOrdenavel
-                          label="Projetado"
-                          ativo={ordenacao === "projetado"}
-                          direcao={direcao}
-                          onClick={() => ordenarPor("projetado")}
-                          align="right"
-                        />
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visiveis.map((p) => (
-                        <TableRow key={p.id}>
-                          <TableCell>
-                            <Badge variant="default">{nomeTitular(p.emissor_id)}</Badge>
-                          </TableCell>
-                          <TableCell className="font-medium">{p.instituicao}</TableCell>
-                          <TableCell className="max-w-[280px] truncate">
-                            {p.contrato_finalidade}
-                          </TableCell>
-                          <TableCell className="font-mono-nums">
-                            {formatPctDecimal(p.taxa_juros)}
-                          </TableCell>
-                          <TableCell>{formatDateBR(p.vencimento_final)}</TableCell>
-                          <TableCell className="text-right font-mono-nums">
-                            {formatBRL(p.saldo_devedor)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono-nums">
-                            {formatBRL(p.total_projetado)}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </TabelaPreview>
-            )}
-
-            <div className="mt-6 border-t border-border/60 pt-5">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Resumo por banco
-              </p>
-              <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />
-            </div>
+          <SectionCard title="Saldo por banco" description="Ranking das instituições no filtro atual.">
+            <RankedBarList items={porBancoChart} emptyLabel="Sem dados por banco." />
           </SectionCard>
         </div>
-      </div>
+
+        <SectionCard title="Cronograma de vencimentos" description="Alocação por período · planilha SCR">
+          <TimelineBarChart items={cronogramaChart} color="var(--chart-3)" emptyLabel="Sem vencimentos no filtro." />
+        </SectionCard>
+
+        <SectionCard title="Contratos" description={`${filtrados.length} registros`}>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Carregando…</p>
+          ) : filtrados.length === 0 ? (
+            <p className="py-10 text-center text-sm text-muted-foreground">
+              Nenhum contrato com os filtros atuais.
+            </p>
+          ) : (
+            <TabelaPreview rows={filtrados}>
+              {(visiveis) => (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <CabecalhoOrdenavel
+                        label="Titular"
+                        ativo={ordenacao === "titular"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("titular")}
+                      />
+                      <CabecalhoOrdenavel
+                        label="Instituição"
+                        ativo={ordenacao === "instituicao"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("instituicao")}
+                      />
+                      <TableHead>Contrato</TableHead>
+                      <CabecalhoOrdenavel
+                        label="Taxa"
+                        ativo={ordenacao === "taxa"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("taxa")}
+                      />
+                      <CabecalhoOrdenavel
+                        label="Vencimento"
+                        ativo={ordenacao === "vencimento"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("vencimento")}
+                      />
+                      <CabecalhoOrdenavel
+                        label="Saldo"
+                        ativo={ordenacao === "saldo"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("saldo")}
+                        align="right"
+                      />
+                      <CabecalhoOrdenavel
+                        label="Projetado"
+                        ativo={ordenacao === "projetado"}
+                        direcao={direcao}
+                        onClick={() => ordenarPor("projetado")}
+                        align="right"
+                      />
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {visiveis.map((p) => (
+                      <TableRow key={p.id}>
+                        <TableCell>
+                          <Badge variant="default">{nomeTitular(p.emissor_id)}</Badge>
+                        </TableCell>
+                        <TableCell className="font-medium">{p.instituicao}</TableCell>
+                        <TableCell className="max-w-[280px] truncate">
+                          {p.contrato_finalidade}
+                        </TableCell>
+                        <TableCell className="font-mono-nums">
+                          {formatPctDecimal(p.taxa_juros)}
+                        </TableCell>
+                        <TableCell>{formatDateBR(p.vencimento_final)}</TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {formatBRL(p.saldo_devedor)}
+                        </TableCell>
+                        <TableCell className="text-right font-mono-nums">
+                          {formatBRL(p.total_projetado)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </TabelaPreview>
+          )}
+
+          <div className="mt-6 border-t border-border/60 pt-5">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              Resumo por banco
+            </p>
+            <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />
+          </div>
+        </SectionCard>
+      </LayoutAbasFiltros>
     </div>
   );
 }
