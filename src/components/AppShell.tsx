@@ -71,8 +71,7 @@ export const NAV = [
     group: "Financeiro",
     items: [
       { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
-      { to: "/financeiro/xml", label: "Importação XML", icon: FileSpreadsheet },
-      { to: "/financeiro/conciliacao", label: "Conciliação", icon: Landmark },
+      { to: "/conciliacao", label: "Conciliação", icon: Landmark },
       { to: "/passivos", label: "Passivos · SCR", icon: Scale },
     ],
   },
@@ -80,6 +79,7 @@ export const NAV = [
     group: "Fiscal",
     items: [
       { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
+      { to: "/importacao-xml", label: "Importação XML", icon: FileSpreadsheet },
       { to: "/clientes", label: "Clientes & Compradores", icon: UserCircle },
       { to: "/contratos", label: "Contratos · Tradings", icon: Handshake },
     ],
