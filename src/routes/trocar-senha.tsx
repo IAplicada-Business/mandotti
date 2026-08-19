@@ -16,7 +16,7 @@ export const Route = createFileRoute("/trocar-senha")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    if (!data.user.user_metadata?.must_change_password) {
+    if (!data.user.user_metadata?.["must_change_password"]) {
       throw redirect({ to: "/dashboard" });
     }
     return { user: data.user };
