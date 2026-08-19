@@ -28,7 +28,7 @@ export function useSession() {
 // Espelha public.rota_e_fiscal_financeira() da migration — manter em sincronia.
 function rotaEFiscalFinanceira(rota: string) {
   return (
-    ["/financeiro", "/notas-fiscais", "/contabilidade"].includes(rota) ||
+    ["/financeiro", "/passivos", "/notas-fiscais", "/contabilidade"].includes(rota) ||
     rota.startsWith("/financeiro/") ||
     rota.startsWith("/contabilidade/")
   );

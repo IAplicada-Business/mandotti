@@ -4,6 +4,7 @@ import {
   Building2,
   Calculator,
   FileSpreadsheet,
+  Landmark,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -11,13 +12,16 @@ import {
   Package,
   PanelLeftClose,
   PanelLeftOpen,
+  Scale,
   ScrollText,
   Search,
   Settings,
   ShieldCheck,
   Sprout,
   Sun,
+  Tractor,
   Users,
+  Wallet,
   Warehouse,
   X,
 } from "lucide-react";
@@ -47,10 +51,20 @@ export const NAV = [
     items: [{ to: "/dashboard", label: "Dashboard", icon: LayoutDashboard }],
   },
   {
+    group: "Financeiro",
+    items: [
+      { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
+      { to: "/financeiro/xml", label: "Importação XML", icon: FileSpreadsheet },
+      { to: "/financeiro/conciliacao", label: "Conciliação", icon: Landmark },
+      { to: "/passivos", label: "Passivos · SCR", icon: Scale },
+    ],
+  },
+  {
     group: "Cadastros",
     items: [
       { to: "/emissores", label: "Emissores", icon: Building2 },
       { to: "/fazendas", label: "Fazendas", icon: Sprout },
+      { to: "/maquinario", label: "Maquinário", icon: Tractor },
       { to: "/certificados", label: "Certificados", icon: ShieldCheck },
       { to: "/produtos", label: "Produtos", icon: Package },
     ],
@@ -111,6 +125,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       if (ctx === "contabilidade") {
         return (
           item.to === "/dashboard" ||
+          item.to === "/financeiro" ||
+          item.to.startsWith("/financeiro/") ||
+          item.to === "/passivos" ||
           item.to === "/notas-fiscais" ||
           item.to === "/relatorios" ||
           item.to === "/certificados"
