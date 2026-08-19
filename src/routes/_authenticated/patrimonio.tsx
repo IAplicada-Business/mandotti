@@ -3,13 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import {
   ArrowRight,
   Building2,
+  ChevronDown,
+  ChevronUp,
   Home,
   Landmark,
   Scale,
   Tractor,
   Users,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import {
@@ -18,7 +20,7 @@ import {
   TimelineBarChart,
 } from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -29,7 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBRL, formatDateBR, formatPctDecimal } from "@/lib/format";
+import { formatBRL, formatPctDecimal } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/patrimonio")({
   head: () => ({
@@ -37,7 +39,7 @@ export const Route = createFileRoute("/_authenticated/patrimonio")({
       { title: "Patrimônio | Sistema Grupo Mandotti" },
       {
         name: "description",
-        content: "Composição patrimonial, bens e cadastro do Grupo Mandotti.",
+        content: "Composição patrimonial, bens e passivos do Grupo Mandotti.",
       },
     ],
   }),
@@ -53,31 +55,36 @@ const CRONOGRAMA = [
   { key: "cronograma_apos_jun30", label: "Após jun/30" },
 ] as const;
 
+const LIMITE_LINHAS = 5;
+
 function PatrimonioPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["patrimonio"],
     queryFn: async () => {
-      const [resumo, bens, pessoas, passivoInst] = await Promise.all([
+      const [resumo, bens, passivoInst, maquinarios] = await Promise.all([
         supabase.from("resumo_patrimonial").select("*").limit(1).maybeSingle(),
         supabase.from("patrimonio_bens").select("*").order("ordem"),
-        supabase.from("cadastro_pessoas").select("*").order("ordem"),
         supabase.from("passivo_por_instituicao").select("*").order("saldo_devedor", { ascending: false }),
+        supabase
+          .from("maquinarios")
+          .select("id, nome, categoria, valor_aquisicao, ordem")
+          .is("deleted_at", null)
+          .order("ordem"),
       ]);
       if (resumo.error) throw resumo.error;
       if (bens.error) throw bens.error;
-      if (pessoas.error) throw pessoas.error;
       if (passivoInst.error) throw passivoInst.error;
+      if (maquinarios.error) throw maquinarios.error;
       return {
         resumo: resumo.data,
         bens: bens.data ?? [],
-        pessoas: pessoas.data ?? [],
         passivoInst: passivoInst.data ?? [],
+        maquinarios: maquinarios.data ?? [],
       };
     },
   });
 
   const r = data?.resumo;
-  const participacoes = data?.bens.filter((b) => b.tipo === "participacao") ?? [];
   const imoveis = data?.bens.filter((b) => b.tipo === "imovel") ?? [];
 
   const composicaoChart = useMemo(() => {
@@ -189,19 +196,12 @@ function PatrimonioPage() {
         </SectionCard>
       </div>
 
-      <Tabs defaultValue="participacoes">
+      <Tabs defaultValue="imoveis">
         <TabsList>
-          <TabsTrigger value="participacoes">Participações ({participacoes.length})</TabsTrigger>
           <TabsTrigger value="imoveis">Imóveis ({imoveis.length})</TabsTrigger>
-          <TabsTrigger value="cadastro">Cadastro ({data?.pessoas.length ?? 0})</TabsTrigger>
+          <TabsTrigger value="ativos">Ativos · equipamentos ({data?.maquinarios.length ?? 0})</TabsTrigger>
           <TabsTrigger value="passivo-inst">Passivo por banco ({data?.passivoInst.length ?? 0})</TabsTrigger>
         </TabsList>
-
-        <TabsContent value="participacoes">
-          <SectionCard title="Participações societárias" description="Aba Dados Patrimoniais">
-            <TabelaBens rows={participacoes} loading={isLoading} />
-          </SectionCard>
-        </TabsContent>
 
         <TabsContent value="imoveis">
           <SectionCard title="Bens imóveis" description="Glebas, residências e lotes fora do quadro operacional de fazendas">
@@ -209,62 +209,12 @@ function PatrimonioPage() {
           </SectionCard>
         </TabsContent>
 
-        <TabsContent value="cadastro">
-          <SectionCard title="Dados cadastrais" description="Titular, cônjuge e correspondência — importados da ficha">
-            {isLoading ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
-            ) : (
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {data?.pessoas.map((p) => (
-                  <div key={p.id} className="rounded-xl border border-border/80 bg-surface-soft p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Badge variant="secondary">{labelTipo(p.tipo)}</Badge>
-                    </div>
-                    <p className="font-semibold text-foreground">{p.nome}</p>
-                    <dl className="mt-3 space-y-1.5 text-sm">
-                      {p.email && (
-                        <div>
-                          <dt className="text-muted-foreground">E-mail</dt>
-                          <dd>{p.email}</dd>
-                        </div>
-                      )}
-                      {p.telefone && (
-                        <div>
-                          <dt className="text-muted-foreground">Telefone</dt>
-                          <dd>{p.telefone}</dd>
-                        </div>
-                      )}
-                      {p.endereco && (
-                        <div>
-                          <dt className="text-muted-foreground">Endereço</dt>
-                          <dd>{p.endereco}</dd>
-                        </div>
-                      )}
-                      {(p.cidade || p.cep) && (
-                        <div>
-                          <dt className="text-muted-foreground">Cidade / CEP</dt>
-                          <dd>
-                            {[p.cidade, p.uf, p.cep].filter(Boolean).join(" · ")}
-                          </dd>
-                        </div>
-                      )}
-                      {p.profissao && (
-                        <div>
-                          <dt className="text-muted-foreground">Profissão</dt>
-                          <dd>{p.profissao}</dd>
-                        </div>
-                      )}
-                      {p.data_nascimento && (
-                        <div>
-                          <dt className="text-muted-foreground">Nascimento</dt>
-                          <dd>{formatDateBR(p.data_nascimento)}</dd>
-                        </div>
-                      )}
-                    </dl>
-                  </div>
-                ))}
-              </div>
-            )}
+        <TabsContent value="ativos">
+          <SectionCard
+            title="Ativos · equipamentos"
+            description="Maquinários e veículos do grupo — detalhe operacional em Maquinário"
+          >
+            <TabelaAtivos rows={data?.maquinarios ?? []} loading={isLoading} />
           </SectionCard>
         </TabsContent>
 
@@ -284,10 +234,33 @@ function PatrimonioPage() {
   );
 }
 
-function labelTipo(tipo: string) {
-  if (tipo === "titular") return "Titular";
-  if (tipo === "conjuge") return "Cônjuge";
-  return "Correspondência";
+function VerMais({
+  total,
+  expandido,
+  onToggle,
+}: {
+  total: number;
+  expandido: boolean;
+  onToggle: () => void;
+}) {
+  if (total <= LIMITE_LINHAS) return null;
+  return (
+    <div className="mt-4 flex justify-center border-t border-border/60 pt-4">
+      <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={onToggle}>
+        {expandido ? (
+          <>
+            <ChevronUp className="size-4" />
+            Ver menos
+          </>
+        ) : (
+          <>
+            <ChevronDown className="size-4" />
+            Ver mais ({total - LIMITE_LINHAS} restantes)
+          </>
+        )}
+      </Button>
+    </div>
+  );
 }
 
 function TabelaBens({
@@ -299,6 +272,9 @@ function TabelaBens({
   loading: boolean;
   showMunicipio?: boolean;
 }) {
+  const [expandido, setExpandido] = useState(false);
+  const visiveis = expandido ? rows : rows.slice(0, LIMITE_LINHAS);
+
   if (loading) {
     return <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>;
   }
@@ -306,23 +282,69 @@ function TabelaBens({
     return <p className="py-8 text-center text-sm text-muted-foreground">Nenhum registro</p>;
   }
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-12">#</TableHead>
-          <TableHead>Descrição</TableHead>
-          {showMunicipio && <TableHead>Município</TableHead>}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {rows.map((row) => (
-          <TableRow key={row.id}>
-            <TableCell className="font-mono-nums text-muted-foreground">{row.ordem}</TableCell>
-            <TableCell>{row.descricao}</TableCell>
-            {showMunicipio && <TableCell className="text-muted-foreground">{row.municipio ?? "—"}</TableCell>}
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">#</TableHead>
+            <TableHead>Descrição</TableHead>
+            {showMunicipio && <TableHead>Município</TableHead>}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {visiveis.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell className="font-mono-nums text-muted-foreground">{row.ordem}</TableCell>
+              <TableCell>{row.descricao}</TableCell>
+              {showMunicipio && <TableCell className="text-muted-foreground">{row.municipio ?? "—"}</TableCell>}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <VerMais total={rows.length} expandido={expandido} onToggle={() => setExpandido((v) => !v)} />
+    </>
+  );
+}
+
+function TabelaAtivos({
+  rows,
+  loading,
+}: {
+  rows: { id: string; nome: string; categoria: string; valor_aquisicao: number | null; ordem: number }[];
+  loading: boolean;
+}) {
+  const [expandido, setExpandido] = useState(false);
+  const visiveis = expandido ? rows : rows.slice(0, LIMITE_LINHAS);
+
+  if (loading) {
+    return <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>;
+  }
+  if (!rows.length) {
+    return <p className="py-8 text-center text-sm text-muted-foreground">Nenhum registro</p>;
+  }
+  return (
+    <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12">#</TableHead>
+            <TableHead>Equipamento</TableHead>
+            <TableHead>Categoria</TableHead>
+            <TableHead className="text-right">Valor</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {visiveis.map((row) => (
+            <TableRow key={row.id}>
+              <TableCell className="font-mono-nums text-muted-foreground">{row.ordem}</TableCell>
+              <TableCell className="font-medium">{row.nome}</TableCell>
+              <TableCell className="text-muted-foreground">{row.categoria}</TableCell>
+              <TableCell className="text-right font-mono-nums">{formatBRL(row.valor_aquisicao)}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <VerMais total={rows.length} expandido={expandido} onToggle={() => setExpandido((v) => !v)} />
+    </>
   );
 }
