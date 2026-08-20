@@ -14,7 +14,6 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   PanelLeftClose,
   PanelLeftOpen,
   PenLine,
@@ -24,7 +23,6 @@ import {
   Settings,
   ShieldCheck,
   Sprout,
-  Sun,
   Tractor,
   UserCircle,
   Users,
@@ -50,7 +48,6 @@ import { MandottiLogo } from "@/components/MandottiLogo";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
-import { useTheme } from "@/lib/theme-context";
 
 export const NAV = [
   {
@@ -142,7 +139,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [ctx, setCtx] = useState<"gestao" | "contabilidade">("gestao");
   const { user } = useSession();
   const { perfil, pode } = usePerfil(user);
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isNavigating = useRouterState({ select: (s) => s.status === "pending" });
@@ -218,17 +214,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         preload="intent"
         onClick={() => setOpen(false)}
         className={cn(
-          "relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+          "flex items-center gap-3 rounded-2xl px-2.5 py-2 text-sm font-medium transition-all",
           active
-            ? "bg-surface-soft font-semibold text-primary"
-            : "text-sidebar-foreground/75 hover:bg-surface-soft hover:text-foreground",
-          rail && "lg:justify-center lg:gap-0 lg:px-0",
+            ? "bg-primary text-primary-foreground shadow-xs"
+            : "text-muted-foreground hover:bg-surface-soft hover:text-foreground",
+          rail && "lg:justify-center lg:gap-0 lg:px-1.5 lg:py-2",
         )}
       >
-        {active ? (
-          <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
-        ) : null}
-        <item.icon className={cn("size-4 shrink-0", active ? "opacity-100" : "opacity-60")} />
+        <span
+          className={cn(
+            "grid size-8 shrink-0 place-items-center rounded-xl",
+            active ? "bg-white/15" : "bg-surface-soft text-primary",
+          )}
+        >
+          <item.icon className="size-4" />
+        </span>
         <span className={cn("truncate", soRail)}>{item.label}</span>
       </Link>
     );
@@ -264,25 +264,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="flex min-h-screen bg-background">
+      <div className="flex min-h-dvh bg-background">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-40 flex w-[272px] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[transform,width] duration-300 lg:static lg:translate-x-0",
+            "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-sidebar text-sidebar-foreground shadow-md transition-[transform,width,border-radius] duration-300 lg:sticky lg:top-3 lg:m-3 lg:h-[calc(100dvh-1.5rem)] lg:translate-x-0 lg:rounded-[1.75rem]",
             open ? "translate-x-0" : "-translate-x-full",
-            colapsada ? "lg:w-[76px]" : "lg:w-[272px]",
+            colapsada ? "lg:w-[88px]" : "lg:w-[280px]",
           )}
         >
           <div
-            className="h-[3px] w-full"
-            style={{
-              background:
-                "linear-gradient(90deg, #2E6636 0%, #7FA832 30%, #C99012 60%, #B5541C 85%, #6E5537 100%)",
-            }}
-          />
-
-          <div
             className={cn(
-              "flex items-center gap-3 border-b border-sidebar-border px-4 py-4",
+              "flex items-center gap-3 px-4 py-5",
               colapsada && "lg:justify-center lg:px-2",
             )}
           >
@@ -292,7 +284,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               onClick={() => definirColapso(false)}
               disabled={!colapsada}
               aria-label="Expandir menu"
-              className="grid size-11 shrink-0 place-items-center rounded-full bg-white ring-1 ring-black/5 transition-transform disabled:cursor-default enabled:hover:scale-105"
+              className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface-soft transition-transform disabled:cursor-default enabled:hover:scale-105"
             >
               <MandottiLogo className="size-8" />
             </button>
@@ -316,7 +308,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {podeAlternarContexto ? (
             <div
               className={cn(
-                "mx-3 mt-4 flex rounded-xl border border-primary/10 bg-surface-soft p-1",
+                "mx-3 mt-2 flex rounded-full bg-surface-soft p-1",
                 soRail,
               )}
             >
@@ -331,9 +323,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   type="button"
                   onClick={() => setCtx(key)}
                   className={cn(
-                    "flex-1 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
+                    "flex-1 rounded-full px-3 py-2 text-xs font-semibold transition-all",
                     ctx === key
-                      ? "bg-card text-primary shadow-sm"
+                      ? "bg-primary text-primary-foreground shadow-xs"
                       : "text-muted-foreground hover:text-foreground",
                   )}
                 >
@@ -351,7 +343,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <button
                     type="button"
                     onClick={() => setCtx(ctx === "gestao" ? "contabilidade" : "gestao")}
-                    className="grid size-10 place-items-center rounded-xl border border-primary/10 bg-surface-soft text-primary transition-colors hover:bg-card"
+                    className="grid size-10 place-items-center rounded-2xl bg-surface-soft text-primary transition-colors hover:bg-card"
                     aria-label={`Contexto: ${ctx === "gestao" ? "Gestão" : "Contabilidade"}. Alternar.`}
                   >
                     {ctx === "gestao" ? (
@@ -396,10 +388,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                       onClick={() => toggleGrupo(section.group)}
                       aria-expanded={aberto}
                       className={cn(
-                        "flex w-full items-center justify-between gap-2 rounded-xl px-2.5 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] transition-colors",
-                        aberto
-                          ? "bg-surface-soft text-primary"
-                          : "text-muted-foreground hover:bg-surface-soft/70 hover:text-foreground",
+                        "flex w-full items-center justify-between gap-2 rounded-2xl px-3 py-2 text-left text-[11px] font-semibold tracking-[0.08em] text-muted-foreground transition-colors hover:bg-surface-soft hover:text-foreground",
+                        aberto && "text-foreground",
                       )}
                     >
                       <span className="truncate">{section.group}</span>
@@ -428,7 +418,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="hidden rounded-xl lg:flex"
+                    className="hidden rounded-full lg:flex"
                     onClick={sair}
                     aria-label="Sair"
                   >
@@ -440,7 +430,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ) : null}
             <Button
               variant="outline"
-              className={cn("w-full justify-start gap-2 rounded-xl", colapsada && "lg:hidden")}
+              className={cn("w-full justify-start gap-2 rounded-full", colapsada && "lg:hidden")}
               onClick={sair}
             >
               <LogOut className="size-4" />
@@ -458,7 +448,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex h-[68px] items-center gap-3 border-b border-border/80 bg-card/85 px-4 backdrop-blur-md lg:px-6">
+          <header className="sticky top-0 z-20 flex h-16 items-center gap-2 bg-background/90 px-3 backdrop-blur-xl sm:h-[72px] sm:gap-3 sm:px-5 lg:px-6">
             <Button
               variant="ghost"
               size="icon"
@@ -491,11 +481,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               </TooltipContent>
             </Tooltip>
 
-            <div className="grid size-9 shrink-0 place-items-center rounded-full bg-white ring-1 ring-black/5 lg:hidden">
+            <div className="grid size-9 shrink-0 place-items-center rounded-2xl bg-surface-soft lg:hidden">
               <MandottiLogo className="size-7" />
             </div>
 
-            <div className="hidden min-w-[220px] items-center gap-2 rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm text-muted-foreground md:flex">
+            <div className="hidden min-w-[200px] items-center gap-2 rounded-full bg-surface-soft px-4 py-2.5 text-sm text-muted-foreground lg:flex">
               <Search className="size-4 shrink-0 opacity-60" />
               <span className="truncate">Buscar fazendas, emissores, notas…</span>
             </div>
@@ -504,19 +494,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <EmissorSelector />
             </div>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              aria-label={theme === "dark" ? "Tema claro" : "Tema escuro"}
-            >
-              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="gap-2 rounded-full pl-1.5 pr-3">
-                  <span className="grid size-7 place-items-center rounded-full bg-primary/12 text-[11px] font-bold text-primary">
+                  <span className="grid size-7 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
                     {initials(user?.email)}
                   </span>
                   <span className="hidden max-w-[10rem] truncate text-sm sm:inline">
@@ -524,7 +505,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl">
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl">
                 <DropdownMenuLabel className="font-normal">
                   <p className="text-sm font-medium">{user?.email}</p>
                   <p className="text-xs text-muted-foreground">
@@ -542,7 +523,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
           {/* Fluido de propósito: o conteúdo acompanha a largura da tela em vez de
             ficar preso a uma coluna central com sobra nas laterais. */}
-          <main className="relative w-full flex-1 px-4 py-6 lg:px-8 lg:py-8 2xl:px-10">
+          <main className="relative w-full flex-1 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7">
             {isNavigating ? (
               <div
                 className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/10"
@@ -569,9 +550,9 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
+    <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-7 sm:gap-4">
       <div className="flex min-w-0 items-center gap-2">
-        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">{title}</h1>
+        <h1 className="text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">{title}</h1>
         {description ? (
           <Tooltip>
             <TooltipTrigger asChild>

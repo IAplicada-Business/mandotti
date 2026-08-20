@@ -43,7 +43,7 @@ export function EmissorSelector() {
           role="combobox"
           aria-expanded={open}
           aria-label="Emissores em exibição"
-          className="min-w-0 flex-1 justify-between gap-2 rounded-xl border-border bg-card sm:w-[18rem] sm:flex-none"
+          className="min-w-0 flex-1 justify-between gap-2 rounded-full border-border bg-card sm:w-[18rem] sm:flex-none"
         >
           <span className="truncate text-left">
             <span className="mr-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -54,8 +54,8 @@ export function EmissorSelector() {
           <ChevronDown className="size-4 shrink-0 opacity-60" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72 p-2">
-        <label className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent">
+      <PopoverContent align="start" className="w-72 rounded-2xl p-2">
+        <label className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-accent">
           <Checkbox checked={todosMarcados} onCheckedChange={toggleTodos} />
           <span className="font-medium">Selecionar todos</span>
         </label>
@@ -64,7 +64,7 @@ export function EmissorSelector() {
           {emissores.map((e) => (
             <label
               key={e.id}
-              className="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent"
+              className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-accent"
             >
               <Checkbox
                 checked={emissorIds.includes(e.id)}

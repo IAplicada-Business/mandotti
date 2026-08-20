@@ -21,7 +21,7 @@ type LayoutAbasFiltrosProps = {
 /** Card compacto com um dropdown */
 export function FiltroCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="w-[9.5rem] shrink-0 rounded-xl border border-border/80 bg-card px-2 py-1.5 shadow-xs [&_button]:h-8 [&_button]:px-2.5 [&_button]:text-xs">
+    <div className="w-[min(100%,9.5rem)] shrink-0 rounded-2xl border border-border/60 bg-card px-2.5 py-2 shadow-xs [&_button]:h-8 [&_button]:rounded-xl [&_button]:px-2.5 [&_button]:text-xs">
       <Label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
         {label}
       </Label>
@@ -51,7 +51,7 @@ export function LayoutAbasFiltros({
       {abas?.length ? (
         <nav
           aria-label="Sub-abas"
-          className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
+          className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-full bg-surface-soft p-1"
         >
           {abas.map((aba) => {
             const ativa = abaAtiva === aba.id;
@@ -61,9 +61,9 @@ export function LayoutAbasFiltros({
                 type="button"
                 onClick={() => onAbaChange?.(aba.id)}
                 className={cn(
-                  "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                  "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
                   ativa
-                    ? "bg-card text-primary shadow-sm"
+                    ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -77,7 +77,7 @@ export function LayoutAbasFiltros({
       {encapsular ? (
         <div
           key={abaAtiva ?? "conteudo"}
-          className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm duration-300 animate-in fade-in-0 slide-in-from-left-2"
+          className="overflow-hidden rounded-[1.35rem] border border-border/60 bg-card shadow-sm duration-300 animate-in fade-in-0"
         >
           <div className="p-4 sm:p-5">{children}</div>
         </div>

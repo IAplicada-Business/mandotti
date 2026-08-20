@@ -204,7 +204,7 @@ function Dashboard() {
                     <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                     <Tooltip
                       contentStyle={{
-                        borderRadius: 12,
+                        borderRadius: 16,
                         border: "1px solid var(--border)",
                         boxShadow: "var(--shadow-sm-token)",
                       }}
@@ -270,7 +270,7 @@ function Dashboard() {
                   <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
                   <Tooltip
                     contentStyle={{
-                      borderRadius: 12,
+                      borderRadius: 16,
                       border: "1px solid var(--border)",
                     }}
                   />

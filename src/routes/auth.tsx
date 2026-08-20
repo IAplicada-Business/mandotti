@@ -30,18 +30,18 @@ export const Route = createFileRoute("/auth")({
  * gotas que se sobrepõem para o filtro gooey fundi-las numa massa líquida.
  */
 const GLOWS = [
-  { size: 46, left: -6, top: -4, delay: -4, duration: 30, tint: "rgba(63,125,73,0.55)" },
-  { size: 38, left: 72, top: 4, delay: -13, duration: 34, tint: "rgba(127,168,50,0.34)" },
-  { size: 42, left: 60, top: 66, delay: -19, duration: 31, tint: "rgba(46,102,54,0.5)" },
-  { size: 26, left: 4, top: 72, delay: -8, duration: 26, tint: "rgba(201,144,18,0.24)" },
+  { size: 46, left: -6, top: -4, delay: -4, duration: 30, tint: "rgba(96,108,56,0.55)" },
+  { size: 38, left: 72, top: 4, delay: -13, duration: 34, tint: "rgba(221,161,94,0.34)" },
+  { size: 42, left: 60, top: 66, delay: -19, duration: 31, tint: "rgba(40,54,24,0.5)" },
+  { size: 26, left: 4, top: 72, delay: -8, duration: 26, tint: "rgba(188,108,37,0.24)" },
 ];
 
 const DROPS = [
-  { size: 250, left: 22, top: 34, delay: -3, duration: 19, from: "#4d8f4f", to: "#1d4423" },
-  { size: 190, left: 34, top: 62, delay: -9, duration: 23, from: "#7fa832", to: "#2e6636" },
-  { size: 210, left: 70, top: 40, delay: -14, duration: 21, from: "#3f7d49", to: "#16301a" },
-  { size: 160, left: 60, top: 68, delay: -6, duration: 17, from: "#6b9c3a", to: "#26512b" },
-  { size: 130, left: 82, top: 22, delay: -11, duration: 25, from: "#c99012", to: "#6e5537" },
+  { size: 250, left: 22, top: 34, delay: -3, duration: 19, from: "#606c38", to: "#283618" },
+  { size: 190, left: 34, top: 62, delay: -9, duration: 23, from: "#dda15e", to: "#bc6c25" },
+  { size: 210, left: 70, top: 40, delay: -14, duration: 21, from: "#606c38", to: "#283618" },
+  { size: 160, left: 60, top: 68, delay: -6, duration: 17, from: "#9aa56e", to: "#283618" },
+  { size: 130, left: 82, top: 22, delay: -11, duration: 25, from: "#dda15e", to: "#bc6c25" },
 ];
 
 function AuthPage() {
@@ -245,19 +245,19 @@ function AuthPage() {
 
 const AUTH_CSS = `
 .mandotti-auth {
-  --m-bg: #07130c;
-  --m-leaf: #7fa832;
-  --m-green: #3f7d49;
-  --m-green-deep: #16301a;
-  --m-amber: #c99012;
+  --m-bg: #283618;
+  --m-leaf: #606c38;
+  --m-green: #606c38;
+  --m-green-deep: #283618;
+  --m-amber: #dda15e;
 
-  /* Cores exatas da marca oficial, usadas na aura sob o ícone */
-  --m-logo-leaf: #037638;
-  --m-logo-field: #16472c;
-  --m-logo-seed: #ca8921;
-  --m-ink: #f1f7f1;
-  --m-dim: rgba(241, 247, 241, 0.55);
-  --m-line: rgba(241, 247, 241, 0.14);
+  /* Paleta da empresa */
+  --m-logo-leaf: #606c38;
+  --m-logo-field: #283618;
+  --m-logo-seed: #bc6c25;
+  --m-ink: #fefae0;
+  --m-dim: rgba(254, 250, 224, 0.55);
+  --m-line: rgba(254, 250, 224, 0.14);
   --m-goo: url('#mandotti-gooey');
 
   position: relative;
@@ -270,8 +270,8 @@ const AUTH_CSS = `
   overflow: hidden;
   padding: 48px 20px;
   background:
-    radial-gradient(1200px 700px at 12% -8%, rgba(63, 125, 73, 0.28), transparent 60%),
-    radial-gradient(900px 600px at 96% 6%, rgba(127, 168, 50, 0.18), transparent 55%),
+    radial-gradient(1200px 700px at 12% -8%, rgba(96, 108, 56, 0.4), transparent 60%),
+    radial-gradient(900px 600px at 96% 6%, rgba(221, 161, 94, 0.22), transparent 55%),
     var(--m-bg);
   color: var(--m-ink);
   font-family: var(--font-sans, "Plus Jakarta Sans", system-ui, sans-serif);
@@ -316,7 +316,7 @@ const AUTH_CSS = `
   filter: blur(18px);
   box-shadow:
     inset -18px -18px 40px rgba(4, 16, 8, 0.55),
-    14px 14px 50px rgba(127, 168, 50, 0.14);
+    14px 14px 50px rgba(96, 108, 56, 0.14);
   animation: mandotti-float 22s infinite alternate ease-in-out;
 }
 

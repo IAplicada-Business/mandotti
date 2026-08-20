@@ -50,7 +50,7 @@ export function tooltipBRLWithShare(value: unknown, _name: string, item: { paylo
 
 /** Estilo padrão de tooltip Recharts */
 export const TOOLTIP_STYLE = {
-  borderRadius: 12,
+  borderRadius: 16,
   border: "1px solid var(--border)",
   background: "var(--card)",
   boxShadow: "var(--shadow-sm-token)",

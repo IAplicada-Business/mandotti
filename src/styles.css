@@ -6,9 +6,9 @@
 
 /*
  * Design system — Grupo Mandotti
- * Referência visual: dashboard SaaS (sidebar clara, cards soft, mint/agro green,
- * KPIs com anéis, tabs em pill, badges tintados).
- * Tokens hex + oklch mapeados; nunca hardcode de cor nos componentes.
+ * Paleta oficial: moss #606C38, forest #283618, silk #FEFAE0,
+ * earth #DDA15E, tiger #BC6C25. Fundo da aplicação: sempre branco.
+ * Linguagem: cards flutuantes, raios amplos, pílulas, sombra suave.
  */
 
 @theme inline {
@@ -64,6 +64,11 @@
   --color-brand-leaf: var(--brand-leaf);
   --color-brand-field: var(--brand-field);
   --color-brand-seed: var(--brand-seed);
+  --color-brand-moss: var(--brand-moss);
+  --color-brand-forest: var(--brand-forest);
+  --color-brand-silk: var(--brand-silk);
+  --color-brand-earth: var(--brand-earth);
+  --color-brand-tiger: var(--brand-tiger);
   --color-emissor-eder: var(--emissor-eder);
   --color-emissor-nagyla: var(--emissor-nagyla);
   --color-emissor-mandotti: var(--emissor-mandotti);
@@ -72,120 +77,124 @@
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Cores da marca oficial, amostradas do ícone em /favicon-512.png */
-  --brand-leaf: #037638;
-  --brand-field: #16472c;
-  --brand-seed: #ca8921;
+  /* Paleta da empresa */
+  --brand-moss: #606c38;
+  --brand-forest: #283618;
+  --brand-silk: #fefae0;
+  --brand-earth: #dda15e;
+  --brand-tiger: #bc6c25;
 
-  /* Agro / mint primary scale */
-  --primary-900: #16301a;
-  --primary-800: #235229;
-  --primary-700: #2e6636;
-  --primary-600: #3f7d49;
-  --primary-500: #5c9463;
-  --primary-400: #86b28c;
-  --primary-300: #b3d0b7;
-  --primary-200: #d2e4d4;
-  --primary-100: #e1eee2;
-  --primary-050: #f1f7f1;
+  --brand-leaf: #606c38;
+  --brand-field: #283618;
+  --brand-seed: #bc6c25;
 
-  --emissor-eder: #2e6636;
-  --emissor-nagyla: #b5541c;
-  --emissor-mandotti: #6e5537;
-  --emissor-tractor: #c99012;
+  --primary-900: #283618;
+  --primary-800: #3a4624;
+  --primary-700: #4c582e;
+  --primary-600: #606c38;
+  --primary-500: #7a864c;
+  --primary-400: #9aa56e;
+  --primary-300: #c3c9a4;
+  --primary-200: #e4e6cf;
+  --primary-100: #f3f4e6;
+  --primary-050: #fefae0;
 
-  --background: #f4f7f5;
-  --foreground: #1f2a22;
+  --emissor-eder: #283618;
+  --emissor-nagyla: #bc6c25;
+  --emissor-mandotti: #606c38;
+  --emissor-tractor: #dda15e;
+
+  --background: #ffffff;
+  --foreground: #283618;
   --card: #ffffff;
-  --card-foreground: #1f2a22;
+  --card-foreground: #283618;
   --popover: #ffffff;
-  --popover-foreground: #1f2a22;
-  --primary: #3f7d49;
+  --popover-foreground: #283618;
+  --primary: #606c38;
   --primary-foreground: #ffffff;
-  --secondary: #e8f1ea;
-  --secondary-foreground: #235229;
-  --muted: #eef3ef;
-  --muted-foreground: #6b7a6f;
-  --accent: #e8f1ea;
-  --accent-foreground: #235229;
-  --destructive: #e11d48;
+  --secondary: #fefae0;
+  --secondary-foreground: #283618;
+  --muted: #f7f6ef;
+  --muted-foreground: #6b7354;
+  --accent: #fefae0;
+  --accent-foreground: #283618;
+  --destructive: #c2410c;
   --destructive-foreground: #ffffff;
-  --success: #10b981;
+  --success: #606c38;
   --success-foreground: #ffffff;
-  --warning: #f58a1f;
-  --warning-foreground: #1f2a22;
-  --border: #e3ebe5;
-  --input: #d7e2da;
-  --ring: #3f7d49;
-  --surface-soft: #f1f7f1;
+  --warning: #bc6c25;
+  --warning-foreground: #ffffff;
+  --border: rgb(40 54 24 / 0.08);
+  --input: rgb(40 54 24 / 0.12);
+  --ring: #606c38;
+  --surface-soft: #fefae0;
 
-  --chart-1: #3f7d49;
-  --chart-2: #7fa832;
-  --chart-3: #c99012;
-  --chart-4: #b5541c;
-  --chart-5: #6e5537;
+  --chart-1: #606c38;
+  --chart-2: #283618;
+  --chart-3: #dda15e;
+  --chart-4: #bc6c25;
+  --chart-5: #9aa56e;
 
-  /* Light sidebar — TeamHub pattern */
   --sidebar: #ffffff;
-  --sidebar-foreground: #1f2a22;
-  --sidebar-primary: #3f7d49;
+  --sidebar-foreground: #283618;
+  --sidebar-primary: #606c38;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f7f1;
-  --sidebar-accent-foreground: #235229;
-  --sidebar-border: #e3ebe5;
-  --sidebar-ring: #3f7d49;
+  --sidebar-accent: #fefae0;
+  --sidebar-accent-foreground: #283618;
+  --sidebar-border: rgb(40 54 24 / 0.06);
+  --sidebar-ring: #606c38;
 
-  --shadow-xs-token: 0 1px 2px rgb(22 48 26 / 0.04);
-  --shadow-sm-token: 0 1px 3px rgb(22 48 26 / 0.06), 0 1px 2px rgb(22 48 26 / 0.04);
-  --shadow-md-token: 0 8px 24px rgb(22 48 26 / 0.08);
+  --shadow-xs-token: 0 1px 2px rgb(40 54 24 / 0.04);
+  --shadow-sm-token: 0 8px 28px rgb(40 54 24 / 0.06);
+  --shadow-md-token: 0 18px 44px rgb(40 54 24 / 0.1);
 }
 
 .dark {
-  --background: #121a14;
-  --foreground: #eef3ef;
-  --card: #1a241c;
-  --card-foreground: #eef3ef;
-  --popover: #1a241c;
-  --popover-foreground: #eef3ef;
-  --primary: #86b28c;
-  --primary-foreground: #121a14;
-  --secondary: #243028;
-  --secondary-foreground: #eef3ef;
-  --muted: #243028;
-  --muted-foreground: #9aada0;
-  --accent: #243028;
-  --accent-foreground: #eef3ef;
-  --destructive: #fb7185;
-  --destructive-foreground: #121a14;
-  --success: #34d399;
-  --success-foreground: #121a14;
-  --warning: #fbbf24;
-  --warning-foreground: #121a14;
-  --border: rgb(255 255 255 / 10%);
-  --input: rgb(255 255 255 / 14%);
-  --ring: #86b28c;
-  --surface-soft: #1f2a22;
+  --background: #ffffff;
+  --foreground: #283618;
+  --card: #ffffff;
+  --card-foreground: #283618;
+  --popover: #ffffff;
+  --popover-foreground: #283618;
+  --primary: #606c38;
+  --primary-foreground: #ffffff;
+  --secondary: #fefae0;
+  --secondary-foreground: #283618;
+  --muted: #f7f6ef;
+  --muted-foreground: #6b7354;
+  --accent: #fefae0;
+  --accent-foreground: #283618;
+  --destructive: #c2410c;
+  --destructive-foreground: #ffffff;
+  --success: #606c38;
+  --success-foreground: #ffffff;
+  --warning: #bc6c25;
+  --warning-foreground: #ffffff;
+  --border: rgb(40 54 24 / 0.08);
+  --input: rgb(40 54 24 / 0.12);
+  --ring: #606c38;
+  --surface-soft: #fefae0;
 
-  --chart-1: #86b28c;
-  --chart-2: #a3c44a;
-  --chart-3: #e0b03a;
-  --chart-4: #d5784a;
-  --chart-5: #a08a6a;
+  --chart-1: #606c38;
+  --chart-2: #283618;
+  --chart-3: #dda15e;
+  --chart-4: #bc6c25;
+  --chart-5: #9aa56e;
 
-  --sidebar: #161f18;
-  --sidebar-foreground: #eef3ef;
-  --sidebar-primary: #86b28c;
-  --sidebar-primary-foreground: #121a14;
-  --sidebar-accent: #243028;
-  --sidebar-accent-foreground: #eef3ef;
-  --sidebar-border: rgb(255 255 255 / 10%);
-  --sidebar-ring: #86b28c;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #283618;
+  --sidebar-primary: #606c38;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fefae0;
+  --sidebar-accent-foreground: #283618;
+  --sidebar-border: rgb(40 54 24 / 0.06);
+  --sidebar-ring: #606c38;
 
-  --shadow-xs-token: 0 1px 2px rgb(0 0 0 / 0.25);
-  --shadow-sm-token: 0 1px 3px rgb(0 0 0 / 0.35);
-  --shadow-md-token: 0 8px 24px rgb(0 0 0 / 0.4);
+  --shadow-xs-token: 0 1px 2px rgb(40 54 24 / 0.04);
+  --shadow-sm-token: 0 8px 28px rgb(40 54 24 / 0.06);
+  --shadow-md-token: 0 18px 44px rgb(40 54 24 / 0.1);
 }
 
 @layer base {
@@ -194,7 +203,7 @@
   }
 
   body {
-    background-color: var(--color-background);
+    background-color: #ffffff;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
