@@ -4,6 +4,7 @@ import { AlertTriangle, Plus, Tractor, Wallet, Wrench } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { AcoesCadastro } from "@/components/AcoesCadastro";
 import { PageHeader } from "@/components/AppShell";
 import { Callout, KpiCard, SectionCard } from "@/components/design-system";
 import { BarraFiltros, FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
@@ -52,6 +53,7 @@ export const Route = createFileRoute("/_authenticated/maquinario")({
 });
 
 const VAZIO = {
+  id: undefined as string | undefined,
   emissor_id: "",
   nome: "",
   categoria: "Máquina",
@@ -287,9 +289,9 @@ function MaquinarioPage() {
   const manutTotal = filtrados.reduce((acc, m) => acc + (m.custo_manutencao_acumulado ?? 0), 0);
   const alertas = filtrados.filter((m) => statusDoAtivo(m) === "avaliar_troca").length;
 
-  const criar = useMutation({
+  const salvar = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("maquinarios").insert({
+      const payload = {
         emissor_id: form.emissor_id,
         nome: form.nome,
         categoria: form.categoria,
@@ -304,15 +306,35 @@ function MaquinarioPage() {
         depreciacao_anual_pct: form.depreciacao_anual_pct ? Number(form.depreciacao_anual_pct) : 10,
         cor: form.cor || null,
         chassi_serie: form.chassi_serie || null,
-        ordem: (data.length || 0) + 1,
-        ativo: true,
-      });
+      };
+      const res = form.id
+        ? await supabase.from("maquinarios").update(payload).eq("id", form.id)
+        : await supabase.from("maquinarios").insert({
+            ...payload,
+            ordem: (data.length || 0) + 1,
+            ativo: true,
+          });
+      if (res.error) throw res.error;
+    },
+    onSuccess: () => {
+      toast.success(form.id ? "Ativo atualizado" : "Ativo cadastrado");
+      setAberto(false);
+      setForm(VAZIO);
+      qc.invalidateQueries({ queryKey: ["maquinarios"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const arquivar = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("maquinarios")
+        .update({ deleted_at: new Date().toISOString(), ativo: false })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Ativo cadastrado");
-      setAberto(false);
-      setForm(VAZIO);
+      toast.success("Ativo arquivado");
       qc.invalidateQueries({ queryKey: ["maquinarios"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -409,12 +431,13 @@ function MaquinarioPage() {
                     <TableHead className="text-right">Valor</TableHead>
                     <TableHead className="text-right">Manut.</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="w-24" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {visiveis.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={10} className="py-8 text-center text-muted-foreground">
+                      <TableCell colSpan={11} className="py-8 text-center text-muted-foreground">
                         Nenhum ativo com os filtros atuais.
                       </TableCell>
                     </TableRow>
@@ -455,6 +478,37 @@ function MaquinarioPage() {
                           <TableCell>
                             <Badge variant={STATUS_BADGE[st]}>{STATUS_MANUTENCAO_LABEL[st]}</Badge>
                           </TableCell>
+                          <TableCell>
+                            {podeEditar ? (
+                              <AcoesCadastro
+                                onEdit={() => {
+                                  setForm({
+                                    id: m.id,
+                                    emissor_id: m.emissor_id,
+                                    nome: m.nome,
+                                    categoria: m.categoria,
+                                    fazenda_nome: m.fazenda_nome ?? "",
+                                    marca: m.marca ?? "",
+                                    modelo: m.modelo ?? "",
+                                    ano: m.ano != null ? String(m.ano) : "",
+                                    valor_aquisicao:
+                                      m.valor_aquisicao != null ? String(m.valor_aquisicao) : "",
+                                    custo_manutencao_acumulado: String(m.custo_manutencao_acumulado ?? 0),
+                                    depreciacao_anual_pct:
+                                      m.depreciacao_anual_pct != null
+                                        ? String(m.depreciacao_anual_pct)
+                                        : "10",
+                                    cor: "",
+                                    chassi_serie: m.chassi_serie ?? "",
+                                  });
+                                  setAberto(true);
+                                }}
+                                onDelete={() => {
+                                  if (window.confirm(`Arquivar ${m.nome}?`)) arquivar.mutate(m.id);
+                                }}
+                              />
+                            ) : null}
+                          </TableCell>
                         </TableRow>
                       );
                     })
@@ -469,7 +523,7 @@ function MaquinarioPage() {
       <Dialog open={aberto} onOpenChange={setAberto}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Novo maquinário</DialogTitle>
+            <DialogTitle>{form.id ? "Editar maquinário" : "Novo maquinário"}</DialogTitle>
           </DialogHeader>
           <div className="grid gap-3">
             <div className="space-y-2">
@@ -585,8 +639,8 @@ function MaquinarioPage() {
               Cancelar
             </Button>
             <Button
-              disabled={!form.emissor_id || !form.nome || criar.isPending}
-              onClick={() => criar.mutate()}
+              disabled={!form.emissor_id || !form.nome || salvar.isPending}
+              onClick={() => salvar.mutate()}
             >
               Salvar
             </Button>

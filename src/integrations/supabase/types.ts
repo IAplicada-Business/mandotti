@@ -895,8 +895,10 @@ export type Database = {
           jul28_jun29: number
           jul29_jun30: number
           origem: string
+          pago_em: string | null
           saldo_devedor: number | null
           sem_cronograma: number
+          status: string
           taxa_juros: number | null
           total_projetado: number | null
           updated_at: string
@@ -916,8 +918,10 @@ export type Database = {
           jul28_jun29?: number
           jul29_jun30?: number
           origem?: string
+          pago_em?: string | null
           saldo_devedor?: number | null
           sem_cronograma?: number
+          status?: string
           taxa_juros?: number | null
           total_projetado?: number | null
           updated_at?: string
@@ -937,8 +941,10 @@ export type Database = {
           jul28_jun29?: number
           jul29_jun30?: number
           origem?: string
+          pago_em?: string | null
           saldo_devedor?: number | null
           sem_cronograma?: number
+          status?: string
           taxa_juros?: number | null
           total_projetado?: number | null
           updated_at?: string
