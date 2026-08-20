@@ -100,7 +100,7 @@ function GradeDeAcessos({
   };
 
   return (
-    <div className="max-h-64 space-y-2 overflow-y-auto rounded-md border p-3">
+    <div className="max-h-64 space-y-2 overflow-y-auto rounded-[1.25rem] bg-surface-soft p-3">
       {ROTAS.map((r) => {
         const g = grants.find((x) => x.rota === r.to) ?? {
           rota: r.to,

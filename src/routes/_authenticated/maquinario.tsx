@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { AlertTriangle, Plus, Tractor, Wallet, Wrench } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
-import { KpiCard, SectionCard } from "@/components/design-system";
+import { Callout, KpiCard, SectionCard } from "@/components/design-system";
 import { BarraFiltros, FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
@@ -372,17 +372,22 @@ function MaquinarioPage() {
       </BarraFiltros>
 
       <div className="grid gap-4 sm:grid-cols-4">
-        <KpiCard label="Ativos" value={filtrados.length} />
-        <KpiCard label="Valor total" value={formatBRL(valorTotal)} tone="success" />
-        <KpiCard label="Manutenção acum." value={formatBRL(manutTotal)} tone="warning" />
-        <KpiCard label="Alertas de troca" value={alertas} tone={alertas > 0 ? "danger" : "default"} />
+        <KpiCard label="Ativos" value={filtrados.length} icon={Tractor} />
+        <KpiCard label="Valor total" value={formatBRL(valorTotal)} icon={Wallet} tone="success" />
+        <KpiCard label="Manutenção acum." value={formatBRL(manutTotal)} icon={Wrench} tone="warning" />
+        <KpiCard
+          label="Alertas de troca"
+          value={alertas}
+          icon={AlertTriangle}
+          tone={alertas > 0 ? "danger" : "default"}
+        />
       </div>
 
       {alertas > 0 ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+        <Callout tone="danger">
           <span className="font-semibold text-destructive">Ponto de atenção:</span>{" "}
           {alertas} ativo(s) com custo de manutenção elevado — avaliar troca do equipamento.
-        </div>
+        </Callout>
       ) : null}
 
       <LayoutAbasFiltros>

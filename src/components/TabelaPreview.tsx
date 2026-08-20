@@ -33,8 +33,8 @@ export function VerMais({
   if (total <= limit) return null;
   const restantes = total - limit;
   return (
-    <div className="mt-4 flex justify-center border-t border-border/60 pt-4">
-      <Button type="button" variant="outline" size="sm" onClick={onToggle}>
+    <div className="mt-5 flex justify-center">
+      <Button type="button" variant="outline" size="sm" className="rounded-full" onClick={onToggle}>
         {aberto ? (
           <>
             Ver menos

@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Handshake, ShoppingCart, UserCircle } from "lucide-react";
+import { ArrowRight, Handshake, Hourglass, ShoppingCart, UserCircle } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
@@ -167,7 +167,7 @@ function ClientesPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Compradores" value={compradoresUnicos.length} icon={UserCircle} tone="info" />
         <KpiCard label="Negociações" value={negociacoes.length} icon={Handshake} hint="Por safra/cultura" />
-        <KpiCard label="Em negociação" value={negociando} tone="warning" />
+        <KpiCard label="Em negociação" value={negociando} icon={Hourglass} tone="warning" />
         <KpiCard
           label="Prontas p/ NF"
           value={aguardandoNf}
@@ -293,7 +293,7 @@ function ButtonLink({ to, label }: { to: string; label: string }) {
   return (
     <Link
       to={to}
-      className="inline-flex h-9 items-center gap-1 rounded-xl border border-border bg-background px-4 text-sm font-medium hover:bg-surface-soft"
+      className="inline-flex h-9 items-center gap-1 rounded-full bg-card px-4 text-sm font-medium shadow-sm hover:bg-surface-soft"
     >
       {label} <ArrowRight className="size-4" />
     </Link>

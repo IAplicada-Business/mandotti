@@ -8,9 +8,9 @@ type Tone = "default" | "success" | "warning" | "danger" | "info";
 const toneIcon: Record<Tone, string> = {
   default: "bg-primary/12 text-primary",
   success: "bg-primary/12 text-primary",
-  warning: "bg-warning/12 text-warning",
+  warning: "bg-warning/15 text-warning",
   danger: "bg-destructive/12 text-destructive",
-  info: "bg-secondary text-foreground",
+  info: "bg-surface-soft text-foreground",
 };
 
 export function KpiCard({
@@ -31,24 +31,27 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "rounded-[1.35rem] border border-border/60 bg-card p-4 shadow-sm sm:p-5",
+        "flex items-center gap-4 rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-5",
         className,
       )}
     >
-      <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-          {label}
+      {Icon ? (
+        <span
+          className={cn(
+            "grid size-12 shrink-0 place-items-center rounded-2xl",
+            toneIcon[tone],
+          )}
+        >
+          <Icon className="size-5" />
+        </span>
+      ) : null}
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
+        <p className="mt-1 font-mono-nums text-2xl font-extrabold tracking-tight text-foreground sm:text-[1.75rem]">
+          {value}
         </p>
-        {Icon ? (
-          <span className={cn("grid size-9 shrink-0 place-items-center rounded-2xl", toneIcon[tone])}>
-            <Icon className="size-4" />
-          </span>
-        ) : null}
+        {hint ? <div className="mt-1 text-xs font-medium text-muted-foreground">{hint}</div> : null}
       </div>
-      <p className="mt-3 font-mono-nums text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
-        {value}
-      </p>
-      {hint ? <div className="mt-2 text-xs font-medium text-muted-foreground">{hint}</div> : null}
     </div>
   );
 }
@@ -72,12 +75,7 @@ export function RingStat({
   const offset = c - (pct / 100) * c;
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-4 rounded-[1.35rem] border border-border/60 bg-card p-4 shadow-sm sm:p-5",
-        className,
-      )}
-    >
+    <div className={cn("flex items-center gap-4 rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-5", className)}>
       <div className="relative size-[88px] shrink-0">
         <svg viewBox="0 0 96 96" className="size-full -rotate-90">
           <circle cx="48" cy="48" r={r} fill="none" stroke="var(--surface-soft)" strokeWidth="10" />
@@ -124,22 +122,40 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <div
-      className={cn(
-        "overflow-hidden rounded-[1.35rem] border border-border/60 bg-card shadow-sm",
-        className,
-      )}
-    >
-      <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-5">
+    <div className={cn("rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6", className)}>
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-base font-bold tracking-tight">{title}</h3>
+          <h3 className="text-lg font-bold tracking-tight">{title}</h3>
           {description ? (
-            <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
           ) : null}
         </div>
         {action}
       </div>
-      <div className="px-4 pb-5 sm:px-5">{children}</div>
+      {children}
+    </div>
+  );
+}
+
+const calloutTone: Record<"info" | "warning" | "danger", string> = {
+  info: "bg-primary/8 text-foreground",
+  warning: "bg-warning/12 text-foreground",
+  danger: "bg-destructive/8 text-foreground",
+};
+
+/** Faixa de aviso sem borda — mesmo idioma dos cards */
+export function Callout({
+  children,
+  tone = "info",
+  className,
+}: {
+  children: ReactNode;
+  tone?: "info" | "warning" | "danger";
+  className?: string;
+}) {
+  return (
+    <div className={cn("rounded-[1.25rem] px-4 py-3.5 text-sm", calloutTone[tone], className)}>
+      {children}
     </div>
   );
 }

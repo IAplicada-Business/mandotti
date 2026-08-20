@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Download, FileSpreadsheet } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
-import { SectionCard } from "@/components/design-system";
+import { Callout, SectionCard } from "@/components/design-system";
 import { Button } from "@/components/ui/button";
 import { fetchDadosContabilidade } from "@/lib/contabilidade-data";
 import { downloadCsv } from "@/lib/export-csv";
@@ -138,10 +138,10 @@ function RelatoriosContabilidadePage() {
         description="Exportação CSV para o escritório. Dados espelham gestão — sem reentrada."
       />
 
-      <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
+      <Callout>
         Gere os pacotes abaixo e envie ao escritório. Quando o modo automático estiver ativo
         (Parâmetros → envio até dia 5), estes mesmos dados podem ser enviados por e-mail.
-      </div>
+      </Callout>
 
       {isLoading ? (
         <p className="text-sm text-muted-foreground">Carregando dados…</p>

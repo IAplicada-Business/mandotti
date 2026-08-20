@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight, FileText, Landmark, List, Plus, Scale, TrendingDown, TrendingUp } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -246,20 +246,24 @@ function FinanceiroPage() {
           <KpiCard
             label="Passivo total"
             value={formatBRL(resumo?.passivo_total ?? saldoPassivos)}
+            icon={Scale}
             tone="warning"
           />
           <KpiCard
             label="Patrimônio líquido"
             value={formatBRL(resumo?.patrimonio_liquido)}
+            icon={Landmark}
             tone="success"
           />
           <KpiCard
             label="Endividamento"
             value={resumo ? formatPctDecimal(resumo.endividamento_pct) : "—"}
+            icon={TrendingDown}
           />
           <KpiCard
             label="Contratos SCR"
             value={passivos.length}
+            icon={FileText}
             hint={jurosProjetados > 0 ? `Juros proj. ${formatBRL(jurosProjetados)}` : undefined}
           />
         </div>
@@ -368,9 +372,9 @@ function FinanceiroPage() {
         description="Receitas e despesas via XML ou cadastro manual (separado do SCR da planilha)."
       >
         <div className="mb-4 grid gap-4 sm:grid-cols-3">
-          <KpiCard label="Receitas" value={formatBRL(totalReceitas)} tone="success" />
-          <KpiCard label="Despesas" value={formatBRL(totalDespesas)} tone="warning" />
-          <KpiCard label="Lançamentos" value={lancamentos.length} />
+          <KpiCard label="Receitas" value={formatBRL(totalReceitas)} icon={TrendingUp} tone="success" />
+          <KpiCard label="Despesas" value={formatBRL(totalDespesas)} icon={TrendingDown} tone="warning" />
+          <KpiCard label="Lançamentos" value={lancamentos.length} icon={List} />
         </div>
         {isLoading ? (
           <Skeleton className="h-32 w-full rounded-xl" />

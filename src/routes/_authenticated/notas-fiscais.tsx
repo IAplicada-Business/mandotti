@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { FileText, ScrollText, ShieldCheck } from "lucide-react";
+import { Clock, FileText, ScrollText, ShieldCheck } from "lucide-react";
 import { useMemo } from "react";
 
 import { PageHeader } from "@/components/AppShell";
@@ -98,7 +98,7 @@ function NotasFiscaisPage() {
         action={
           <Link
             to="/clientes"
-            className="inline-flex h-9 items-center rounded-xl border border-border bg-background px-4 text-sm font-medium hover:bg-surface-soft"
+            className="inline-flex h-9 items-center rounded-full bg-card px-4 text-sm font-medium shadow-sm hover:bg-surface-soft"
           >
             Clientes & Compradores
           </Link>
@@ -110,6 +110,7 @@ function NotasFiscaisPage() {
         <KpiCard
           label="Aguardando pagamento"
           value={filaNf.filter((n) => n.status !== "pagamento_validado").length}
+          icon={Clock}
           tone="warning"
         />
         <KpiCard
@@ -200,7 +201,7 @@ function NotasFiscaisPage() {
             {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (data?.notas.length ?? 0) === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-surface-soft px-6 py-14 text-center">
+              <div className="rounded-[1.25rem] bg-surface-soft px-6 py-14 text-center">
                 <p className="text-base font-bold text-foreground">Nenhuma nota fiscal ainda</p>
                 <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
                   A estrutura está pronta: quando uma negociação tiver pagamento validado, a NF será

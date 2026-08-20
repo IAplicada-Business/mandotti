@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download } from "lucide-react";
+import { ArrowLeftRight, Download, FileSpreadsheet, Users } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
-import { KpiCard, SectionCard } from "@/components/design-system";
+import { Callout, KpiCard, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -64,17 +64,18 @@ function ExtratosContabilidadePage() {
         }
       />
 
-      <div className="rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm">
+      <Callout tone="warning">
         <span className="font-semibold">Consumo, não input:</span> a contabilidade não faz upload de
         extratos aqui. Solicite ao time Mandotti ou aguarde o envio automático até o dia 5 de cada mês.
-      </div>
+      </Callout>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard label="Extratos" value={data?.extratos.length ?? 0} />
-        <KpiCard label="Movimentos" value={data?.movimentos.length ?? 0} />
+        <KpiCard label="Extratos" value={data?.extratos.length ?? 0} icon={FileSpreadsheet} />
+        <KpiCard label="Movimentos" value={data?.movimentos.length ?? 0} icon={ArrowLeftRight} />
         <KpiCard
           label="Emissores"
           value={emissorIds.length}
+          icon={Users}
           hint={emissores.map((e) => e.nome_fantasia).filter(Boolean).join(", ")}
         />
       </div>

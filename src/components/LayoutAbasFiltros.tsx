@@ -21,10 +21,8 @@ type LayoutAbasFiltrosProps = {
 /** Card compacto com um dropdown */
 export function FiltroCard({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="w-[min(100%,9.5rem)] shrink-0 rounded-2xl border border-border/60 bg-card px-2.5 py-2 shadow-xs [&_button]:h-8 [&_button]:rounded-xl [&_button]:px-2.5 [&_button]:text-xs">
-      <Label className="mb-1 block text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
-        {label}
-      </Label>
+    <div className="w-[min(100%,12rem)] shrink-0 rounded-[1.25rem] bg-card px-3.5 py-3 shadow-sm [&_button]:h-9 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-surface-soft [&_button]:px-3 [&_button]:text-xs [&_button]:shadow-none">
+      <Label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">{label}</Label>
       {children}
     </div>
   );
@@ -32,7 +30,7 @@ export function FiltroCard({ label, children }: { label: string; children: React
 
 /** Filtros compactos sempre visíveis, em linha, acima dos cards */
 export function BarraFiltros({ children }: { children: ReactNode }) {
-  return <div className="flex flex-wrap items-start gap-2">{children}</div>;
+  return <div className="flex flex-wrap items-stretch gap-2.5">{children}</div>;
 }
 
 /**
@@ -77,9 +75,9 @@ export function LayoutAbasFiltros({
       {encapsular ? (
         <div
           key={abaAtiva ?? "conteudo"}
-          className="overflow-hidden rounded-[1.35rem] border border-border/60 bg-card shadow-sm duration-300 animate-in fade-in-0"
+          className="rounded-[1.5rem] bg-card p-4 shadow-sm duration-300 animate-in fade-in-0 sm:p-6"
         >
-          <div className="p-4 sm:p-5">{children}</div>
+          {children}
         </div>
       ) : (
         <div key={abaAtiva ?? "conteudo"} className="space-y-6 duration-300 animate-in fade-in-0">

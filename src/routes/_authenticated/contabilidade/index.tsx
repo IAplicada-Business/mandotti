@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileSpreadsheet, FileText, Landmark, Wallet } from "lucide-react";
+import { Download, FileSpreadsheet, FileText, Landmark, List, Scale, Wallet } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
-import { KpiCard, SectionCard } from "@/components/design-system";
+import { Callout, KpiCard, SectionCard } from "@/components/design-system";
 import { Button } from "@/components/ui/button";
 import { fetchDadosContabilidade } from "@/lib/contabilidade-data";
 import { downloadCsv } from "@/lib/export-csv";
@@ -56,26 +56,36 @@ function ContabilidadeDashboard() {
         }
       />
 
-      <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+      <Callout tone="info">
         <span className="font-semibold">Como funciona:</span> o time Mandotti alimenta gestão
         (passivos, produção, conciliação bancária). A contabilidade{" "}
         <strong>consome, valida e exporta</strong> — importa documentos fiscais e extrai relatórios.
         Extratos bancários são importados pela gestão.
-      </div>
+      </Callout>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Passivo total"
           value={isLoading ? "…" : formatBRL(data?.resumo?.passivo_total)}
+          icon={Scale}
           tone="warning"
         />
         <KpiCard
           label="Patrimônio líquido"
           value={isLoading ? "…" : formatBRL(data?.resumo?.patrimonio_liquido)}
+          icon={Landmark}
           tone="success"
         />
-        <KpiCard label="Contratos SCR" value={isLoading ? "…" : (data?.passivos.length ?? 0)} />
-        <KpiCard label="Lançamentos" value={isLoading ? "…" : (data?.lancamentos.length ?? 0)} />
+        <KpiCard
+          label="Contratos SCR"
+          value={isLoading ? "…" : (data?.passivos.length ?? 0)}
+          icon={FileText}
+        />
+        <KpiCard
+          label="Lançamentos"
+          value={isLoading ? "…" : (data?.lancamentos.length ?? 0)}
+          icon={List}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -139,7 +149,7 @@ function Atalho({
   return (
     <Link
       to={to}
-      className="flex flex-col gap-3 rounded-2xl border border-border/80 bg-card p-5 shadow-sm transition-colors hover:border-primary/30 hover:bg-surface-soft"
+      className="flex flex-col gap-3 rounded-[1.5rem] bg-card p-5 shadow-sm transition-colors hover:bg-surface-soft"
     >
       <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
         <Icon className="size-5" />

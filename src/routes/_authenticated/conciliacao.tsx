@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link2, Upload } from "lucide-react";
+import { CircleCheck, Clock, Link2, List, Upload } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -195,9 +195,9 @@ function ConciliacaoPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard label="Movimentos" value={movimentos.length} />
-        <KpiCard label="Pendentes" value={pendentes.length} tone="warning" />
-        <KpiCard label="Conciliados" value={conciliados.length} tone="success" />
+        <KpiCard label="Movimentos" value={movimentos.length} icon={List} />
+        <KpiCard label="Pendentes" value={pendentes.length} icon={Clock} tone="warning" />
+        <KpiCard label="Conciliados" value={conciliados.length} icon={CircleCheck} tone="success" />
       </div>
 
       <SectionCard

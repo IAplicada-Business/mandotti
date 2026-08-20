@@ -121,7 +121,7 @@ function ConfiguracoesPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft p-4">
+            <div className="flex items-center justify-between rounded-[1.25rem] bg-surface-soft p-4">
               <div>
                 <p className="text-sm font-semibold">Envio automático por e-mail</p>
                 <p className="text-xs text-muted-foreground">
@@ -208,7 +208,7 @@ function ConfiguracoesPage() {
         ) : ficha?.pessoas.length ? (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {ficha.pessoas.map((p) => (
-              <div key={p.id} className="rounded-xl border border-border/80 bg-surface-soft p-4">
+              <div key={p.id} className="rounded-[1.25rem] bg-surface-soft p-4">
                 <div className="mb-2 flex items-center gap-2">
                   <Badge variant="secondary">{labelTipoPessoa(p.tipo)}</Badge>
                 </div>

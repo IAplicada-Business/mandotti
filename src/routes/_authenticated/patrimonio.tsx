@@ -140,7 +140,7 @@ function PatrimonioPage() {
       <div className="grid gap-3 sm:grid-cols-3">
         <Link
           to="/maquinario"
-          className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm transition-colors hover:border-primary/30 hover:bg-card"
+          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
         >
           <span className="inline-flex items-center gap-2 font-semibold">
             <Tractor className="size-4 text-primary" />
@@ -150,7 +150,7 @@ function PatrimonioPage() {
         </Link>
         <Link
           to="/passivos"
-          className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm transition-colors hover:border-primary/30 hover:bg-card"
+          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
         >
           <span className="inline-flex items-center gap-2 font-semibold">
             <Scale className="size-4 text-primary" />
@@ -160,7 +160,7 @@ function PatrimonioPage() {
         </Link>
         <Link
           to="/contratos"
-          className="flex items-center justify-between rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm transition-colors hover:border-primary/30 hover:bg-card"
+          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
         >
           <span className="inline-flex items-center gap-2 font-semibold">
             <Users className="size-4 text-primary" />
@@ -244,8 +244,8 @@ function VerMais({
 }) {
   if (total <= LIMITE_LINHAS) return null;
   return (
-    <div className="mt-4 flex justify-center border-t border-border/60 pt-4">
-      <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-primary" onClick={onToggle}>
+    <div className="mt-5 flex justify-center">
+      <Button type="button" variant="outline" size="sm" className="rounded-full gap-1.5" onClick={onToggle}>
         {expandido ? (
           <>
             <ChevronUp className="size-4" />
