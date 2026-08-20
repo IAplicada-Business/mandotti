@@ -5,12 +5,12 @@ import { cn } from "@/lib/utils";
 
 type Tone = "default" | "success" | "warning" | "danger" | "info";
 
-const toneBar: Record<Tone, string> = {
-  default: "bg-primary",
-  success: "bg-success",
-  warning: "bg-warning",
-  danger: "bg-destructive",
-  info: "bg-chart-5",
+const toneIcon: Record<Tone, string> = {
+  default: "bg-primary/12 text-primary",
+  success: "bg-primary/12 text-primary",
+  warning: "bg-warning/12 text-warning",
+  danger: "bg-destructive/12 text-destructive",
+  info: "bg-secondary text-foreground",
 };
 
 export function KpiCard({
@@ -31,22 +31,21 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
+        "rounded-[1.35rem] border border-border/60 bg-card p-4 shadow-sm sm:p-5",
         className,
       )}
     >
-      <span className={cn("absolute inset-x-0 top-0 h-[3px]", toneBar[tone])} />
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
           {label}
         </p>
         {Icon ? (
-          <span className="rounded-xl bg-surface-soft p-2 text-primary">
+          <span className={cn("grid size-9 shrink-0 place-items-center rounded-2xl", toneIcon[tone])}>
             <Icon className="size-4" />
           </span>
         ) : null}
       </div>
-      <p className="mt-2 font-mono-nums text-3xl font-extrabold tracking-tight text-foreground">
+      <p className="mt-3 font-mono-nums text-2xl font-extrabold tracking-tight text-foreground sm:text-3xl">
         {value}
       </p>
       {hint ? <div className="mt-2 text-xs font-medium text-muted-foreground">{hint}</div> : null}
@@ -75,9 +74,7 @@ export function RingStat({
   return (
     <div
       className={cn(
-        // Linha em vez de coluna: o anel centralizado deixava muito vazio
-        // lateral quando o card cresce em telas largas.
-        "flex items-center gap-4 rounded-2xl border border-border/80 bg-card p-5 shadow-sm",
+        "flex items-center gap-4 rounded-[1.35rem] border border-border/60 bg-card p-4 shadow-sm sm:p-5",
         className,
       )}
     >
@@ -129,12 +126,12 @@ export function SectionCard({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-2xl border border-border/80 bg-card shadow-sm",
+        "overflow-hidden rounded-[1.35rem] border border-border/60 bg-card shadow-sm",
         className,
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-4">
-        <div>
+      <div className="flex flex-wrap items-start justify-between gap-3 px-4 py-4 sm:px-5">
+        <div className="min-w-0">
           <h3 className="text-base font-bold tracking-tight">{title}</h3>
           {description ? (
             <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
@@ -142,7 +139,7 @@ export function SectionCard({
         </div>
         {action}
       </div>
-      <div className="p-5">{children}</div>
+      <div className="px-4 pb-5 sm:px-5">{children}</div>
     </div>
   );
 }
