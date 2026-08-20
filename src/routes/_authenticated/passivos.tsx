@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Building2, FileText, Landmark, TrendingDown } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Building2, FileText, Landmark, Plus, TrendingDown } from "lucide-react";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
+import { AcoesCadastro } from "@/components/AcoesCadastro";
 import { PageHeader } from "@/components/AppShell";
 import {
   DonutDistribution,
@@ -18,6 +20,16 @@ import {
   type DirecaoOrdem,
 } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -33,8 +45,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { usePerfil, useSession } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBRL, formatDateBR, formatPctDecimal } from "@/lib/format";
+import { emptyToNull, formatBRL, formatDateBR, formatPctDecimal, numOrNull } from "@/lib/format";
 import { useEmissor } from "@/lib/emissor-context";
 
 export const Route = createFileRoute("/_authenticated/passivos")({
@@ -69,6 +82,8 @@ type PassivoRow = {
   vencimento_final: string | null;
   saldo_devedor: number | null;
   total_projetado: number | null;
+  status: string;
+  pago_em: string | null;
   ate_jun_2026: number;
   jul26_jun27: number;
   jul27_jun28: number;
@@ -78,14 +93,42 @@ type PassivoRow = {
   sem_cronograma: number;
 };
 
+type FormPassivo = {
+  id?: string;
+  emissor_id: string;
+  instituicao: string;
+  contrato_finalidade: string;
+  taxa_juros: string;
+  vencimento_final: string;
+  saldo_devedor: string;
+  total_projetado: string;
+};
+
+const VAZIO_PASSIVO: FormPassivo = {
+  emissor_id: "",
+  instituicao: "",
+  contrato_finalidade: "",
+  taxa_juros: "",
+  vencimento_final: "",
+  saldo_devedor: "",
+  total_projetado: "",
+};
+
 type Ordenacao = "saldo" | "projetado" | "vencimento" | "instituicao" | "titular" | "taxa";
 
 function PassivosPage() {
+  const qc = useQueryClient();
+  const { user } = useSession();
+  const { pode } = usePerfil(user);
   const { emissores, emissorIds } = useEmissor();
+  const podeEditar = pode("/passivos", "editar");
   const [banco, setBanco] = useState("todos");
   const [titular, setTitular] = useState("todos");
+  const [situacao, setSituacao] = useState("abertos");
   const [ordenacao, setOrdenacao] = useState<Ordenacao>("saldo");
   const [direcao, setDirecao] = useState<DirecaoOrdem>("desc");
+  const [aberto, setAberto] = useState(false);
+  const [form, setForm] = useState<FormPassivo>(VAZIO_PASSIVO);
 
   const { data = [], isLoading } = useQuery({
     queryKey: ["passivos", emissorIds],
@@ -124,10 +167,72 @@ function PassivosPage() {
     [data, emissores, emissorIds],
   );
 
+  const salvar = useMutation({
+    mutationFn: async (f: FormPassivo) => {
+      if (!f.emissor_id || !f.instituicao.trim() || !f.contrato_finalidade.trim()) {
+        throw new Error("Informe titular, instituição e contrato");
+      }
+      const payload = {
+        emissor_id: f.emissor_id,
+        instituicao: f.instituicao.trim(),
+        contrato_finalidade: f.contrato_finalidade.trim(),
+        taxa_juros: numOrNull(f.taxa_juros),
+        vencimento_final: emptyToNull(f.vencimento_final),
+        saldo_devedor: numOrNull(f.saldo_devedor),
+        total_projetado: numOrNull(f.total_projetado),
+        origem: "manual",
+        status: "aberto",
+      };
+      const res = f.id
+        ? await supabase.from("passivos").update(payload).eq("id", f.id)
+        : await supabase.from("passivos").insert(payload);
+      if (res.error) throw res.error;
+    },
+    onSuccess: () => {
+      toast.success("Contrato salvo");
+      setAberto(false);
+      setForm(VAZIO_PASSIVO);
+      qc.invalidateQueries({ queryKey: ["passivos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const darBaixa = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("passivos")
+        .update({ status: "pago", pago_em: new Date().toISOString().slice(0, 10) })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Baixa registrada como pago");
+      qc.invalidateQueries({ queryKey: ["passivos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const arquivar = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from("passivos")
+        .update({ deleted_at: new Date().toISOString() })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Contrato excluído");
+      qc.invalidateQueries({ queryKey: ["passivos"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const filtrados = useMemo(() => {
     let rows = data;
     if (banco !== "todos") rows = rows.filter((p) => p.instituicao === banco);
     if (titular !== "todos") rows = rows.filter((p) => p.emissor_id === titular);
+    if (situacao === "abertos") rows = rows.filter((p) => (p.status ?? "aberto") !== "pago");
+    if (situacao === "pagos") rows = rows.filter((p) => p.status === "pago");
 
     const copia = [...rows];
     const fator = direcao === "asc" ? 1 : -1;
@@ -153,7 +258,7 @@ function PassivosPage() {
       }
     });
     return copia;
-  }, [data, banco, titular, ordenacao, direcao, emissores]);
+  }, [data, banco, titular, situacao, ordenacao, direcao, emissores]);
 
   const ordenarPor = (campo: Ordenacao) => {
     if (ordenacao === campo) {
@@ -237,7 +342,20 @@ function PassivosPage() {
     <div className="space-y-6">
       <PageHeader
         title="Passivos · SCR"
-        description="Contratos da ficha cadastral — visão por titular, banco e ano."
+        description="Cadastre contratos, filtre por banco/titular e dê baixa manual como pago."
+        action={
+          podeEditar ? (
+            <Button
+              onClick={() => {
+                setForm({ ...VAZIO_PASSIVO, emissor_id: emissorIds[0] ?? "" });
+                setAberto(true);
+              }}
+            >
+              <Plus className="mr-2 size-4" />
+              Novo contrato
+            </Button>
+          ) : null
+        }
       />
 
       <BarraFiltros>
@@ -268,6 +386,18 @@ function PassivosPage() {
                   {b}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+        <FiltroCard label="Situação">
+          <Select value={situacao} onValueChange={setSituacao}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="abertos">Em aberto</SelectItem>
+              <SelectItem value="pagos">Pagos</SelectItem>
+              <SelectItem value="todos">Todos</SelectItem>
             </SelectContent>
           </Select>
         </FiltroCard>
@@ -384,6 +514,8 @@ function PassivosPage() {
                         onClick={() => ordenarPor("projetado")}
                         align="right"
                       />
+                      <TableHead>Situação</TableHead>
+                      <TableHead className="w-32" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -406,6 +538,45 @@ function PassivosPage() {
                         <TableCell className="text-right font-mono-nums">
                           {formatBRL(p.total_projetado)}
                         </TableCell>
+                        <TableCell>
+                          <Badge variant={p.status === "pago" ? "secondary" : "default"}>
+                            {p.status === "pago"
+                              ? `Pago${p.pago_em ? ` · ${formatDateBR(p.pago_em)}` : ""}`
+                              : "Aberto"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {podeEditar ? (
+                            <AcoesCadastro
+                              onPago={
+                                p.status !== "pago"
+                                  ? () => {
+                                      if (window.confirm("Marcar este contrato como pago?")) {
+                                        darBaixa.mutate(p.id);
+                                      }
+                                    }
+                                  : undefined
+                              }
+                              onEdit={() => {
+                                setForm({
+                                  id: p.id,
+                                  emissor_id: p.emissor_id,
+                                  instituicao: p.instituicao,
+                                  contrato_finalidade: p.contrato_finalidade,
+                                  taxa_juros: p.taxa_juros != null ? String(p.taxa_juros) : "",
+                                  vencimento_final: p.vencimento_final ?? "",
+                                  saldo_devedor: p.saldo_devedor != null ? String(p.saldo_devedor) : "",
+                                  total_projetado:
+                                    p.total_projetado != null ? String(p.total_projetado) : "",
+                                });
+                                setAberto(true);
+                              }}
+                              onDelete={() => {
+                                if (window.confirm("Excluir este contrato?")) arquivar.mutate(p.id);
+                              }}
+                            />
+                          ) : null}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -421,6 +592,105 @@ function PassivosPage() {
             <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />
           </div>
         </SectionCard>
+
+      <Dialog open={aberto} onOpenChange={setAberto}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{form.id ? "Editar contrato" : "Novo contrato"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-3">
+            <div className="space-y-2">
+              <Label>Titular</Label>
+              <Select
+                value={form.emissor_id}
+                onValueChange={(v) => setForm((f) => ({ ...f, emissor_id: v }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Titular" />
+                </SelectTrigger>
+                <SelectContent>
+                  {emissores
+                    .filter((e) => emissorIds.includes(e.id))
+                    .map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nome_fantasia || e.razao_social}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Instituição</Label>
+              <Input
+                value={form.instituicao}
+                onChange={(e) => setForm((f) => ({ ...f, instituicao: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Contrato / finalidade</Label>
+              <Input
+                value={form.contrato_finalidade}
+                onChange={(e) => setForm((f) => ({ ...f, contrato_finalidade: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Taxa (decimal, ex. 0.12)</Label>
+                <Input
+                  type="number"
+                  step="0.0001"
+                  value={form.taxa_juros}
+                  onChange={(e) => setForm((f) => ({ ...f, taxa_juros: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Vencimento</Label>
+                <Input
+                  type="date"
+                  value={form.vencimento_final}
+                  onChange={(e) => setForm((f) => ({ ...f, vencimento_final: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Saldo devedor</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.saldo_devedor}
+                  onChange={(e) => setForm((f) => ({ ...f, saldo_devedor: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Projetado c/ juros</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={form.total_projetado}
+                  onChange={(e) => setForm((f) => ({ ...f, total_projetado: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAberto(false)}>
+              Cancelar
+            </Button>
+            <Button
+              disabled={
+                !form.emissor_id ||
+                !form.instituicao.trim() ||
+                !form.contrato_finalidade.trim() ||
+                salvar.isPending
+              }
+              onClick={() => salvar.mutate(form)}
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
