@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Handshake, Scale, Truck } from "lucide-react";
+import { ArrowRight, ClipboardList, Handshake, Scale, Truck } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
@@ -74,12 +74,12 @@ function ContratosPage() {
         <KpiCard label="Destinos" value={destinos.length} icon={Handshake} tone="info" hint="Tradings / esmagadoras" />
         <KpiCard label="Fornecedores" value={fornecedores.length} icon={Truck} tone="success" />
         <KpiCard label="Referências" value={referencias.length} icon={Handshake} />
-        <KpiCard label="Total cadastros" value={data.length} hint="Planilha Mandotti" />
+        <KpiCard label="Total cadastros" value={data.length} icon={ClipboardList} hint="Planilha Mandotti" />
       </div>
 
       <Link
         to="/passivos"
-        className="flex items-center justify-between rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm transition-colors hover:bg-warning/10"
+        className="flex items-center justify-between rounded-[1.25rem] bg-warning/12 px-4 py-3.5 text-sm transition-colors hover:bg-warning/18"
       >
         <span className="inline-flex items-center gap-2 font-semibold">
           <Scale className="size-4 text-warning" />
@@ -122,7 +122,7 @@ function ContratosPage() {
             title="Contratos forward"
             description="Negociações futuras (soja, milho, sorgo, milheto) — sem histórico anterior na planilha"
           >
-            <div className="rounded-xl border border-dashed border-border bg-surface-soft px-6 py-14 text-center">
+            <div className="rounded-[1.25rem] bg-surface-soft px-6 py-14 text-center">
               <p className="text-base font-bold text-foreground">Nenhum contrato forward registrado</p>
               <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
                 Os parceiros acima ({destinos.map((d) => d.nome).join(", ") || "—"}) já estão cadastrados como

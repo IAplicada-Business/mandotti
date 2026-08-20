@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download } from "lucide-react";
+import { Download, FileText, List, Percent, Scale } from "lucide-react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
@@ -81,10 +81,14 @@ function ContabilidadeFinanceiroPage() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Passivo total" value={formatBRL(data?.resumo?.passivo_total)} tone="warning" />
-        <KpiCard label="Endividamento" value={formatPctDecimal(data?.resumo?.endividamento_pct)} />
-        <KpiCard label="Contratos" value={data?.passivos.length ?? 0} />
-        <KpiCard label="Lançamentos" value={data?.lancamentos.length ?? 0} />
+        <KpiCard label="Passivo total" value={formatBRL(data?.resumo?.passivo_total)} icon={Scale} tone="warning" />
+        <KpiCard
+          label="Endividamento"
+          value={formatPctDecimal(data?.resumo?.endividamento_pct)}
+          icon={Percent}
+        />
+        <KpiCard label="Contratos" value={data?.passivos.length ?? 0} icon={FileText} />
+        <KpiCard label="Lançamentos" value={data?.lancamentos.length ?? 0} icon={List} />
       </div>
 
       <SectionCard

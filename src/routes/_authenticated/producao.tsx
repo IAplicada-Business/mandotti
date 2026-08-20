@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Sprout, Wheat } from "lucide-react";
+import { Layers, Sprout, Wheat } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
@@ -342,6 +342,7 @@ function ProducaoPage() {
         <KpiCard
           label="Safrinha"
           value={fmtHa(kpis.safrinha)}
+          icon={Layers}
           hint={kpis.prodMedia != null ? `Prod. média ${fmtScHa(kpis.prodMedia)}` : undefined}
           tone="warning"
         />

@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
-import { SectionCard } from "@/components/design-system";
+import { Callout, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -144,11 +144,11 @@ function DocumentosContabilidadePage() {
         description="Importação de XML pela contabilidade. Lançamentos gerados alimentam gestão e exportações — sem duplicar cadastro manual."
       />
 
-      <div className="rounded-xl border border-border/80 bg-surface-soft px-4 py-3 text-sm text-muted-foreground">
+      <Callout>
         XMLs importados aqui criam lançamentos visíveis em{" "}
         <strong className="text-foreground">Gestão → Financeiro</strong> e nos relatórios de
         exportação deste módulo.
-      </div>
+      </Callout>
 
       <SectionCard
         title="Importar XML"

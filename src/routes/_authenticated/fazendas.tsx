@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Pencil, Plus, Trash2 } from "lucide-react";
+import { AlertTriangle, Home, Pencil, Plus, Sprout, Target, Trash2, Trees } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
-import { KpiCard, SectionCard } from "@/components/design-system";
+import { Callout, KpiCard, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -262,34 +262,38 @@ function FazendasPage() {
         <KpiCard
           label="Área produtiva"
           value={`${kpis.areaProd.toLocaleString("pt-BR")} ha`}
+          icon={Sprout}
           hint={`${kpis.countProd} fazendas no quadro produtivo`}
         />
         <KpiCard
           label="Em abertura"
           value={`${kpis.areaAbertura.toLocaleString("pt-BR")} ha`}
+          icon={Trees}
           hint="Desmate / licenciamento"
           tone="warning"
         />
         <KpiCard
           label="Meta do grupo"
           value={`${Number(kpis.meta).toLocaleString("pt-BR")} ha`}
+          icon={Target}
           hint="Projeção expansão · usina de álcool"
           tone="success"
         />
         <KpiCard
           label="Arrendadas a 3º"
           value={String(kpis.arrendTerceiro)}
+          icon={Home}
           hint="Sol Nascente · Cruz de Malta"
         />
       </div>
 
-      <div className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-foreground">
+      <Callout tone="warning" className="flex items-start gap-2">
         <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
         <p>
           <span className="font-semibold">Custo de arrendamento por área:</span> a validar — Nagyla
           vai enviar. Campos vazios aparecem como &quot;a validar&quot; até a confirmação.
         </p>
-      </div>
+      </Callout>
 
       <SectionCard title="Imóveis rurais">
         <Table>

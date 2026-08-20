@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Building2, FileText, Landmark, TrendingDown } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
@@ -305,12 +306,13 @@ function PassivosPage() {
       </BarraFiltros>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard label="Contratos" value={filtrados.length} />
-        <KpiCard label="Saldo devedor" value={formatBRL(saldoTotal)} tone="warning" />
-        <KpiCard label="Projetado c/ juros" value={formatBRL(projetado)} tone="danger" />
+        <KpiCard label="Contratos" value={filtrados.length} icon={FileText} />
+        <KpiCard label="Saldo devedor" value={formatBRL(saldoTotal)} icon={Landmark} tone="warning" />
+        <KpiCard label="Projetado c/ juros" value={formatBRL(projetado)} icon={TrendingDown} tone="danger" />
         <KpiCard
           label="Instituições"
           value={porBanco.length}
+          icon={Building2}
           hint="No filtro atual"
           tone="info"
         />
@@ -412,8 +414,8 @@ function PassivosPage() {
             </TabelaPreview>
           )}
 
-          <div className="mt-6 border-t border-border/60 pt-5">
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="mt-6">
+            <p className="mb-4 text-sm font-semibold text-muted-foreground">
               Resumo por banco
             </p>
             <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />

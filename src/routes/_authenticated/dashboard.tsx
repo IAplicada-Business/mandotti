@@ -2,23 +2,15 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Landmark, Scale, Tractor } from "lucide-react";
 import { useMemo } from "react";
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { PageHeader } from "@/components/AppShell";
-import { CompositionDonut } from "@/components/charts/MandottiCharts";
+import {
+  AreaSeriesChart,
+  CompositionDonut,
+  MandottiTooltip,
+  TimelineBarChart,
+} from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,20 +36,20 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 });
 
 const EMPTY_TREND = [
-  { mes: "Mar", valor: 0 },
-  { mes: "Abr", valor: 0 },
-  { mes: "Mai", valor: 0 },
-  { mes: "Jun", valor: 0 },
-  { mes: "Jul", valor: 0 },
-  { mes: "Ago", valor: 0 },
+  { label: "Mar", value: 0 },
+  { label: "Abr", value: 0 },
+  { label: "Mai", value: 0 },
+  { label: "Jun", value: 0 },
+  { label: "Jul", value: 0 },
+  { label: "Ago", value: 0 },
 ];
 
 const EMPTY_BARS = [
-  { nome: "Combustível", valor: 0 },
-  { nome: "Químicos", valor: 0 },
-  { nome: "Peças", valor: 0 },
-  { nome: "Manutenção", valor: 0 },
-  { nome: "Folha", valor: 0 },
+  { label: "Combustível", value: 0 },
+  { label: "Químicos", value: 0 },
+  { label: "Peças", value: 0 },
+  { label: "Manutenção", value: 0 },
+  { label: "Folha", value: 0 },
 ];
 
 const EMPTY_PIE = [
@@ -65,14 +57,6 @@ const EMPTY_PIE = [
   { name: "Nagyla", value: 1, color: "var(--emissor-nagyla)" },
   { name: "Mandotti", value: 1, color: "var(--emissor-mandotti)" },
   { name: "Tractor", value: 1, color: "var(--emissor-tractor)" },
-];
-
-const PIE_COLORS = [
-  "var(--chart-1)",
-  "var(--chart-2)",
-  "var(--chart-3)",
-  "var(--chart-4)",
-  "var(--chart-5)",
 ];
 
 function Dashboard() {
@@ -190,35 +174,7 @@ function Dashboard() {
               title="Movimentação (encaixe)"
               description="Será preenchida pelo módulo Financeiro — estado vazio real."
             >
-              <div className="h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={EMPTY_TREND}>
-                    <defs>
-                      <linearGradient id="fillTrend" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.28} />
-                        <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.02} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                    <XAxis dataKey="mes" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-                    <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 16,
-                        border: "1px solid var(--border)",
-                        boxShadow: "var(--shadow-sm-token)",
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="valor"
-                      stroke="var(--primary)"
-                      fill="url(#fillTrend)"
-                      strokeWidth={2.5}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              <AreaSeriesChart data={EMPTY_TREND} height={260} emptyLabel="Sem movimentação ainda." />
             </SectionCard>
 
             <SectionCard
@@ -233,22 +189,24 @@ function Dashboard() {
                       data={EMPTY_PIE}
                       dataKey="value"
                       nameKey="name"
-                      innerRadius={58}
-                      outerRadius={82}
-                      paddingAngle={3}
+                    innerRadius={62}
+                    outerRadius={88}
+                    paddingAngle={4}
+                    cornerRadius={8}
+                    stroke="transparent"
                     >
                       {EMPTY_PIE.map((entry) => (
                         <Cell key={entry.name} fill={entry.color} opacity={0.35} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip content={<MandottiTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
               <div className="mt-2 flex flex-wrap justify-center gap-3">
                 {EMPTY_PIE.map((e) => (
                   <span key={e.name} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <i className="size-2.5 rounded-sm" style={{ background: e.color }} />
+                    <i className="size-2.5 rounded-full" style={{ background: e.color }} />
                     {e.name}
                   </span>
                 ))}
@@ -262,28 +220,18 @@ function Dashboard() {
             title="Despesas por categoria"
             description="Aguardando importação de XML — layout já no padrão do design system."
           >
-            <div className="h-[280px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={EMPTY_BARS} barSize={28}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="nome" tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-                  <YAxis tickLine={false} axisLine={false} tick={{ fill: "var(--muted-foreground)", fontSize: 12 }} />
-                  <Tooltip
-                    contentStyle={{
-                      borderRadius: 16,
-                      border: "1px solid var(--border)",
-                    }}
-                  />
-                  <Bar dataKey="valor" fill="var(--primary)" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            <TimelineBarChart
+              items={EMPTY_BARS}
+              color="var(--primary)"
+              height={280}
+              emptyLabel="Aguardando importação de XML."
+            />
           </SectionCard>
         </TabsContent>
 
         <TabsContent value="fiscal">
           <SectionCard title="Fila fiscal">
-            <div className="rounded-xl border border-dashed border-border bg-surface-soft px-6 py-14 text-center">
+            <div className="rounded-[1.25rem] bg-surface-soft px-6 py-14 text-center">
               <p className="text-base font-bold text-foreground">Sem lançamentos ainda</p>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
                 XMLs, notas e conciliação vão aparecer aqui. A navegação e o visual já estão
