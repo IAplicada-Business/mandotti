@@ -52,6 +52,7 @@ import { usePerfil, useSession } from "@/hooks/useAuth";
 export const NAV = [
   {
     group: "Visão geral",
+    icon: LayoutDashboard,
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/patrimonio", label: "Patrimônio", icon: Home },
@@ -59,6 +60,7 @@ export const NAV = [
   },
   {
     group: "Operação",
+    icon: Sprout,
     items: [
       { to: "/fazendas", label: "Fazendas & Áreas", icon: Sprout },
       { to: "/producao", label: "Produção & Safras", icon: Wheat },
@@ -67,6 +69,7 @@ export const NAV = [
   },
   {
     group: "Financeiro",
+    icon: Wallet,
     items: [
       { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
       { to: "/conciliacao", label: "Conciliação", icon: Landmark },
@@ -75,6 +78,7 @@ export const NAV = [
   },
   {
     group: "Fiscal",
+    icon: ScrollText,
     items: [
       { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
       { to: "/importacao-xml", label: "Importação XML", icon: FileSpreadsheet },
@@ -84,6 +88,7 @@ export const NAV = [
   },
   {
     group: "Documentos",
+    icon: FolderOpen,
     items: [
       { to: "/documentos", label: "Biblioteca", icon: FolderOpen },
       { to: "/assinaturas", label: "Assinatura digital", icon: PenLine },
@@ -91,6 +96,7 @@ export const NAV = [
   },
   {
     group: "Configurações",
+    icon: Settings,
     items: [
       { to: "/emissores", label: "Emissores", icon: Building2 },
       { to: "/certificados", label: "Certificados", icon: ShieldCheck },
@@ -161,6 +167,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? [
           {
             group: "Contabilidade",
+            icon: Calculator,
             items: NAV_CONTABILIDADE.filter((item) => pode(item.to, "ver")),
           },
         ].filter((section) => section.items.length > 0)
@@ -202,12 +209,62 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const soRail = colapsada ? "lg:hidden" : undefined;
 
+  const itemAtivo = (to: string) =>
+    pathname === to || (to !== "/" && pathname.startsWith(`${to}/`));
+
+  const renderRailGroup = (section: (typeof navVisivel)[number]) => {
+    const ativo = section.group === grupoComRotaAtiva;
+    const Icon = section.icon;
+    return (
+      <DropdownMenu>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={section.group}
+                className={cn(
+                  "grid size-11 place-items-center rounded-2xl transition-colors",
+                  ativo
+                    ? "bg-primary text-primary-foreground shadow-xs"
+                    : "bg-surface-soft text-primary hover:bg-card",
+                )}
+              >
+                <Icon className="size-4" />
+              </button>
+            </DropdownMenuTrigger>
+          </TooltipTrigger>
+          <TooltipContent side="right">{section.group}</TooltipContent>
+        </Tooltip>
+        <DropdownMenuContent side="right" align="start" sideOffset={12} className="min-w-[13.5rem]">
+          <DropdownMenuLabel>{section.group}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {section.items.map((item) => {
+            const active = itemAtivo(item.to);
+            return (
+              <DropdownMenuItem key={item.to} asChild>
+                <Link
+                  to={item.to}
+                  preload="intent"
+                  onClick={() => setOpen(false)}
+                  className={cn("flex cursor-pointer items-center gap-2", active && "bg-surface-soft font-semibold")}
+                >
+                  <item.icon className="size-4 text-primary" />
+                  {item.label}
+                </Link>
+              </DropdownMenuItem>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   const renderNavItem = (
     item: { to: string; label: string; icon: typeof LayoutDashboard },
     rail: boolean,
   ) => {
-    const active =
-      pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`));
+    const active = itemAtivo(item.to);
     const link = (
       <Link
         to={item.to}
@@ -371,14 +428,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
               return (
                 <div key={section.group}>
-                  {/* Desktop recolhido: só ícones, sem agrupamento */}
+                  {/* Desktop recolhido: só o ícone do grupo pai */}
                   {colapsada ? (
-                    <div className="hidden lg:block">
-                      <div className="mx-2 mb-2 h-px bg-sidebar-border" />
-                      <ul className="space-y-0.5">
-                        {section.items.map((item) => renderNavItem(item, true))}
-                      </ul>
-                    </div>
+                    <div className="hidden justify-center py-0.5 lg:flex">{renderRailGroup(section)}</div>
                   ) : null}
 
                   {/* Mobile + desktop expandido: grupos colapsáveis */}
