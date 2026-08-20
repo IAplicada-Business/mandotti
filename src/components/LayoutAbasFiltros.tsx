@@ -9,8 +9,6 @@ export type AbaLateral = {
 };
 
 type LayoutAbasFiltrosProps = {
-  /** Título à esquerda quando não há sub-abas */
-  title?: string;
   /** Sub-abas em pílula, acima da tabela */
   abas?: AbaLateral[];
   abaAtiva?: string;
@@ -42,47 +40,38 @@ export function BarraFiltros({ children }: { children: ReactNode }) {
  * Os filtros ficam em `BarraFiltros`, sempre acima dos cards da página.
  */
 export function LayoutAbasFiltros({
-  title,
   abas,
   abaAtiva,
   onAbaChange,
   children,
   encapsular = true,
 }: LayoutAbasFiltrosProps) {
-  const temBarra = Boolean(abas?.length || title);
-
   return (
     <div className="space-y-4">
-      {temBarra ? (
-        <div className="flex flex-wrap items-center gap-3">
-          {abas?.length ? (
-            <nav
-              aria-label="Sub-abas"
-              className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
-            >
-              {abas.map((aba) => {
-                const ativa = abaAtiva === aba.id;
-                return (
-                  <button
-                    key={aba.id}
-                    type="button"
-                    onClick={() => onAbaChange?.(aba.id)}
-                    className={cn(
-                      "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
-                      ativa
-                        ? "bg-card text-primary shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {aba.label}
-                  </button>
-                );
-              })}
-            </nav>
-          ) : (
-            <h3 className="text-base font-bold tracking-tight">{title}</h3>
-          )}
-        </div>
+      {abas?.length ? (
+        <nav
+          aria-label="Sub-abas"
+          className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
+        >
+          {abas.map((aba) => {
+            const ativa = abaAtiva === aba.id;
+            return (
+              <button
+                key={aba.id}
+                type="button"
+                onClick={() => onAbaChange?.(aba.id)}
+                className={cn(
+                  "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                  ativa
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {aba.label}
+              </button>
+            );
+          })}
+        </nav>
       ) : null}
 
       {encapsular ? (

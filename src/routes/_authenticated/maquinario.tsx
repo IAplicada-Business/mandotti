@@ -385,7 +385,7 @@ function MaquinarioPage() {
         </div>
       ) : null}
 
-      <LayoutAbasFiltros title="Frota">
+      <LayoutAbasFiltros>
           {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (
