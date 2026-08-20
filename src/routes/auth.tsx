@@ -542,6 +542,7 @@ const AUTH_CSS = `
   border-radius: 48px;
   background: linear-gradient(120deg, var(--m-leaf), var(--m-green));
   z-index: 1;
+  pointer-events: none;
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.4s;
 }
 
