@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard } from "@/components/design-system";
-import { LayoutAbasFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
+import { BarraFiltros, FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -128,7 +128,6 @@ function FiltrosProducao({
   onFazenda,
   onCultura,
   onOrdenacao,
-  mostrarFazenda = true,
 }: {
   safras: string[];
   fazendas: { id: string; nome: string }[];
@@ -141,7 +140,6 @@ function FiltrosProducao({
   onFazenda: (v: string) => void;
   onCultura: (v: string) => void;
   onOrdenacao: (v: Ordenacao) => void;
-  mostrarFazenda?: boolean;
 }) {
   return (
     <>
@@ -160,23 +158,21 @@ function FiltrosProducao({
           </SelectContent>
         </Select>
       </FiltroCard>
-      {mostrarFazenda ? (
-        <FiltroCard label="Fazenda">
-          <Select value={fazenda} onValueChange={onFazenda}>
-            <SelectTrigger>
-              <SelectValue placeholder="Fazenda" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="todas">Todas</SelectItem>
-              {fazendas.map((f) => (
-                <SelectItem key={f.id} value={f.id}>
-                  {f.nome}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FiltroCard>
-      ) : null}
+      <FiltroCard label="Fazenda">
+        <Select value={fazenda} onValueChange={onFazenda}>
+          <SelectTrigger>
+            <SelectValue placeholder="Fazenda" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="todas">Todas</SelectItem>
+            {fazendas.map((f) => (
+              <SelectItem key={f.id} value={f.id}>
+                {f.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </FiltroCard>
       <FiltroCard label="Cultura">
         <Select value={cultura} onValueChange={onCultura}>
           <SelectTrigger>
@@ -322,7 +318,6 @@ function ProducaoPage() {
       onFazenda={setFazendaFiltro}
       onCultura={setCulturaFiltro}
       onOrdenacao={setOrdenacao}
-      mostrarFazenda={abaAtiva === "fazenda"}
     />
   );
 
@@ -332,6 +327,8 @@ function ProducaoPage() {
         title="Produção & Safras"
         description="Visão por fazenda, histórico realizado e projeções."
       />
+
+      <BarraFiltros>{filtrosProducao}</BarraFiltros>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
@@ -354,7 +351,6 @@ function ProducaoPage() {
         abas={[...ABAS_PRODUCAO]}
         abaAtiva={abaAtiva}
         onAbaChange={(id) => setAbaAtiva(id as AbaProducao)}
-        filtros={filtrosProducao}
       >
             {abaAtiva === "fazenda" ? (
               isLoading ? (
