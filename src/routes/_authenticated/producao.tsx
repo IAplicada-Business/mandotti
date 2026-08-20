@@ -550,6 +550,14 @@ function ProducaoPage() {
         action={
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild>
+              <Link
+                to="/relatorios"
+                search={{ safra: safraFiltro === "todas" ? undefined : safraFiltro }}
+              >
+                Exportar para o banco
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
               <Link to="/produtos">Culturas</Link>
             </Button>
             {podeEditar ? (

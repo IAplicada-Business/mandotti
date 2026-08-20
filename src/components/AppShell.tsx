@@ -56,6 +56,7 @@ export const NAV = [
     items: [
       { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { to: "/patrimonio", label: "Patrimônio", icon: Home },
+      { to: "/relatorios", label: "Relatórios", icon: FileSpreadsheet },
     ],
   },
   {
@@ -324,7 +325,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <div className="flex min-h-dvh bg-background">
         <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-sidebar text-sidebar-foreground shadow-md transition-[transform,width,border-radius] duration-300 lg:sticky lg:top-3 lg:m-3 lg:h-[calc(100dvh-1.5rem)] lg:translate-x-0 lg:rounded-[1.75rem]",
+            "no-print fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col bg-sidebar text-sidebar-foreground shadow-md transition-[transform,width,border-radius] duration-300 lg:sticky lg:top-3 lg:m-3 lg:h-[calc(100dvh-1.5rem)] lg:translate-x-0 lg:rounded-[1.75rem]",
             open ? "translate-x-0" : "-translate-x-full",
             colapsada ? "lg:w-[88px]" : "lg:w-[280px]",
           )}
@@ -500,7 +501,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex h-16 items-center gap-2 bg-background/90 px-3 backdrop-blur-xl sm:h-[72px] sm:gap-3 sm:px-5 lg:px-6">
+          <header className="no-print sticky top-0 z-20 flex h-16 items-center gap-2 bg-background/90 px-3 backdrop-blur-xl sm:h-[72px] sm:gap-3 sm:px-5 lg:px-6">
             <Button
               variant="ghost"
               size="icon"

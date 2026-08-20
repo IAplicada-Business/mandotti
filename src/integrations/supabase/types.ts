@@ -208,6 +208,62 @@ export type Database = {
         }
         Relationships: []
       }
+      documentos: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          fazenda_id: string | null
+          id: string
+          mime_type: string | null
+          nome_arquivo: string | null
+          observacoes: string | null
+          storage_path: string
+          tamanho_bytes: number | null
+          tipo: string
+          titulo: string
+          updated_at: string
+          vencimento: string | null
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          fazenda_id?: string | null
+          id?: string
+          mime_type?: string | null
+          nome_arquivo?: string | null
+          observacoes?: string | null
+          storage_path: string
+          tamanho_bytes?: number | null
+          tipo?: string
+          titulo: string
+          updated_at?: string
+          vencimento?: string | null
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          fazenda_id?: string | null
+          id?: string
+          mime_type?: string | null
+          nome_arquivo?: string | null
+          observacoes?: string | null
+          storage_path?: string
+          tamanho_bytes?: number | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          vencimento?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_fazenda_id_fkey"
+            columns: ["fazenda_id"]
+            isOneToOne: false
+            referencedRelation: "fazendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emissores: {
         Row: {
           ativo: boolean
