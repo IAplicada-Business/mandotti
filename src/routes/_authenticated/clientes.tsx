@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
+import { BarraFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -142,25 +143,26 @@ function ClientesPage() {
       <PageHeader
         title="Clientes & Compradores"
         description="Tradings e esmagadoras — destino da produção. Base para negociações, validação de pagamento e emissão de NF."
-        action={
-          <div className="flex flex-wrap gap-2">
-            <Select value={safraFiltro} onValueChange={setSafraFiltro}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Safra" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todas">Todas as safras</SelectItem>
-                {safras.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <ButtonLink to="/notas-fiscais" label="Notas fiscais" />
-          </div>
-        }
+        action={<ButtonLink to="/notas-fiscais" label="Notas fiscais" />}
       />
+
+      <BarraFiltros>
+        <FiltroCard label="Safra">
+          <Select value={safraFiltro} onValueChange={setSafraFiltro}>
+            <SelectTrigger>
+              <SelectValue placeholder="Safra" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todas">Todas</SelectItem>
+              {safras.map((s) => (
+                <SelectItem key={s} value={s}>
+                  {s}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+      </BarraFiltros>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Compradores" value={compradoresUnicos.length} icon={UserCircle} tone="info" />

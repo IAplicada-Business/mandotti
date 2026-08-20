@@ -9,14 +9,10 @@ export type AbaLateral = {
 };
 
 type LayoutAbasFiltrosProps = {
-  /** Título à esquerda quando não há sub-abas */
-  title?: string;
-  /** Sub-abas em pílula, acima da tabela, à esquerda */
+  /** Sub-abas em pílula, acima da tabela */
   abas?: AbaLateral[];
   abaAtiva?: string;
   onAbaChange?: (id: string) => void;
-  /** Cards de filtro sempre visíveis */
-  filtros: ReactNode;
   children: ReactNode;
   /** false = conteúdo livre abaixo da barra (gráficos + tabela) */
   encapsular?: boolean;
@@ -34,54 +30,49 @@ export function FiltroCard({ label, children }: { label: string; children: React
   );
 }
 
+/** Filtros compactos sempre visíveis, em linha, acima dos cards */
+export function BarraFiltros({ children }: { children: ReactNode }) {
+  return <div className="flex flex-wrap items-start gap-2">{children}</div>;
+}
+
 /**
- * Sub-abas à esquerda e filtros compactos sempre visíveis à direita,
- * acima do conteúdo — sem botão para abrir.
+ * Sub-abas em pílula acima do conteúdo.
+ * Os filtros ficam em `BarraFiltros`, sempre acima dos cards da página.
  */
 export function LayoutAbasFiltros({
-  title,
   abas,
   abaAtiva,
   onAbaChange,
-  filtros,
   children,
   encapsular = true,
 }: LayoutAbasFiltrosProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {abas?.length ? (
-          <nav
-            aria-label="Sub-abas"
-            className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
-          >
-            {abas.map((aba) => {
-              const ativa = abaAtiva === aba.id;
-              return (
-                <button
-                  key={aba.id}
-                  type="button"
-                  onClick={() => onAbaChange?.(aba.id)}
-                  className={cn(
-                    "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
-                    ativa
-                      ? "bg-card text-primary shadow-sm"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {aba.label}
-                </button>
-              );
-            })}
-          </nav>
-        ) : title ? (
-          <h3 className="text-base font-bold tracking-tight">{title}</h3>
-        ) : (
-          <span />
-        )}
-
-        <div className="flex flex-wrap items-center justify-end gap-2">{filtros}</div>
-      </div>
+      {abas?.length ? (
+        <nav
+          aria-label="Sub-abas"
+          className="inline-flex h-10 items-center gap-1 rounded-full bg-surface-soft p-1"
+        >
+          {abas.map((aba) => {
+            const ativa = abaAtiva === aba.id;
+            return (
+              <button
+                key={aba.id}
+                type="button"
+                onClick={() => onAbaChange?.(aba.id)}
+                className={cn(
+                  "inline-flex items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                  ativa
+                    ? "bg-card text-primary shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {aba.label}
+              </button>
+            );
+          })}
+        </nav>
+      ) : null}
 
       {encapsular ? (
         <div

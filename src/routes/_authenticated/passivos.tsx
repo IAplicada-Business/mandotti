@@ -10,7 +10,7 @@ import {
   TimelineBarChart,
 } from "@/components/charts/MandottiCharts";
 import { KpiCard, SectionCard } from "@/components/design-system";
-import { FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
+import { BarraFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import {
   CabecalhoOrdenavel,
   TabelaPreview,
@@ -239,6 +239,71 @@ function PassivosPage() {
         description="Contratos da ficha cadastral — visão por titular, banco e ano."
       />
 
+      <BarraFiltros>
+        <FiltroCard label="Titular">
+          <Select value={titular} onValueChange={setTitular}>
+            <SelectTrigger>
+              <SelectValue placeholder="Titular" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todos</SelectItem>
+              {titulares.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.nome}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+        <FiltroCard label="Instituição">
+          <Select value={banco} onValueChange={setBanco}>
+            <SelectTrigger>
+              <SelectValue placeholder="Banco" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todos">Todas</SelectItem>
+              {bancos.map((b) => (
+                <SelectItem key={b} value={b}>
+                  {b}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+        <FiltroCard label="Ordenar">
+          <Select
+            value={ordenacao}
+            onValueChange={(v) => {
+              setOrdenacao(v as Ordenacao);
+              setDirecao(v === "instituicao" || v === "titular" ? "asc" : "desc");
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="saldo">Saldo devedor</SelectItem>
+              <SelectItem value="projetado">Projetado</SelectItem>
+              <SelectItem value="vencimento">Vencimento</SelectItem>
+              <SelectItem value="instituicao">Instituição</SelectItem>
+              <SelectItem value="titular">Titular</SelectItem>
+              <SelectItem value="taxa">Taxa</SelectItem>
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+        <FiltroCard label="Direção">
+          <Select value={direcao} onValueChange={(v) => setDirecao(v as DirecaoOrdem)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Maior → menor</SelectItem>
+              <SelectItem value="asc">Menor → maior</SelectItem>
+            </SelectContent>
+          </Select>
+        </FiltroCard>
+      </BarraFiltros>
+
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Contratos" value={filtrados.length} />
         <KpiCard label="Saldo devedor" value={formatBRL(saldoTotal)} tone="warning" />
@@ -251,77 +316,7 @@ function PassivosPage() {
         />
       </div>
 
-      <LayoutAbasFiltros
-        title="Contratos"
-        encapsular={false}
-        filtros={
-          <>
-            <FiltroCard label="Titular">
-              <Select value={titular} onValueChange={setTitular}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Titular" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos</SelectItem>
-                  {titulares.map((t) => (
-                    <SelectItem key={t.id} value={t.id}>
-                      {t.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FiltroCard>
-            <FiltroCard label="Instituição">
-              <Select value={banco} onValueChange={setBanco}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Banco" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todas</SelectItem>
-                  {bancos.map((b) => (
-                    <SelectItem key={b} value={b}>
-                      {b}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </FiltroCard>
-            <FiltroCard label="Ordenar">
-              <Select
-                value={ordenacao}
-                onValueChange={(v) => {
-                  setOrdenacao(v as Ordenacao);
-                  setDirecao(v === "instituicao" || v === "titular" ? "asc" : "desc");
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="saldo">Saldo devedor</SelectItem>
-                  <SelectItem value="projetado">Projetado</SelectItem>
-                  <SelectItem value="vencimento">Vencimento</SelectItem>
-                  <SelectItem value="instituicao">Instituição</SelectItem>
-                  <SelectItem value="titular">Titular</SelectItem>
-                  <SelectItem value="taxa">Taxa</SelectItem>
-                </SelectContent>
-              </Select>
-            </FiltroCard>
-            <FiltroCard label="Direção">
-              <Select value={direcao} onValueChange={(v) => setDirecao(v as DirecaoOrdem)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="desc">Maior → menor</SelectItem>
-                  <SelectItem value="asc">Menor → maior</SelectItem>
-                </SelectContent>
-              </Select>
-            </FiltroCard>
-          </>
-        }
-      >
-        <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
           <SectionCard title="Saldo por titular" description="Participação de cada emissor no passivo filtrado.">
             <DonutDistribution items={porTitularChart} centerLabel="Saldo" emptyLabel="Sem dados por titular." />
           </SectionCard>
@@ -424,7 +419,6 @@ function PassivosPage() {
             <HorizontalBarChart items={porBancoChart} height={Math.max(160, porBancoChart.length * 48)} />
           </div>
         </SectionCard>
-      </LayoutAbasFiltros>
     </div>
   );
 }

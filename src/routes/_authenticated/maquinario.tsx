@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
 import { KpiCard, SectionCard } from "@/components/design-system";
-import { LayoutAbasFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
+import { BarraFiltros, FiltroCard, LayoutAbasFiltros } from "@/components/LayoutAbasFiltros";
 import { TabelaPreview } from "@/components/TabelaPreview";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -353,6 +353,24 @@ function MaquinarioPage() {
         }
       />
 
+      <BarraFiltros>
+        <FiltrosMaquinario
+          anos={anos}
+          proprietarios={proprietarios}
+          equipamentos={equipamentos}
+          ano={anoFiltro}
+          proprietario={proprietarioFiltro}
+          equipamento={equipamentoFiltro}
+          status={statusFiltro}
+          ordenacao={ordenacao}
+          onAno={setAnoFiltro}
+          onProprietario={setProprietarioFiltro}
+          onEquipamento={setEquipamentoFiltro}
+          onStatus={setStatusFiltro}
+          onOrdenacao={setOrdenacao}
+        />
+      </BarraFiltros>
+
       <div className="grid gap-4 sm:grid-cols-4">
         <KpiCard label="Ativos" value={filtrados.length} />
         <KpiCard label="Valor total" value={formatBRL(valorTotal)} tone="success" />
@@ -367,26 +385,7 @@ function MaquinarioPage() {
         </div>
       ) : null}
 
-      <LayoutAbasFiltros
-        title="Frota"
-        filtros={
-          <FiltrosMaquinario
-            anos={anos}
-            proprietarios={proprietarios}
-            equipamentos={equipamentos}
-            ano={anoFiltro}
-            proprietario={proprietarioFiltro}
-            equipamento={equipamentoFiltro}
-            status={statusFiltro}
-            ordenacao={ordenacao}
-            onAno={setAnoFiltro}
-            onProprietario={setProprietarioFiltro}
-            onEquipamento={setEquipamentoFiltro}
-            onStatus={setStatusFiltro}
-            onOrdenacao={setOrdenacao}
-          />
-        }
-      >
+      <LayoutAbasFiltros>
           {isLoading ? (
               <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
             ) : (
