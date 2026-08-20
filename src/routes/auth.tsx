@@ -207,7 +207,6 @@ function AuthPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <span className="input-glow" />
           </div>
 
           <div className="form-group">
@@ -222,7 +221,6 @@ function AuthPage() {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
             />
-            <span className="input-glow" />
           </div>
 
           <div className="submit-wrap">
@@ -498,16 +496,21 @@ const AUTH_CSS = `
 
 .mandotti-auth .form-group input {
   width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--m-line);
-  border-radius: 0;
+  background: rgba(254, 250, 224, 0.06);
+  border: 1px solid var(--m-line);
+  border-radius: 999px;
   color: var(--m-ink);
-  padding: 12px 0;
+  padding: 14px 22px;
   font-size: 17px;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.4s;
+  transition: border-color 0.35s, box-shadow 0.35s, background 0.35s;
+}
+
+.mandotti-auth .form-group input:focus {
+  border-color: rgba(96, 108, 56, 0.9);
+  background: rgba(254, 250, 224, 0.1);
+  box-shadow: 0 0 0 3px rgba(96, 108, 56, 0.28);
 }
 
 .mandotti-auth .form-group input::placeholder { color: rgba(241, 247, 241, 0.28); }
@@ -516,23 +519,11 @@ const AUTH_CSS = `
 .mandotti-auth .form-group input:-webkit-autofill,
 .mandotti-auth .form-group input:-webkit-autofill:hover,
 .mandotti-auth .form-group input:-webkit-autofill:focus {
+  border-radius: 999px;
   -webkit-text-fill-color: var(--m-ink);
-  -webkit-box-shadow: 0 0 0 1000px #0b1a10 inset;
+  -webkit-box-shadow: 0 0 0 1000px #243318 inset;
   caret-color: var(--m-ink);
 }
-
-.mandotti-auth .input-glow {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--m-leaf);
-  box-shadow: 0 0 14px var(--m-leaf);
-  transition: width 0.6s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.mandotti-auth .form-group input:focus ~ .input-glow { width: 100%; }
 
 /* ---------- Botão líquido ---------- */
 .mandotti-auth .submit-wrap {
