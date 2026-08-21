@@ -1,7 +1,9 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Info } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 type Tone = "default" | "success" | "warning" | "danger" | "info";
 
@@ -125,10 +127,21 @@ export function SectionCard({
     <div className={cn("rounded-[1.5rem] bg-primary/5 p-4 shadow-sm sm:p-6", className)}>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-lg font-bold tracking-tight">{title}</h3>
-          {description ? (
-            <p className="mt-1 text-sm text-muted-foreground">{description}</p>
-          ) : null}
+          <h3 className="inline-flex items-center gap-1.5 text-lg font-bold tracking-tight">
+            {title}
+            {description ? (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="size-3.5 shrink-0 text-muted-foreground/60" />
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="max-w-xs">
+                    {description}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : null}
+          </h3>
         </div>
         {action}
       </div>
