@@ -1,15 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
-  ArrowRight,
   Building2,
   ChevronDown,
   ChevronUp,
   Home,
   Landmark,
   Scale,
-  Tractor,
-  Users,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
@@ -135,39 +132,6 @@ function PatrimonioPage() {
           hint={`Passivo ${formatBRL(r?.passivo_total)}`}
         />
         <KpiCard label="Imóveis" value={formatBRL(r?.imoveis)} icon={Home} hint={`${imoveis.length} bens cadastrados`} />
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-3">
-        <Link
-          to="/maquinario"
-          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
-        >
-          <span className="inline-flex items-center gap-2 font-semibold">
-            <Tractor className="size-4 text-primary" />
-            Maquinários · {formatBRL(r?.maquinarios_veiculos)}
-          </span>
-          <ArrowRight className="size-4 text-muted-foreground" />
-        </Link>
-        <Link
-          to="/passivos"
-          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
-        >
-          <span className="inline-flex items-center gap-2 font-semibold">
-            <Scale className="size-4 text-primary" />
-            Passivos · SCR · {formatBRL(r?.passivo_total)}
-          </span>
-          <ArrowRight className="size-4 text-muted-foreground" />
-        </Link>
-        <Link
-          to="/contratos"
-          className="flex items-center justify-between rounded-[1.25rem] bg-card px-4 py-3.5 text-sm shadow-sm transition-colors hover:bg-surface-soft"
-        >
-          <span className="inline-flex items-center gap-2 font-semibold">
-            <Users className="size-4 text-primary" />
-            Contratos · Tradings
-          </span>
-          <ArrowRight className="size-4 text-muted-foreground" />
-        </Link>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
