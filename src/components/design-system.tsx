@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-5",
+        "flex items-center gap-4 rounded-[1.5rem] bg-primary/5 p-4 shadow-sm sm:p-5",
         className,
       )}
     >
@@ -75,7 +75,7 @@ export function RingStat({
   const offset = c - (pct / 100) * c;
 
   return (
-    <div className={cn("flex items-center gap-4 rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-5", className)}>
+    <div className={cn("flex items-center gap-4 rounded-[1.5rem] bg-primary/5 p-4 shadow-sm sm:p-5", className)}>
       <div className="relative size-[88px] shrink-0">
         <svg viewBox="0 0 96 96" className="size-full -rotate-90">
           <circle cx="48" cy="48" r={r} fill="none" stroke="var(--surface-soft)" strokeWidth="10" />
@@ -122,7 +122,7 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6", className)}>
+    <div className={cn("rounded-[1.5rem] bg-primary/5 p-4 shadow-sm sm:p-6", className)}>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-lg font-bold tracking-tight">{title}</h3>
