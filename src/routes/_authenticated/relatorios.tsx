@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Download, FileSpreadsheet, Layers, Printer, Sprout, Wheat } from "lucide-react";
+import { ChevronDown, Download, FileSpreadsheet, Layers, Printer, Sprout, Wheat } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
-import { Callout, KpiCard, SectionCard } from "@/components/design-system";
+import { Callout, KpiCard } from "@/components/design-system";
 import { BarraFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -244,44 +245,59 @@ function RelatoriosPage() {
             </SelectContent>
           </Select>
         </FiltroCard>
+        <FiltroCard
+          label="Colunas"
+          className="no-print w-[min(100%,17.5rem)] bg-brand-earth/20 [&_button]:h-10 [&_button]:bg-white/75"
+        >
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-between font-medium"
+                aria-label="Colunas do relatório"
+              >
+                <span className="truncate">
+                  {pacoteBanco ? "Pacote banco" : `${colunas.length} campos`}
+                </span>
+                <ChevronDown className="size-4 shrink-0 opacity-60" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent align="start" className="w-72 rounded-2xl p-2">
+              <p className="px-2 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Campos do relatório
+              </p>
+              <div className="max-h-72 space-y-0.5 overflow-y-auto">
+                {COLUNAS_RELATORIO.map((c) => (
+                  <label
+                    key={c.id}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-accent"
+                  >
+                    <Checkbox
+                      checked={colunas.includes(c.id)}
+                      onCheckedChange={(v) => toggleColuna(c.id, v === true)}
+                    />
+                    <span className="min-w-0 flex-1 truncate">{c.label}</span>
+                    {!c.banco ? (
+                      <Badge variant="outline" className="font-normal">
+                        opcional
+                      </Badge>
+                    ) : null}
+                  </label>
+                ))}
+              </div>
+              <div className="my-1 h-px bg-border" />
+              <button
+                type="button"
+                className="flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left text-sm hover:bg-accent"
+                onClick={aplicarPacoteBanco}
+              >
+                <FileSpreadsheet className="size-4 text-muted-foreground" />
+                {pacoteBanco ? "Pacote banco ativo" : "Voltar ao pacote banco"}
+              </button>
+            </PopoverContent>
+          </Popover>
+        </FiltroCard>
       </BarraFiltros>
-
-      <SectionCard
-        title="Colunas do relatório"
-        description="O pacote do banco já exclui patrimônio, dívida e saldo."
-        action={
-          <Button variant="outline" size="sm" className="no-print" onClick={aplicarPacoteBanco}>
-            <FileSpreadsheet className="mr-2 size-4" />
-            Pacote banco
-          </Button>
-        }
-      >
-        <div className="no-print flex flex-wrap gap-x-5 gap-y-3">
-          {COLUNAS_RELATORIO.map((c) => (
-            <label key={c.id} className="flex items-center gap-2 text-sm">
-              <Checkbox
-                checked={colunas.includes(c.id)}
-                onCheckedChange={(v) => toggleColuna(c.id, v === true)}
-              />
-              <span>{c.label}</span>
-              {!c.banco ? (
-                <Badge variant="outline" className="font-normal">
-                  opcional
-                </Badge>
-              ) : null}
-            </label>
-          ))}
-        </div>
-        {pacoteBanco ? (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Pacote banco ativo: cultura, área e produtividade — sem ativo ou passivo.
-          </p>
-        ) : (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Colunas personalizadas. Use “Pacote banco” para voltar ao padrão anual.
-          </p>
-        )}
-      </SectionCard>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard label="Linhas" value={kpis.qtd} icon={Layers} />

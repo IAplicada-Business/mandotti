@@ -19,9 +19,22 @@ type LayoutAbasFiltrosProps = {
 };
 
 /** Card compacto com um dropdown */
-export function FiltroCard({ label, children }: { label: string; children: ReactNode }) {
+export function FiltroCard({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
-    <div className="w-[min(100%,12rem)] shrink-0 rounded-[1.25rem] bg-card px-3.5 py-3 shadow-sm [&_button]:h-9 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-surface-soft [&_button]:px-3 [&_button]:text-xs [&_button]:shadow-none">
+    <div
+      className={cn(
+        "w-[min(100%,12rem)] shrink-0 rounded-[1.25rem] bg-card px-3.5 py-3 shadow-sm [&_button]:h-9 [&_button]:rounded-full [&_button]:border-0 [&_button]:bg-surface-soft [&_button]:px-3 [&_button]:text-xs [&_button]:shadow-none",
+        className,
+      )}
+    >
       <Label className="mb-1.5 block text-[11px] font-medium text-muted-foreground">{label}</Label>
       {children}
     </div>
@@ -59,7 +72,7 @@ export function LayoutAbasFiltros({
                 type="button"
                 onClick={() => onAbaChange?.(aba.id)}
                 className={cn(
-                  "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                  "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-colors",
                   ativa
                     ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground",
@@ -73,7 +86,9 @@ export function LayoutAbasFiltros({
       ) : null}
 
       {encapsular ? (
-        <div className="rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6">{children}</div>
+        <div className="rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6">
+          {children}
+        </div>
       ) : (
         <div className="space-y-6">{children}</div>
       )}

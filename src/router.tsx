@@ -20,9 +20,12 @@ export const getRouter = () => {
     context: { queryClient },
     scrollRestoration: true,
     defaultPreload: "intent",
+    defaultPreloadDelay: 0,
     defaultPreloadStaleTime: 30_000,
-    defaultPendingMs: 80,
-    defaultPendingMinMs: 280,
+    // Mantém a página atual até a próxima estar pronta. O esqueleto só entra
+    // se o chunk realmente demorar; a barra fina do AppShell já indica o trânsito.
+    defaultPendingMs: 1200,
+    defaultPendingMinMs: 0,
     defaultPendingComponent: RoutePendingFallback,
   });
 
