@@ -6,6 +6,7 @@ import {
   FolderOpen,
   Home,
   Search,
+  Settings,
   Tractor,
   UserCircle,
   X,
@@ -13,7 +14,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { NAV } from "@/lib/nav";
+import { ABAS_PARAMETROS, NAV, podeVerItemNav } from "@/lib/nav";
 import { Button } from "@/components/ui/button";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ type Resultado = {
   titulo: string;
   detalhe?: string | undefined;
   to: string;
+  search?: { aba: string } | undefined;
   icon: LucideIcon;
 };
 
@@ -97,7 +99,7 @@ export function BuscaGlobal({ className }: { className?: string }) {
     const paginas: Resultado[] = [];
     for (const g of NAV) {
       for (const item of g.items) {
-        if (!pode(item.to, "ver")) continue;
+        if (!podeVerItemNav(pode, item.to)) continue;
         if (q && !coincide(q, item.label, item.to)) continue;
         paginas.push({
           id: `pagina-${item.to}`,
@@ -109,6 +111,36 @@ export function BuscaGlobal({ className }: { className?: string }) {
         if (paginas.length >= 6) break;
       }
       if (paginas.length >= 6) break;
+    }
+    if (paginas.length < 6) {
+      for (const aba of ABAS_PARAMETROS) {
+        if (q && !coincide(q, aba.label)) continue;
+        if (aba.id === "emissores" && !(pode("/emissores", "ver") || pode("/configuracoes", "ver"))) {
+          continue;
+        }
+        if (
+          aba.id === "certificados" &&
+          !(pode("/certificados", "ver") || pode("/configuracoes", "ver"))
+        ) {
+          continue;
+        }
+        if (
+          aba.id !== "emissores" &&
+          aba.id !== "certificados" &&
+          !pode("/configuracoes", "ver")
+        ) {
+          continue;
+        }
+        paginas.push({
+          id: `param-${aba.id}`,
+          grupo: "Parâmetros",
+          titulo: aba.label,
+          to: "/configuracoes",
+          search: { aba: aba.id },
+          icon: Settings,
+        });
+        if (paginas.length >= 6) break;
+      }
     }
 
     if (!q) return paginas;
@@ -122,7 +154,8 @@ export function BuscaGlobal({ className }: { className?: string }) {
         grupo: "Emissores",
         titulo: e.nome_fantasia || e.razao_social,
         detalhe: e.cnpj,
-        to: "/emissores",
+        to: "/configuracoes",
+        search: { aba: "emissores" },
         icon: Building2,
       });
     }
@@ -186,7 +219,8 @@ export function BuscaGlobal({ className }: { className?: string }) {
   }, [termo, data, emissores, pode]);
 
   const ir = (item: Resultado) => {
-    navigate({ to: item.to as never });
+    if (item.search) navigate({ to: item.to as never, search: item.search as never });
+    else navigate({ to: item.to as never });
     setTermo("");
     setAberto(false);
     setMobileAberto(false);

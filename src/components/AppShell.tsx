@@ -27,7 +27,7 @@ import {
 import { EmissorSelector } from "@/components/EmissorSelector";
 import { BuscaGlobal } from "@/components/BuscaGlobal";
 import { MandottiLogo } from "@/components/MandottiLogo";
-import { NAV, NAV_CONTABILIDADE } from "@/lib/nav";
+import { NAV, NAV_CONTABILIDADE, podeVerItemNav } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
@@ -92,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         ].filter((section) => section.items.length > 0)
       : NAV.map((section) => ({
           ...section,
-          items: section.items.filter((item) => pode(item.to, "ver")),
+          items: section.items.filter((item) => podeVerItemNav(pode, item.to)),
         })).filter((section) => section.items.length > 0);
 
   const grupoComRotaAtiva = useMemo(

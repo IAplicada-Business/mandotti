@@ -19,7 +19,11 @@ export function EmissorSelector() {
 
   if (!emissores.length) {
     return (
-      <Link to="/emissores" className="text-sm text-muted-foreground underline underline-offset-4">
+      <Link
+        to="/configuracoes"
+        search={{ aba: "emissores" }}
+        className="text-sm text-muted-foreground underline underline-offset-4"
+      >
         Nenhum emissor cadastrado — cadastrar
       </Link>
     );
