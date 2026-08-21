@@ -7,12 +7,14 @@ import { EmissorProvider } from "@/lib/emissor-context";
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    if (error || !data.user) throw redirect({ to: "/auth" });
-    if (data.user.user_metadata?.["must_change_password"]) {
+    // getSession lê o token local — getUser() iria à rede a cada clique do menu.
+    const { data, error } = await supabase.auth.getSession();
+    const user = data.session?.user;
+    if (error || !user) throw redirect({ to: "/auth" });
+    if (user.user_metadata?.["must_change_password"]) {
       throw redirect({ to: "/trocar-senha" });
     }
-    return { user: data.user };
+    return { user };
   },
   component: () => (
     <EmissorProvider>

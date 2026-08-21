@@ -1,9 +1,9 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-/** Feedback imediato enquanto a rota carrega — evita sensação de travamento ao trocar de menu. */
+/** Só aparece se a rota nova demorar de verdade; a troca comum não passa por aqui. */
 export function RoutePendingFallback() {
   return (
-    <div className="space-y-6 animate-in fade-in duration-200">
+    <div className="space-y-6">
       <div className="space-y-2">
         <Skeleton className="h-3 w-32" />
         <Skeleton className="h-8 w-64 max-w-full" />

@@ -59,7 +59,7 @@ export function LayoutAbasFiltros({
                 type="button"
                 onClick={() => onAbaChange?.(aba.id)}
                 className={cn(
-                  "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-200",
+                  "inline-flex shrink-0 items-center rounded-full px-4 py-1.5 text-sm font-semibold transition-colors",
                   ativa
                     ? "bg-primary text-primary-foreground shadow-xs"
                     : "text-muted-foreground hover:text-foreground",
@@ -73,16 +73,11 @@ export function LayoutAbasFiltros({
       ) : null}
 
       {encapsular ? (
-        <div
-          key={abaAtiva ?? "conteudo"}
-          className="rounded-[1.5rem] bg-card p-4 shadow-sm duration-300 animate-in fade-in-0 sm:p-6"
-        >
+        <div className="rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6">
           {children}
         </div>
       ) : (
-        <div key={abaAtiva ?? "conteudo"} className="space-y-6 duration-300 animate-in fade-in-0">
-          {children}
-        </div>
+        <div className="space-y-6">{children}</div>
       )}
     </div>
   );
