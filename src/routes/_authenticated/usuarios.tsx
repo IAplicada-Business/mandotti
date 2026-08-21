@@ -4,7 +4,7 @@ import { Copy, Plus, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import { NAV } from "@/components/AppShell";
+import { ROTAS_ACESSO } from "@/lib/nav";
 import { PageHeader } from "@/components/AppShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,9 +59,7 @@ const PERFIL_LABEL: Record<Perfil, string> = {
   funcionario: "Funcionário",
   contabilidade: "Contabilidade",
 };
-const ROTAS: { to: string; label: string }[] = NAV.flatMap((g) =>
-  g.items.map((i) => ({ to: i.to as string, label: i.label as string })),
-);
+const ROTAS: { to: string; label: string }[] = ROTAS_ACESSO;
 
 type Grant = { rota: string; pode_ver: boolean; pode_editar: boolean };
 

@@ -1,5 +1,4 @@
 import {
-  Building2,
   Calculator,
   FileSpreadsheet,
   FileText,
@@ -12,7 +11,6 @@ import {
   Scale,
   ScrollText,
   Settings,
-  ShieldCheck,
   Sprout,
   Tractor,
   UserCircle,
@@ -71,13 +69,46 @@ export const NAV = [
     group: "Configurações",
     icon: Settings,
     items: [
-      { to: "/emissores", label: "Emissores", icon: Building2 },
-      { to: "/certificados", label: "Certificados", icon: ShieldCheck },
       { to: "/usuarios", label: "Usuários & Acessos", icon: Users },
       { to: "/configuracoes", label: "Parâmetros", icon: Settings },
     ],
   },
 ] as const;
+
+export const ABAS_PARAMETROS = [
+  { id: "emissores", label: "Emissores", rota: "/emissores" },
+  { id: "certificados", label: "Certificados", rota: "/certificados" },
+  { id: "filtros", label: "Filtros", rota: "/configuracoes" },
+  { id: "automacoes", label: "Automações", rota: "/configuracoes" },
+  { id: "dados", label: "Dados", rota: "/configuracoes" },
+] as const;
+
+export type AbaParametros = (typeof ABAS_PARAMETROS)[number]["id"];
+
+/** Telas da matriz de acesso — inclui abas de Parâmetros que saíram da sidebar. */
+export const ROTAS_ACESSO: { to: string; label: string }[] = [
+  ...NAV.flatMap((g) => g.items.map((i) => ({ to: i.to as string, label: i.label as string }))),
+  { to: "/emissores", label: "Emissores" },
+  { to: "/certificados", label: "Certificados" },
+];
+
+export function podeVerItemNav(
+  pode: (rota: string, acao: "ver" | "editar") => boolean,
+  to: string,
+) {
+  if (to === "/configuracoes") {
+    return pode("/configuracoes", "ver") || pode("/emissores", "ver") || pode("/certificados", "ver");
+  }
+  return pode(to, "ver");
+}
+
+export function abasParametrosVisiveis(pode: (rota: string, acao: "ver" | "editar") => boolean) {
+  return ABAS_PARAMETROS.filter((aba) => {
+    if (aba.id === "emissores") return pode("/emissores", "ver") || pode("/configuracoes", "ver");
+    if (aba.id === "certificados") return pode("/certificados", "ver") || pode("/configuracoes", "ver");
+    return pode("/configuracoes", "ver");
+  });
+}
 
 export const NAV_CONTABILIDADE = [
   { to: "/contabilidade", label: "Dashboard", icon: LayoutDashboard },

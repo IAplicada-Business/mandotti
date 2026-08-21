@@ -73,16 +73,9 @@ export function LayoutAbasFiltros({
       ) : null}
 
       {encapsular ? (
-        <div
-          key={abaAtiva ?? "conteudo"}
-          className="rounded-[1.5rem] bg-card p-4 shadow-sm duration-300 animate-in fade-in-0 sm:p-6"
-        >
-          {children}
-        </div>
+        <div className="rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6">{children}</div>
       ) : (
-        <div key={abaAtiva ?? "conteudo"} className="space-y-6 duration-300 animate-in fade-in-0">
-          {children}
-        </div>
+        <div className="space-y-6">{children}</div>
       )}
     </div>
   );
