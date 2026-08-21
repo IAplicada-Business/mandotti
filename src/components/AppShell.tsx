@@ -1,34 +1,15 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Briefcase,
-  Building2,
   Calculator,
   ChevronDown,
   CircleHelp,
-  FileSpreadsheet,
-  FileText,
-  FolderOpen,
-  Handshake,
-  Home,
-  Landmark,
-  LayoutDashboard,
   LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
-  PenLine,
-  Scale,
-  ScrollText,
-  Search,
-  Settings,
-  ShieldCheck,
-  Sprout,
-  Tractor,
-  UserCircle,
-  Users,
-  Wallet,
-  Wheat,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
@@ -44,77 +25,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EmissorSelector } from "@/components/EmissorSelector";
+import { BuscaGlobal } from "@/components/BuscaGlobal";
 import { MandottiLogo } from "@/components/MandottiLogo";
+import { NAV, NAV_CONTABILIDADE } from "@/lib/nav";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil, useSession } from "@/hooks/useAuth";
 
-export const NAV = [
-  {
-    group: "Visão geral",
-    icon: LayoutDashboard,
-    items: [
-      { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { to: "/patrimonio", label: "Patrimônio", icon: Home },
-      { to: "/relatorios", label: "Relatórios", icon: FileSpreadsheet },
-    ],
-  },
-  {
-    group: "Operação",
-    icon: Sprout,
-    items: [
-      { to: "/fazendas", label: "Fazendas & Áreas", icon: Sprout },
-      { to: "/producao", label: "Produção & Safras", icon: Wheat },
-      { to: "/maquinario", label: "Maquinário", icon: Tractor },
-    ],
-  },
-  {
-    group: "Financeiro",
-    icon: Wallet,
-    items: [
-      { to: "/financeiro", label: "Painel financeiro", icon: Wallet },
-      { to: "/conciliacao", label: "Conciliação", icon: Landmark },
-      { to: "/passivos", label: "Passivos · SCR", icon: Scale },
-    ],
-  },
-  {
-    group: "Fiscal",
-    icon: ScrollText,
-    items: [
-      { to: "/notas-fiscais", label: "Notas fiscais", icon: ScrollText },
-      { to: "/importacao-xml", label: "Importação XML", icon: FileSpreadsheet },
-      { to: "/clientes", label: "Clientes & Compradores", icon: UserCircle },
-      { to: "/contratos", label: "Contratos · Tradings", icon: Handshake },
-    ],
-  },
-  {
-    group: "Documentos",
-    icon: FolderOpen,
-    items: [
-      { to: "/documentos", label: "Biblioteca", icon: FolderOpen },
-      { to: "/assinaturas", label: "Assinatura digital", icon: PenLine },
-    ],
-  },
-  {
-    group: "Configurações",
-    icon: Settings,
-    items: [
-      { to: "/emissores", label: "Emissores", icon: Building2 },
-      { to: "/certificados", label: "Certificados", icon: ShieldCheck },
-      { to: "/usuarios", label: "Usuários & Acessos", icon: Users },
-      { to: "/configuracoes", label: "Parâmetros", icon: Settings },
-    ],
-  },
-] as const;
-
-/** Rotas visíveis no contexto Contabilidade (HRM) — consumo e exportação, sem retrabalho de gestão */
-export const NAV_CONTABILIDADE = [
-  { to: "/contabilidade", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/contabilidade/financeiro", label: "Dados financeiros", icon: Wallet },
-  { to: "/contabilidade/documentos", label: "Documentos fiscais", icon: FileText },
-  { to: "/contabilidade/relatorios", label: "Relatórios", icon: FileSpreadsheet },
-  { to: "/contabilidade/extratos", label: "Extratos bancários", icon: Landmark },
-] as const;
+export { NAV, NAV_CONTABILIDADE } from "@/lib/nav";
 
 const PERFIL_LABEL: Record<string, string> = {
   admin: "Admin",
@@ -181,7 +99,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     () =>
       navVisivel.find((section) =>
         section.items.some(
-          (item) => pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`)),
+          (item) => pathname === item.to || pathname.startsWith(`${item.to}/`),
         ),
       )?.group,
     [navVisivel, pathname],
@@ -262,7 +180,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
 
   const renderNavItem = (
-    item: { to: string; label: string; icon: typeof LayoutDashboard },
+    item: { to: string; label: string; icon: LucideIcon },
     rail: boolean,
   ) => {
     const active = itemAtivo(item.to);
@@ -538,10 +456,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <MandottiLogo className="size-7" />
             </div>
 
-            <div className="hidden min-w-[200px] items-center gap-2 rounded-full bg-surface-soft px-4 py-2.5 text-sm text-muted-foreground lg:flex">
-              <Search className="size-4 shrink-0 opacity-60" />
-              <span className="truncate">Buscar fazendas, emissores, notas…</span>
-            </div>
+            <BuscaGlobal />
 
             <div className="min-w-0 flex-1">
               <EmissorSelector />
