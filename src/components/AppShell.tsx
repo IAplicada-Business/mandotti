@@ -190,7 +190,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         preload="intent"
         onClick={() => setOpen(false)}
         className={cn(
-          "flex items-center gap-3 rounded-2xl px-2.5 py-2 text-sm font-medium transition-all",
+          "flex items-center gap-3 rounded-2xl px-2.5 py-2 text-sm font-medium transition-colors",
           active
             ? "bg-primary text-primary-foreground shadow-xs"
             : "text-muted-foreground hover:bg-surface-soft hover:text-foreground",
