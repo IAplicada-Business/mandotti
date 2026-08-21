@@ -4,7 +4,7 @@ import { ChevronDown, Download, FileSpreadsheet, Layers, Printer, Sprout, Wheat 
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/AppShell";
-import { Callout, KpiCard } from "@/components/design-system";
+import { KpiCard } from "@/components/design-system";
 import { BarraFiltros, FiltroCard } from "@/components/LayoutAbasFiltros";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -321,11 +321,6 @@ function RelatoriosPage() {
           icon={FileSpreadsheet}
         />
       </div>
-
-      <Callout tone="info" className="no-print">
-        Este relatório é o envio anual ao banco. Não inclui imóveis, maquinário, contratos SCR nem
-        saldos. Para PDF, use Imprimir e “Salvar como PDF” no celular ou no computador.
-      </Callout>
 
       <section id="relatorio-impressao" className="print-sheet rounded-[1.5rem] bg-card p-4 shadow-sm sm:p-6">
         <div className="mb-5 hidden print:block">
