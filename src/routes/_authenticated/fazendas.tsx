@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Home, Pencil, Plus, Sprout, Target, Trash2, Trees } from "lucide-react";
+import { Home, Pencil, Plus, Sprout, Target, Trash2, Trees } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/AppShell";
-import { Callout, KpiCard, SectionCard } from "@/components/design-system";
+import { KpiCard, SectionCard } from "@/components/design-system";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -286,14 +286,6 @@ function FazendasPage() {
           hint="Sol Nascente · Cruz de Malta"
         />
       </div>
-
-      <Callout tone="warning" className="flex items-start gap-2">
-        <AlertTriangle className="mt-0.5 size-4 shrink-0 text-warning" />
-        <p>
-          <span className="font-semibold">Custo de arrendamento por área:</span> a validar — Nagyla
-          vai enviar. Campos vazios aparecem como &quot;a validar&quot; até a confirmação.
-        </p>
-      </Callout>
 
       <SectionCard title="Imóveis rurais">
         <Table>

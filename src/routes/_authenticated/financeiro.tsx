@@ -369,7 +369,7 @@ function FinanceiroPage() {
 
       <SectionCard
         title="Lançamentos operacionais"
-        description="Receitas e despesas via XML ou cadastro manual (separado do SCR da planilha)."
+        description=""
       >
         <div className="mb-4 grid gap-4 sm:grid-cols-3">
           <KpiCard label="Receitas" value={formatBRL(totalReceitas)} icon={TrendingUp} tone="success" />

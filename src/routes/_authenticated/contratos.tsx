@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowRight, ClipboardList, Handshake, Plus, Scale, Truck } from "lucide-react";
+import { ClipboardList, Handshake, Plus, Truck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -217,17 +217,6 @@ function ContratosPage() {
         <KpiCard label="Referências" value={referencias.length} icon={Handshake} />
         <KpiCard label="Total cadastros" value={data.length} icon={ClipboardList} />
       </div>
-
-      <Link
-        to="/passivos"
-        className="flex items-center justify-between rounded-[1.25rem] bg-warning/12 px-4 py-3.5 text-sm transition-colors hover:bg-warning/18"
-      >
-        <span className="inline-flex items-center gap-2 font-semibold">
-          <Scale className="size-4 text-warning" />
-          Dívidas e contratos SCR (Bacen)
-        </span>
-        <ArrowRight className="size-4" />
-      </Link>
 
       <Tabs defaultValue="destinos">
         <TabsList>

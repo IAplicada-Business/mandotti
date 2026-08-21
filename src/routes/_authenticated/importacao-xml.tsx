@@ -189,10 +189,6 @@ function ImportacaoXmlPage() {
           ) : null
         }
       >
-        <p className="text-sm text-muted-foreground">
-          Regras rápidas: TRR/diesel → combustível; Maqcampo/AGRIMAC → manutenção; defensivos →
-          químicos. Correções manuais no painel financeiro.
-        </p>
       </SectionCard>
 
       <SectionCard title="Histórico de importações">
